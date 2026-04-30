@@ -316,9 +316,9 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
       }
       setMeetings([...meetings, meeting])
       setSelectedMeeting(meeting)
-    } catch (error: any) {
-      console.error('Failed to create meeting:', error?.message, error?.code, error?.details, error?.hint, JSON.stringify(error))
-      alert(`Failed to save meeting: ${error?.message || JSON.stringify(error)}`)
+    } catch (error) {
+      console.error('Failed to create meeting:', error)
+      alert('Failed to save meeting. Please try again.')
     }
   }
 
