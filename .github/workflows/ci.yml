@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [master, main]
   push:
-    branches: [master, main]
+    branches: [master, main, feature/**]
 
 jobs:
   test:
@@ -26,6 +26,9 @@ jobs:
 
       - name: Run tests
         run: npm run test:run
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
 
   build:
     name: Build
@@ -47,7 +50,6 @@ jobs:
       - name: Build project
         run: npm run build
         env:
-          # Add dummy env vars for build (replace with your actual values or use secrets)
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
@@ -70,7 +72,6 @@ jobs:
 
       - name: Run ESLint
         run: npm run lint
-        continue-on-error: true
 
   type-check:
     name: TypeScript Type Check
