@@ -9,6 +9,7 @@ import type { Database } from '@/lib/supabase/types'
 type TeamRow = Database['public']['Tables']['teams']['Row']
 type TeamInsert = Database['public']['Tables']['teams']['Insert']
 type TeamUpdate = Database['public']['Tables']['teams']['Update']
+type MembershipRow = Database['public']['Tables']['team_memberships']['Row']
 
 export interface Team {
   id: string
@@ -20,6 +21,20 @@ export interface Team {
   memberIds?: string[]
   notes?: string
   documentationUrl?: string
+}
+
+function rowToTeam(team: TeamRow, memberIds: string[]): Team {
+  return {
+    id: team.id,
+    name: team.name,
+    description: team.description ?? null,
+    status: team.status,
+    memberCount: memberIds.length,
+    memberIds,
+    createdAt: team.created_at,
+    notes: team.notes ?? '',
+    documentationUrl: team.documentation_url ?? '',
+  }
 }
 
 /**
@@ -40,24 +55,13 @@ export async function getTeams(): Promise<Team[]> {
 
   if (error) throw error
 
-  // Build a map of team_id -> person_ids and counts
   const membersByTeam: Record<string, string[]> = {}
-  for (const m of (memberships ?? []) as any[]) {
+  for (const m of (memberships ?? []) as Pick<MembershipRow, 'team_id' | 'person_id'>[]) {
     if (!membersByTeam[m.team_id]) membersByTeam[m.team_id] = []
     membersByTeam[m.team_id].push(m.person_id)
   }
 
-  return (teams ?? []).map((team: any) => ({
-    id: team.id,
-    name: team.name,
-    description: team.description || '',
-    status: team.status,
-    memberCount: membersByTeam[team.id]?.length ?? 0,
-    memberIds: membersByTeam[team.id] ?? [],
-    createdAt: team.created_at,
-    notes: team.notes || '',
-    documentationUrl: team.documentation_url || '',
-  }))
+  return (teams ?? []).map((team) => rowToTeam(team, membersByTeam[team.id] ?? []))
 }
 
 /**
@@ -69,41 +73,36 @@ export async function createTeam(team: Omit<Team, 'id' | 'memberCount' | 'create
 
   if (!user) throw new Error('Not authenticated')
 
+  const insert: TeamInsert = {
+    name: team.name,
+    description: team.description || null,
+    status: team.status || 'active',
+    notes: team.notes || null,
+    documentation_url: team.documentationUrl || null,
+    owning_user_id: user.id,
+  }
+
   const { data, error } = await supabase
     .from('teams')
-    .insert({
-      name: team.name,
-      description: team.description || null,
-      status: team.status || 'active',
-      notes: team.notes || null,
-      documentation_url: team.documentationUrl || null,
-      owning_user_id: user.id,
-    } as any)
+    .insert(insert)
     .select()
     .single()
 
   if (error) throw error
 
-  const teamId = (data as any).id
   const memberIds = team.memberIds ?? []
 
   if (memberIds.length > 0) {
-    await (supabase.from('team_memberships') as any).insert(
-      memberIds.map((person_id: string) => ({ team_id: teamId, person_id }))
-    )
+    const { error: memberError } = await supabase
+      .from('team_memberships')
+      .insert(memberIds.map((person_id) => ({ team_id: data.id, person_id })))
+    if (memberError) {
+      await supabase.from('teams').delete().eq('id', data.id)
+      throw memberError
+    }
   }
 
-  return {
-    id: teamId,
-    name: (data as any).name,
-    description: (data as any).description || '',
-    status: (data as any).status,
-    memberCount: memberIds.length,
-    memberIds,
-    createdAt: (data as any).created_at,
-    notes: (data as any).notes || '',
-    documentationUrl: (data as any).documentation_url || '',
-  }
+  return rowToTeam(data, memberIds)
 }
 
 /**
@@ -112,22 +111,23 @@ export async function createTeam(team: Omit<Team, 'id' | 'memberCount' | 'create
 export async function updateTeam(id: string, updates: Partial<Team>): Promise<Team> {
   const supabase = createClient()
 
-  const { data, error } = await (supabase
-    .from('teams') as any)
-    .update({
-      name: updates.name,
-      description: updates.description || null,
-      status: updates.status,
-      notes: updates.notes ?? null,
-      documentation_url: updates.documentationUrl ?? null,
-    })
+  const patch: TeamUpdate = {
+    name: updates.name,
+    description: updates.description ?? null,
+    status: updates.status,
+    notes: updates.notes ?? null,
+    documentation_url: updates.documentationUrl ?? null,
+  }
+
+  const { data, error } = await supabase
+    .from('teams')
+    .update(patch)
     .eq('id', id)
     .select('*')
     .single()
 
   if (error) throw error
 
-  // Sync team memberships if memberIds were provided
   if (updates.memberIds !== undefined) {
     const desiredIds = updates.memberIds
 
@@ -135,42 +135,32 @@ export async function updateTeam(id: string, updates: Partial<Team>): Promise<Te
       .from('team_memberships')
       .select('person_id')
       .eq('team_id', id)
-    const currentIds = (currentMemberships ?? []).map((m: any) => m.person_id)
+    const currentIds = (currentMemberships ?? []).map((m) => m.person_id)
 
-    const toAdd = desiredIds.filter((pid: string) => !currentIds.includes(pid))
+    const toAdd = desiredIds.filter((pid) => !currentIds.includes(pid))
     if (toAdd.length > 0) {
-      await (supabase.from('team_memberships') as any).insert(
-        toAdd.map((person_id: string) => ({ team_id: id, person_id }))
-      )
+      await supabase
+        .from('team_memberships')
+        .insert(toAdd.map((person_id) => ({ team_id: id, person_id })))
     }
 
-    const toRemove = currentIds.filter((pid: string) => !desiredIds.includes(pid))
+    const toRemove = currentIds.filter((pid) => !desiredIds.includes(pid))
     if (toRemove.length > 0) {
-      await supabase.from('team_memberships')
+      await supabase
+        .from('team_memberships')
         .delete()
         .eq('team_id', id)
         .in('person_id', toRemove)
     }
   }
 
-  // Fetch final membership ids
   const { data: finalMemberships } = await supabase
     .from('team_memberships')
     .select('person_id')
     .eq('team_id', id)
-  const memberIds = (finalMemberships ?? []).map((m: any) => m.person_id)
+  const memberIds = (finalMemberships ?? []).map((m) => m.person_id)
 
-  return {
-    id: (data as any).id,
-    name: (data as any).name,
-    description: (data as any).description || '',
-    status: (data as any).status,
-    memberCount: memberIds.length,
-    memberIds,
-    createdAt: (data as any).created_at,
-    notes: (data as any).notes || '',
-    documentationUrl: (data as any).documentation_url || '',
-  }
+  return rowToTeam(data, memberIds)
 }
 
 /**

@@ -15,7 +15,7 @@ describe('Tasks Service', () => {
           id: '1',
           title: 'Complete project proposal',
           description: 'Draft and submit Q1 proposal',
-          status: 'open',
+          status: 'not_started',
           due_date: '2024-03-15',
           priority: 'high',
           source: 'manual',
@@ -51,12 +51,11 @@ describe('Tasks Service', () => {
       expect(mockFrom).toHaveBeenCalledWith('tasks')
       expect(tasks).toHaveLength(2)
 
-      // Test mapping from database to UI format
       expect(tasks[0]).toMatchObject({
         id: '1',
         title: 'Complete project proposal',
         description: 'Draft and submit Q1 proposal',
-        status: 'Not started', // 'open' -> 'Not started'
+        status: 'Not started', // 'not_started' -> 'Not started'
         dueDate: '2024-03-15',
         priority: 'High', // 'high' -> 'High'
         list: 'week', // has due date -> 'week'
@@ -73,10 +72,10 @@ describe('Tasks Service', () => {
 
     it('should handle all priority levels correctly', async () => {
       const mockTasks = [
-        { id: '1', title: 'Low priority', status: 'open', priority: 'low', due_date: null, created_at: '2024-01-01T00:00:00Z', task_relations: [] },
-        { id: '2', title: 'Medium priority', status: 'open', priority: 'medium', due_date: null, created_at: '2024-01-01T00:00:00Z', task_relations: [] },
-        { id: '3', title: 'High priority', status: 'open', priority: 'high', due_date: null, created_at: '2024-01-01T00:00:00Z', task_relations: [] },
-        { id: '4', title: 'Very high priority', status: 'open', priority: 'very_high', due_date: null, created_at: '2024-01-01T00:00:00Z', task_relations: [] },
+        { id: '1', title: 'Low priority', status: 'not_started', priority: 'low', due_date: null, created_at: '2024-01-01T00:00:00Z', task_relations: [] },
+        { id: '2', title: 'Medium priority', status: 'not_started', priority: 'medium', due_date: null, created_at: '2024-01-01T00:00:00Z', task_relations: [] },
+        { id: '3', title: 'High priority', status: 'not_started', priority: 'high', due_date: null, created_at: '2024-01-01T00:00:00Z', task_relations: [] },
+        { id: '4', title: 'Very high priority', status: 'not_started', priority: 'very_high', due_date: null, created_at: '2024-01-01T00:00:00Z', task_relations: [] },
       ]
 
       const mockFrom = vi.fn().mockReturnValue({
@@ -131,8 +130,8 @@ describe('Tasks Service', () => {
         title: 'New task',
         description: 'Task description',
         due_date: '2024-04-01',
-        priority: 'high', // UI 'High' -> DB 'high'
-        status: 'open', // UI 'Not started' -> DB 'open'
+        priority: 'high',
+        status: 'not_started', // UI 'Not started' -> DB 'not_started'
         source: 'manual',
         created_at: '2024-01-03T00:00:00Z',
       }
@@ -241,7 +240,7 @@ describe('Tasks Service', () => {
         description: 'Original description',
         due_date: '2024-05-01',
         priority: 'very_high',
-        status: 'open',
+        status: 'not_started',
         source: 'manual',
         created_at: '2024-01-01T00:00:00Z',
       }
@@ -316,7 +315,7 @@ describe('Tasks Service', () => {
         description: null,
         due_date: null,
         priority: 'medium',
-        status: 'open',
+        status: 'in_progress',
         completion_date: null,
         source: 'manual',
         created_at: '2024-01-01T00:00:00Z',
@@ -339,7 +338,7 @@ describe('Tasks Service', () => {
 
       const result = await updateTask('task-1', updates)
 
-      expect(result.status).toBe('Not started')
+      expect(result.status).toBe('In progress')
     })
   })
 
@@ -384,7 +383,7 @@ describe('Tasks Service', () => {
         description: null,
         due_date: '2024-03-01',
         priority: 'medium',
-        status: 'open',
+        status: 'not_started',
         source: 'manual',
         created_at: '2024-01-01T00:00:00Z',
       }
@@ -416,7 +415,7 @@ describe('Tasks Service', () => {
         description: null,
         due_date: null,
         priority: 'low',
-        status: 'open',
+        status: 'not_started',
         source: 'manual',
         created_at: '2024-01-01T00:00:00Z',
       }

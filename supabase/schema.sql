@@ -24,6 +24,8 @@ CREATE TABLE IF NOT EXISTS public.teams (
   name TEXT NOT NULL,
   description TEXT,
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
+  notes TEXT,
+  documentation_url TEXT,
   owning_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
