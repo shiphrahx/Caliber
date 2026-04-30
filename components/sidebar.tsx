@@ -134,10 +134,11 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
             <img
               src={userAvatar}
               alt={userName}
-              className="h-8 w-8 rounded-full object-cover flex-shrink-0"
+              referrerPolicy="no-referrer"
+              className="h-8 w-8 min-w-[2rem] rounded-full object-cover flex-shrink-0"
             />
           ) : (
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-dark-900 text-[#84ffc4] flex-shrink-0">
+            <div className="flex h-8 w-8 min-w-[2rem] items-center justify-center rounded-full bg-[#292929] text-[#84ffc4] flex-shrink-0">
               <span className="text-sm font-semibold">{userInitials}</span>
             </div>
           )}
