@@ -315,7 +315,7 @@ export default function MeetingsPage() {
         justifyContent: "space-between",
         flexShrink: 0,
       }}>
-        <span style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-1)", fontFamily: "var(--font-sans)" }}>
+        <span style={{ fontSize: "var(--text-label)", fontWeight: 500, color: "var(--text-1)", fontFamily: "var(--font-sans)" }}>
           Meetings
         </span>
         <button
@@ -329,7 +329,7 @@ export default function MeetingsPage() {
             color: "#0a1a0a",
             padding: "4px 10px",
             borderRadius: "4px",
-            fontSize: "10px",
+            fontSize: "var(--text-caption)",
             fontWeight: 600,
             cursor: "pointer",
             fontFamily: "var(--font-sans)",
@@ -359,7 +359,7 @@ export default function MeetingsPage() {
             alignItems: "center",
             justifyContent: "space-between",
           }}>
-            <span style={{ fontSize: "11px", fontWeight: 500, color: "var(--text-1)" }}>All meetings</span>
+            <span style={{ fontSize: "var(--text-meta)", fontWeight: 500, color: "var(--text-1)" }}>All meetings</span>
             <div style={{ display: "flex", gap: "2px" }}>
               <button
                 onClick={expandAll}
@@ -394,7 +394,7 @@ export default function MeetingsPage() {
                     alignItems: "center",
                     gap: "5px",
                     padding: "6px 12px",
-                    fontSize: "10px",
+                    fontSize: "var(--text-caption)",
                     fontWeight: 500,
                     color: "var(--text-3)",
                     textTransform: "uppercase",
@@ -424,7 +424,7 @@ export default function MeetingsPage() {
                           onClick={() => togglePerson(personName)}
                           style={{
                             padding: "4px 12px 2px 24px",
-                            fontSize: "10px",
+                            fontSize: "var(--text-caption)",
                             color: "var(--text-3)",
                             fontWeight: 500,
                             background: "none",
@@ -468,11 +468,11 @@ export default function MeetingsPage() {
                               onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "var(--surf-2)" }}
                               onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "none" }}
                             >
-                              <span style={{ fontSize: "11px", color: isActive ? "#00f058" : "var(--text-2)" }}>
+                              <span style={{ fontSize: "var(--text-meta)", color: isActive ? "#00f058" : "var(--text-2)" }}>
                                 {formatDate(meeting.date)}
                               </span>
                               {meeting.title && (
-                                <span style={{ fontSize: "9px", color: "var(--text-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
+                                <span style={{ fontSize: "var(--text-overline)", color: "var(--text-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
                                   {meeting.title}
                                 </span>
                               )}
@@ -489,7 +489,7 @@ export default function MeetingsPage() {
                           onClick={() => toggleTeam(teamName)}
                           style={{
                             padding: "4px 12px 2px 24px",
-                            fontSize: "10px",
+                            fontSize: "var(--text-caption)",
                             color: "var(--text-3)",
                             fontWeight: 500,
                             background: "none",
@@ -533,11 +533,11 @@ export default function MeetingsPage() {
                               onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "var(--surf-2)" }}
                               onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "none" }}
                             >
-                              <span style={{ fontSize: "11px", color: isActive ? "#00f058" : "var(--text-2)" }}>
+                              <span style={{ fontSize: "var(--text-meta)", color: isActive ? "#00f058" : "var(--text-2)" }}>
                                 {formatDate(meeting.date)}
                               </span>
                               {meeting.title && (
-                                <span style={{ fontSize: "9px", color: "var(--text-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
+                                <span style={{ fontSize: "var(--text-overline)", color: "var(--text-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
                                   {meeting.title}
                                 </span>
                               )}
@@ -571,11 +571,11 @@ export default function MeetingsPage() {
                           onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "var(--surf-2)" }}
                           onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "none" }}
                         >
-                          <span style={{ fontSize: "11px", color: isActive ? "#00f058" : "var(--text-2)" }}>
+                          <span style={{ fontSize: "var(--text-meta)", color: isActive ? "#00f058" : "var(--text-2)" }}>
                             {formatDate(meeting.date)}
                           </span>
                           {meeting.title && (
-                            <span style={{ fontSize: "9px", color: "var(--text-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
+                            <span style={{ fontSize: "var(--text-overline)", color: "var(--text-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
                               {meeting.title}
                             </span>
                           )}
@@ -608,11 +608,11 @@ export default function MeetingsPage() {
           {selectedMeeting ? (
             <div>
               {/* Title */}
-              <h1 style={{ fontSize: "16px", fontWeight: 500, color: "var(--text-1)", marginBottom: "4px" }}>
+              <h1 style={{ marginBottom: "4px" }}>
                 {selectedMeeting.title}
               </h1>
               {/* Meta line */}
-              <p style={{ fontSize: "11px", color: "var(--text-3)", marginBottom: "16px" }}>
+              <p style={{ marginBottom: "16px" }}>
                 {formatDate(selectedMeeting.date)}
                 {selectedMeeting.nextMeetingDate && ` · next ${formatDate(selectedMeeting.nextMeetingDate)}`}
                 {selectedMeeting.attendees.length > 0 && ` · ${selectedMeeting.attendees.join(", ")}`}
@@ -621,42 +621,42 @@ export default function MeetingsPage() {
               {/* Meta fields grid */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "16px" }}>
                 <div>
-                  <div style={{ fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "3px" }}>Date</div>
+                  <div style={{ fontSize: "var(--text-overline)", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "3px" }}>Date</div>
                   <div style={{ background: "var(--surf-2)", border: "1px solid var(--border-1)", borderRadius: "5px", overflow: "hidden" }}>
                     <Input
                       type="date"
                       value={selectedMeeting.date}
                       onChange={(e) => handleUpdateMeeting({ ...selectedMeeting, date: e.target.value })}
-                      style={{ fontSize: "11px", color: "var(--text-1)", background: "transparent", border: "none", padding: "6px 9px" }}
+                      style={{ fontSize: "var(--text-meta)", color: "var(--text-1)", background: "transparent", border: "none", padding: "6px 9px" }}
                     />
                   </div>
                 </div>
                 {selectedMeeting.type === "1:1" && selectedMeeting.recurrence && selectedMeeting.recurrence !== "none" && selectedMeeting.nextMeetingDate && (
                   <div>
-                    <div style={{ fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "3px" }}>Next Meeting</div>
+                    <div style={{ fontSize: "var(--text-overline)", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "3px" }}>Next Meeting</div>
                     <div style={{ background: "var(--surf-2)", border: "1px solid var(--border-1)", borderRadius: "5px", overflow: "hidden" }}>
                       <Input
                         type="date"
                         value={selectedMeeting.nextMeetingDate}
                         onChange={(e) => handleUpdateMeeting({ ...selectedMeeting, nextMeetingDate: e.target.value })}
-                        style={{ fontSize: "11px", color: "var(--text-1)", background: "transparent", border: "none", padding: "6px 9px" }}
+                        style={{ fontSize: "var(--text-meta)", color: "var(--text-1)", background: "transparent", border: "none", padding: "6px 9px" }}
                       />
                     </div>
                   </div>
                 )}
                 <div>
-                  <div style={{ fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "3px" }}>Title</div>
+                  <div style={{ fontSize: "var(--text-overline)", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "3px" }}>Title</div>
                   <div style={{ background: "var(--surf-2)", border: "1px solid var(--border-1)", borderRadius: "5px", overflow: "hidden" }}>
                     <Input
                       value={selectedMeeting.title}
                       onChange={(e) => handleUpdateMeeting({ ...selectedMeeting, title: e.target.value })}
                       placeholder="Meeting title"
-                      style={{ fontSize: "11px", color: "var(--text-1)", background: "transparent", border: "none", padding: "6px 9px" }}
+                      style={{ fontSize: "var(--text-meta)", color: "var(--text-1)", background: "transparent", border: "none", padding: "6px 9px" }}
                     />
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "3px" }}>Attendees</div>
+                  <div style={{ fontSize: "var(--text-overline)", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "3px" }}>Attendees</div>
                   <div style={{ background: "var(--surf-2)", border: "1px solid var(--border-1)", borderRadius: "5px", overflow: "hidden" }}>
                     <Input
                       value={selectedMeeting.attendees.join(", ")}
@@ -665,7 +665,7 @@ export default function MeetingsPage() {
                         attendees: e.target.value.split(",").map(a => a.trim()).filter(a => a.length > 0)
                       })}
                       placeholder="Names separated by commas"
-                      style={{ fontSize: "11px", color: "var(--text-1)", background: "transparent", border: "none", padding: "6px 9px" }}
+                      style={{ fontSize: "var(--text-meta)", color: "var(--text-1)", background: "transparent", border: "none", padding: "6px 9px" }}
                     />
                   </div>
                 </div>
@@ -673,7 +673,7 @@ export default function MeetingsPage() {
 
               {/* Action items */}
               <div style={{ marginBottom: "16px" }}>
-                <div style={{ fontSize: "10px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "7px" }}>
+                <div style={{ fontSize: "var(--text-caption)", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "7px" }}>
                   Action items
                 </div>
                 <div style={{
@@ -698,12 +698,12 @@ export default function MeetingsPage() {
                           border: "1.5px solid var(--border-3)",
                           flexShrink: 0,
                         }} />
-                        <span style={{ fontSize: "12px", color: "var(--text-2)" }}>{item}</span>
+                        <span style={{ fontSize: "var(--text-label)", color: "var(--text-2)" }}>{item}</span>
                       </div>
                     ))
                   ) : (
                     <div style={{ padding: "7px 12px" }}>
-                      <span style={{ fontSize: "11px", color: "var(--text-3)" }}>No action items</span>
+                      <span style={{ fontSize: "var(--text-meta)", color: "var(--text-3)" }}>No action items</span>
                     </div>
                   )}
                 </div>
@@ -711,7 +711,7 @@ export default function MeetingsPage() {
 
               {/* Meeting notes */}
               <div>
-                <div style={{ fontSize: "10px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "7px" }}>
+                <div style={{ fontSize: "var(--text-caption)", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "7px" }}>
                   Meeting notes
                 </div>
                 <div style={{
@@ -729,7 +729,7 @@ export default function MeetingsPage() {
                         color: "var(--text-3)",
                         borderRadius: "3px",
                         padding: "2px 7px",
-                        fontSize: "10px",
+                        fontSize: "var(--text-caption)",
                         cursor: "pointer",
                         fontFamily: "var(--font-sans)",
                       }}
@@ -741,7 +741,7 @@ export default function MeetingsPage() {
                     ))}
                   </div>
                   {/* Body */}
-                  <div style={{ padding: "12px 14px", fontSize: "12px", color: "var(--text-2)", lineHeight: 1.75 }}>
+                  <div style={{ padding: "12px 14px", fontSize: "var(--text-label)", color: "var(--text-2)", lineHeight: 1.75 }}>
                     {selectedMeeting.notes ? (
                       <div dangerouslySetInnerHTML={{ __html: selectedMeeting.notes }} />
                     ) : (
@@ -753,7 +753,7 @@ export default function MeetingsPage() {
             </div>
           ) : (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
-              <p style={{ fontSize: "11px", color: "var(--text-3)" }}>Select a meeting to view details</p>
+              <p style={{ color: "var(--text-3)" }}>Select a meeting to view details</p>
             </div>
           )}
         </div>
