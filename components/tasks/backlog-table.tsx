@@ -144,7 +144,7 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
                 border: "1px solid var(--border-1)",
                 borderRadius: "6px",
                 padding: "5px 10px 5px 30px",
-                fontSize: "12px",
+                fontSize: "var(--text-label)",
                 color: "var(--text-1)",
                 width: "180px",
                 outline: "none",
@@ -161,7 +161,7 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
               background: showFilters ? "var(--surf-3)" : "transparent",
               border: "1px solid var(--border-2)",
               color: "var(--text-2)",
-              fontSize: "12px",
+              fontSize: "var(--text-label)",
               padding: "5px 10px",
               borderRadius: "6px",
               cursor: "pointer",
@@ -179,7 +179,7 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
           style={{
             background: "linear-gradient(90deg, #00ffe5 0%, #00f058 100%)",
             color: "#0a1a0a",
-            fontSize: "10px",
+            fontSize: "var(--text-caption)",
             fontWeight: 600,
             padding: "4px 10px",
             borderRadius: "4px",
@@ -213,7 +213,7 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
             { label: "Category", value: categoryFilter, onChange: (v: string) => setCategoryFilter(v as TaskCategory | "all"), options: TASK_CATEGORIES },
           ].map(({ label, value, onChange, options }) => (
             <div key={label} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <label style={{ fontSize: "12px", color: "var(--text-2)", fontWeight: 500 }}>{label}:</label>
+              <label style={{ fontSize: "var(--text-label)", color: "var(--text-2)", fontWeight: 500 }}>{label}:</label>
               <select
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
@@ -222,7 +222,7 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
                   border: "1px solid var(--border-2)",
                   borderRadius: "4px",
                   padding: "3px 6px",
-                  fontSize: "12px",
+                  fontSize: "var(--text-label)",
                   color: "var(--text-1)",
                   cursor: "pointer",
                 }}
@@ -279,7 +279,7 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
                       padding: "8px 12px",
                       background: "var(--surf)",
                       fontWeight: 500,
-                      fontSize: "9px",
+                      fontSize: "var(--text-overline)",
                       color: "var(--text-3)",
                       textTransform: "uppercase",
                       letterSpacing: "0.06em",
@@ -295,7 +295,7 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
                         background: "none",
                         border: "none",
                         cursor: "pointer",
-                        fontSize: "9px",
+                        fontSize: "var(--text-overline)",
                         fontWeight: 500,
                         textTransform: "uppercase",
                         letterSpacing: "0.06em",
@@ -334,7 +334,7 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
 
                   {/* Name */}
                   <td
-                    style={{ padding: "9px 12px", color: "var(--text-1)", fontSize: "11px", overflow: "hidden" }}
+                    style={{ padding: "9px 12px", color: "var(--text-1)", fontSize: "var(--text-meta)", overflow: "hidden" }}
                     title={task.title}
                   >
                     <div className="line-clamp-2 break-all max-md:break-words">{task.title}</div>
@@ -352,7 +352,7 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
                         style: {
                           background: STATUS_PILL_BG[status],
                           color: STATUS_PILL_TEXT[status],
-                          fontSize: "9px",
+                          fontSize: "var(--text-overline)",
                           fontFamily: "var(--font-mono)",
                           fontWeight: 500,
                           borderRadius: "4px",
@@ -365,7 +365,7 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
                   {/* Due date */}
                   <td style={{
                     padding: "9px 12px",
-                    fontSize: "9px",
+                    fontSize: "var(--text-overline)",
                     color: "var(--text-3)",
                     fontFamily: "var(--font-mono)",
                   }}>
@@ -384,7 +384,7 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
                         style: {
                           background: PRIORITY_PILL_BG[priority],
                           color: PRIORITY_PILL_TEXT[priority],
-                          fontSize: "9px",
+                          fontSize: "var(--text-overline)",
                           fontFamily: "var(--font-mono)",
                           fontWeight: 500,
                           borderRadius: "4px",
@@ -406,7 +406,7 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
                         style: {
                           background: "var(--surf-3)",
                           color: "var(--text-2)",
-                          fontSize: "9px",
+                          fontSize: "var(--text-overline)",
                           fontFamily: "var(--font-mono)",
                           fontWeight: 500,
                           borderRadius: "4px",
@@ -430,7 +430,7 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
                           color: "var(--text-3)",
                           borderRadius: "4px",
                           padding: "2px 7px",
-                          fontSize: "11px",
+                          fontSize: "var(--text-meta)",
                           background: "none",
                           cursor: "pointer",
                         }}
@@ -447,7 +447,7 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
                             color: "var(--text-3)",
                             borderRadius: "4px",
                             padding: "2px 7px",
-                            fontSize: "11px",
+                            fontSize: "var(--text-meta)",
                             background: "none",
                             cursor: "pointer",
                           }}
