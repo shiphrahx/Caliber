@@ -141,61 +141,40 @@ export function PersonFormDialog({ open, onOpenChange, person, onSave, available
               </div>
               <div className="grid gap-2">
                 <Label>Level / Seniority</Label>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setFormData({ ...formData, level: "Junior" })}
-                    className={formData.level === "Junior" ? "!bg-green-100 !text-green-700 !border-green-300 hover:!bg-green-200" : "hover:!bg-green-100 hover:!text-green-700 hover:!border-green-300"}
-                  >
-                    Junior
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setFormData({ ...formData, level: "Mid" })}
-                    className={formData.level === "Mid" ? "!bg-yellow-100 !text-yellow-700 !border-yellow-300 hover:!bg-yellow-200" : "hover:!bg-yellow-100 hover:!text-yellow-700 hover:!border-yellow-300"}
-                  >
-                    Mid
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setFormData({ ...formData, level: "Senior" })}
-                    className={formData.level === "Senior" ? "!bg-pink-100 !text-pink-700 !border-pink-300 hover:!bg-pink-200" : "hover:!bg-pink-100 hover:!text-pink-700 hover:!border-pink-300"}
-                  >
-                    Senior
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setFormData({ ...formData, level: "Staff" })}
-                    className={formData.level === "Staff" ? "!bg-blue-100 !text-blue-700 !border-blue-300 hover:!bg-blue-200" : "hover:!bg-blue-100 hover:!text-blue-700 hover:!border-blue-300"}
-                  >
-                    Staff
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setFormData({ ...formData, level: "Principal" })}
-                    className={formData.level === "Principal" ? "!bg-purple-100 !text-purple-700 !border-purple-300 hover:!bg-purple-200" : "hover:!bg-purple-100 hover:!text-purple-700 hover:!border-purple-300"}
-                  >
-                    Principal
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setFormData({ ...formData, level: "Other" })}
-                    className={formData.level !== null && formData.level !== '' && !["Junior", "Mid", "Senior", "Staff", "Principal"].includes(formData.level) ? "!bg-gray-100 !text-gray-700 !border-gray-300 hover:!bg-gray-200" : "hover:!bg-gray-100 hover:!text-gray-700 hover:!border-gray-300"}
-                  >
-                    Other
-                  </Button>
+                <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                  {([
+                    { label: "Junior",    bg: "#0d1420", color: "#818cf8" },
+                    { label: "Mid",       bg: "#0a1a2e", color: "#5b9bd5" },
+                    { label: "Senior",    bg: "#0f1a0a", color: "#4ade80" },
+                    { label: "Staff",     bg: "#1a1200", color: "#c9a227" },
+                    { label: "Principal", bg: "#1e0d00", color: "#e07030" },
+                    { label: "Other",     bg: "#222222", color: "#888888" },
+                  ] as const).map(({ label, bg, color }) => {
+                    const isOther = label === "Other"
+                    const isSelected = isOther
+                      ? (formData.level !== null && formData.level !== "" && !["Junior", "Mid", "Senior", "Staff", "Principal"].includes(formData.level ?? ""))
+                      : formData.level === label
+                    return (
+                      <button
+                        key={label}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, level: isOther ? "" : label })}
+                        style={{
+                          padding: "3px 10px",
+                          borderRadius: "4px",
+                          fontSize: "var(--text-label)",
+                          fontWeight: 500,
+                          fontFamily: "var(--font-sans)",
+                          background: isSelected ? bg : "var(--surf-2)",
+                          color: isSelected ? color : "var(--text-3)",
+                          border: `1px solid ${isSelected ? color + "40" : "var(--border-2)"}`,
+                          cursor: "pointer",
+                        }}
+                      >
+                        {label}
+                      </button>
+                    )
+                  })}
                 </div>
                 <Input
                   id="level"
@@ -217,24 +196,30 @@ export function PersonFormDialog({ open, onOpenChange, person, onSave, available
                 <Label>Teams</Label>
                 <div className="flex gap-3 items-center">
                   {/* Available Teams */}
-                  <div className="flex-1">
-                    <Label className="text-gray-600 mb-1">Available Teams</Label>
-                    <div className="border border-gray-300 rounded-md h-32 overflow-y-auto">
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: "var(--text-label)", color: "var(--text-3)", display: "block", marginBottom: "4px" }}>Available Teams</label>
+                    <div style={{ border: "1px solid var(--border-2)", borderRadius: "4px", height: "128px", overflowY: "auto", background: "var(--surf-2)" }}>
                       {availableTeamsList.length > 0 ? (
                         availableTeamsList.map((team) => (
                           <div
                             key={team.id}
                             onClick={() => toggleAvailableSelection(team.name)}
                             onDoubleClick={() => handleDoubleClickAvailable(team.name)}
-                            className={`px-3 py-2 text-sm cursor-pointer dual-list-item select-none ${
-                              selectedAvailable.includes(team.name) ? 'bg-primary-50 bg-primary-dark-900/30 border-l-2 border-primary-600' : ''
-                            }`}
+                            className="dual-list-item"
+                            style={{
+                              padding: "6px 12px",
+                              fontSize: "var(--text-label)",
+                              cursor: "pointer",
+                              userSelect: "none",
+                              color: selectedAvailable.includes(team.name) ? "#111" : "var(--text-2)",
+                              borderLeft: selectedAvailable.includes(team.name) ? "2px solid #00f058" : "2px solid transparent",
+                            }}
                           >
                             {team.name}
                           </div>
                         ))
                       ) : (
-                        <div className="flex items-center justify-center h-full text-gray-500">
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: "var(--text-label)", color: "var(--text-3)" }}>
                           All teams assigned
                         </div>
                       )}
@@ -242,48 +227,50 @@ export function PersonFormDialog({ open, onOpenChange, person, onSave, available
                   </div>
 
                   {/* Arrow Buttons */}
-                  <div className="flex flex-col gap-2">
-                    <Button
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <button
                       type="button"
-                      variant="outline"
-                      size="icon"
                       onClick={handleAddToTeams}
                       disabled={selectedAvailable.length === 0}
-                      className="h-8 w-8"
+                      style={{ width: "32px", height: "32px", borderRadius: "4px", border: "1px solid var(--border-2)", background: "var(--surf-2)", color: "var(--text-2)", cursor: selectedAvailable.length === 0 ? "not-allowed" : "pointer", opacity: selectedAvailable.length === 0 ? 0.4 : 1, display: "flex", alignItems: "center", justifyContent: "center" }}
                     >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                    <Button
+                      <ChevronRight style={{ width: "16px", height: "16px" }} />
+                    </button>
+                    <button
                       type="button"
-                      variant="outline"
-                      size="icon"
                       onClick={handleRemoveFromTeams}
                       disabled={selectedTeams.length === 0}
-                      className="h-8 w-8"
+                      style={{ width: "32px", height: "32px", borderRadius: "4px", border: "1px solid var(--border-2)", background: "var(--surf-2)", color: "var(--text-2)", cursor: selectedTeams.length === 0 ? "not-allowed" : "pointer", opacity: selectedTeams.length === 0 ? 0.4 : 1, display: "flex", alignItems: "center", justifyContent: "center" }}
                     >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
+                      <ChevronLeft style={{ width: "16px", height: "16px" }} />
+                    </button>
                   </div>
 
                   {/* Person Teams */}
-                  <div className="flex-1">
-                    <Label className="text-gray-600 mb-1">{formData.name ? `${formData.name}'s Teams` : "Person's Teams"} ({personTeamsList.length})</Label>
-                    <div className="border border-gray-300 rounded-md h-32 overflow-y-auto">
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: "var(--text-label)", color: "var(--text-3)", display: "block", marginBottom: "4px" }}>{formData.name ? `${formData.name}'s Teams` : "Person's Teams"} ({personTeamsList.length})</label>
+                    <div style={{ border: "1px solid var(--border-2)", borderRadius: "4px", height: "128px", overflowY: "auto", background: "var(--surf-2)" }}>
                       {personTeamsList.length > 0 ? (
                         personTeamsList.map((team) => (
                           <div
                             key={team.id}
                             onClick={() => toggleTeamSelection(team.name)}
                             onDoubleClick={() => handleDoubleClickTeam(team.name)}
-                            className={`px-3 py-2 text-sm cursor-pointer dual-list-item select-none ${
-                              selectedTeams.includes(team.name) ? 'bg-primary-50 bg-primary-dark-900/30 border-l-2 border-primary-600' : ''
-                            }`}
+                            className="dual-list-item"
+                            style={{
+                              padding: "6px 12px",
+                              fontSize: "var(--text-label)",
+                              cursor: "pointer",
+                              userSelect: "none",
+                              color: selectedTeams.includes(team.name) ? "#111" : "var(--text-2)",
+                              borderLeft: selectedTeams.includes(team.name) ? "2px solid #00f058" : "2px solid transparent",
+                            }}
                           >
                             {team.name}
                           </div>
                         ))
                       ) : (
-                        <div className="flex items-center justify-center h-full text-gray-500">
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: "var(--text-label)", color: "var(--text-3)" }}>
                           No teams yet
                         </div>
                       )}
