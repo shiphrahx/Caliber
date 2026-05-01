@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { MarkdownTextarea } from "@/components/ui/markdown-textarea"
@@ -34,6 +33,15 @@ interface ExtendedMeeting {
   teamId?: string
 }
 
+const LEVEL_CHIPS = [
+  { label: "Junior",    bg: "#0d1420", color: "#818cf8" },
+  { label: "Mid",       bg: "#0a1a2e", color: "#5b9bd5" },
+  { label: "Senior",    bg: "#0f1a0a", color: "#4ade80" },
+  { label: "Staff",     bg: "#1a1200", color: "#c9a227" },
+  { label: "Principal", bg: "#1e0d00", color: "#e07030" },
+  { label: "Other",     bg: "#222222", color: "#888888" },
+] as const
+
 export default function PersonDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
   const [personId, setPersonId] = useState<string | null>(null)
@@ -44,7 +52,6 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
   const [selectedAvailable, setSelectedAvailable] = useState<string[]>([])
   const [selectedTeamMembers, setSelectedTeamMembers] = useState<string[]>([])
 
-  // Meeting states
   const [meetings, setMeetings] = useState<ExtendedMeeting[]>([])
   const [selectedMeeting, setSelectedMeeting] = useState<ExtendedMeeting | null>(null)
   const [expandedTypes, setExpandedTypes] = useState<Set<string>>(new Set(["1:1"]))
@@ -53,9 +60,7 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
   const [isResizing, setIsResizing] = useState(false)
 
   useEffect(() => {
-    params.then(({ id }) => {
-      setPersonId(id)
-    })
+    params.then(({ id }) => setPersonId(id))
   }, [params])
 
   useEffect(() => {
@@ -69,74 +74,43 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
     getTeams().then(setAllTeams).catch(console.error)
     getMeetingsForPerson(personId).then(backendMeetings => {
       setMeetings(backendMeetings.map(m => ({
-        id: m.id,
-        title: m.title,
-        type: m.meetingType,
-        date: m.meetingDate,
+        id: m.id, title: m.title, type: m.meetingType, date: m.meetingDate,
         attendees: m.attendees,
-        personName: m.personName || undefined,
-        teamName: m.teamName || undefined,
-        recurrence: m.recurrence || undefined,
-        nextMeetingDate: m.nextMeetingDate || undefined,
-        actionItems: m.actionItems || undefined,
-        notes: m.notes || undefined,
-        personId: m.personId || undefined,
-        teamId: m.teamId || undefined,
+        personName: m.personName || undefined, teamName: m.teamName || undefined,
+        recurrence: m.recurrence || undefined, nextMeetingDate: m.nextMeetingDate || undefined,
+        actionItems: m.actionItems || undefined, notes: m.notes || undefined,
+        personId: m.personId || undefined, teamId: m.teamId || undefined,
       })))
     }).catch(console.error)
   }, [personId])
 
-  // Meeting helper functions and tree organization - MUST be before early return
   const tree = useMemo(() => {
     if (!formData) return {}
-
-    // Organize meetings into tree structure
     const treeStructure: { [type: string]: TreeNode } = {}
-
     meetings.forEach((meeting) => {
-      if (!treeStructure[meeting.type]) {
-        treeStructure[meeting.type] = {
-          type: meeting.type,
-          meetings: [],
-        }
-      }
+      if (!treeStructure[meeting.type]) treeStructure[meeting.type] = { type: meeting.type, meetings: [] }
       treeStructure[meeting.type].meetings.push(meeting)
     })
-
-    // Sort meetings by date (most recent first)
     Object.values(treeStructure).forEach((node) => {
       node.meetings.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     })
-
     return treeStructure
   }, [formData, meetings])
 
-  // Mouse resize handling - MUST be before early return
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isResizing) return
-
-      const meetingsSection = document.getElementById('meetings-section')
-      if (!meetingsSection) return
-
-      const sectionRect = meetingsSection.getBoundingClientRect()
-      const newWidth = e.clientX - sectionRect.left
-
-      if (newWidth >= 200 && newWidth <= 500) {
-        setLeftPanelWidth(newWidth)
-      }
+      const section = document.getElementById('meetings-section')
+      if (!section) return
+      const newWidth = e.clientX - section.getBoundingClientRect().left
+      if (newWidth >= 200 && newWidth <= 500) setLeftPanelWidth(newWidth)
     }
-
-    const handleMouseUp = () => {
-      setIsResizing(false)
-    }
-
+    const handleMouseUp = () => setIsResizing(false)
     if (isResizing) {
       document.addEventListener('mousemove', handleMouseMove)
       document.addEventListener('mouseup', handleMouseUp)
       document.body.style.cursor = 'col-resize'
       document.body.style.userSelect = 'none'
-
       return () => {
         document.removeEventListener('mousemove', handleMouseMove)
         document.removeEventListener('mouseup', handleMouseUp)
@@ -147,13 +121,11 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
     return undefined
   }, [isResizing])
 
-  const getPersonMeetings = (): ExtendedMeeting[] => {
-    return Object.values(tree).flatMap(node => node.meetings)
-  }
+  const getPersonMeetings = () => Object.values(tree).flatMap(node => node.meetings)
 
   if (!formData) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
         <p>Person not found</p>
       </div>
     )
@@ -169,115 +141,66 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
     }
   }
 
-  const handleCancel = () => {
-    router.push("/people")
-  }
+  const handleCancel = () => router.push("/people")
 
-  const availableTeamsList = allTeams.filter(team =>
-    !formData.teams.includes(team.name)
-  )
-
-  const assignedTeamsList = allTeams.filter(team =>
-    formData.teams.includes(team.name)
-  )
+  const availableTeamsList = allTeams.filter(team => !formData.teams.includes(team.name))
+  const assignedTeamsList = allTeams.filter(team => formData.teams.includes(team.name))
 
   const handleAddToTeams = () => {
-    const teamsToAdd = allTeams
-      .filter(team => selectedAvailable.includes(team.id))
-      .map(team => team.name)
+    const teamsToAdd = allTeams.filter(team => selectedAvailable.includes(team.id)).map(team => team.name)
     setFormData({ ...formData, teams: [...formData.teams, ...teamsToAdd] })
     setSelectedAvailable([])
   }
 
   const handleRemoveFromTeams = () => {
-    const teamsToRemove = allTeams
-      .filter(team => selectedTeamMembers.includes(team.id))
-      .map(team => team.name)
+    const teamsToRemove = allTeams.filter(team => selectedTeamMembers.includes(team.id)).map(team => team.name)
     setFormData({ ...formData, teams: formData.teams.filter(t => !teamsToRemove.includes(t)) })
     setSelectedTeamMembers([])
   }
 
-  const toggleAvailableSelection = (teamId: string) => {
-    setSelectedAvailable(prev =>
-      prev.includes(teamId) ? prev.filter(id => id !== teamId) : [...prev, teamId]
-    )
-  }
+  const toggleAvailableSelection = (teamId: string) =>
+    setSelectedAvailable(prev => prev.includes(teamId) ? prev.filter(id => id !== teamId) : [...prev, teamId])
 
-  const toggleTeamMemberSelection = (teamId: string) => {
-    setSelectedTeamMembers(prev =>
-      prev.includes(teamId) ? prev.filter(id => id !== teamId) : [...prev, teamId]
-    )
-  }
+  const toggleTeamMemberSelection = (teamId: string) =>
+    setSelectedTeamMembers(prev => prev.includes(teamId) ? prev.filter(id => id !== teamId) : [...prev, teamId])
 
   const handleDoubleClickAvailable = (teamId: string) => {
     const team = allTeams.find(t => t.id === teamId)
-    if (team) {
-      setFormData({ ...formData, teams: [...formData.teams, team.name] })
-      setSelectedAvailable(prev => prev.filter(id => id !== teamId))
-    }
+    if (team) { setFormData({ ...formData, teams: [...formData.teams, team.name] }); setSelectedAvailable(prev => prev.filter(id => id !== teamId)) }
   }
 
   const handleDoubleClickTeamMember = (teamId: string) => {
     const team = allTeams.find(t => t.id === teamId)
-    if (team) {
-      setFormData({ ...formData, teams: formData.teams.filter(t => t !== team.name) })
-      setSelectedTeamMembers(prev => prev.filter(id => id !== teamId))
-    }
+    if (team) { setFormData({ ...formData, teams: formData.teams.filter(t => t !== team.name) }); setSelectedTeamMembers(prev => prev.filter(id => id !== teamId)) }
   }
 
   const toggleType = (type: string) => {
-    const newExpanded = new Set(expandedTypes)
-    if (newExpanded.has(type)) {
-      newExpanded.delete(type)
-    } else {
-      newExpanded.add(type)
-    }
-    setExpandedTypes(newExpanded)
+    const s = new Set(expandedTypes)
+    s.has(type) ? s.delete(type) : s.add(type)
+    setExpandedTypes(s)
   }
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    })
-  }
+  const formatDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
 
   const handleAddMeeting = async (newMeeting: any) => {
     try {
-      // For 1:1 meetings on this person's page, always use the page's personId as fallback
-      const resolvedPersonId = newMeeting.type === "1:1"
-        ? (newMeeting.personId || personId)
-        : null
-      const resolvedTeamId = newMeeting.type !== "1:1" && newMeeting.type !== "Other"
-        ? (newMeeting.teamId || null)
-        : null
-
+      const resolvedPersonId = newMeeting.type === "1:1" ? (newMeeting.personId || personId) : null
+      const resolvedTeamId = newMeeting.type !== "1:1" && newMeeting.type !== "Other" ? (newMeeting.teamId || null) : null
       const backendMeeting = await createMeeting({
-        title: newMeeting.title,
-        meetingType: newMeeting.type as MeetingType,
-        meetingDate: newMeeting.date,
-        nextMeetingDate: newMeeting.nextMeetingDate || null,
+        title: newMeeting.title, meetingType: newMeeting.type as MeetingType,
+        meetingDate: newMeeting.date, nextMeetingDate: newMeeting.nextMeetingDate || null,
         recurrence: (newMeeting.recurrence as RecurrenceType) || null,
-        actionItems: newMeeting.actionItems || null,
-        notes: newMeeting.notes || null,
-        personId: resolvedPersonId,
-        teamId: resolvedTeamId,
+        actionItems: newMeeting.actionItems || null, notes: newMeeting.notes || null,
+        personId: resolvedPersonId, teamId: resolvedTeamId,
       })
       const meeting: ExtendedMeeting = {
-        id: backendMeeting.id,
-        title: backendMeeting.title,
-        type: backendMeeting.meetingType,
-        date: backendMeeting.meetingDate,
-        attendees: backendMeeting.attendees,
-        personName: backendMeeting.personName || undefined,
-        teamName: backendMeeting.teamName || undefined,
-        recurrence: backendMeeting.recurrence || undefined,
-        nextMeetingDate: backendMeeting.nextMeetingDate || undefined,
-        actionItems: backendMeeting.actionItems || undefined,
-        notes: backendMeeting.notes || undefined,
-        personId: backendMeeting.personId || undefined,
-        teamId: backendMeeting.teamId || undefined,
+        id: backendMeeting.id, title: backendMeeting.title, type: backendMeeting.meetingType,
+        date: backendMeeting.meetingDate, attendees: backendMeeting.attendees,
+        personName: backendMeeting.personName || undefined, teamName: backendMeeting.teamName || undefined,
+        recurrence: backendMeeting.recurrence || undefined, nextMeetingDate: backendMeeting.nextMeetingDate || undefined,
+        actionItems: backendMeeting.actionItems || undefined, notes: backendMeeting.notes || undefined,
+        personId: backendMeeting.personId || undefined, teamId: backendMeeting.teamId || undefined,
       }
       setMeetings([...meetings, meeting])
       setSelectedMeeting(meeting)
@@ -289,391 +212,247 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
 
   const handleUpdateMeeting = (updatedMeeting: ExtendedMeeting) => {
     if (updatedMeeting.nextMeetingDate && updatedMeeting.date) {
-      const meetingDate = new Date(updatedMeeting.date)
-      const nextMeetingDate = new Date(updatedMeeting.nextMeetingDate)
-      if (nextMeetingDate <= meetingDate) {
+      if (new Date(updatedMeeting.nextMeetingDate) <= new Date(updatedMeeting.date)) {
         alert("Next meeting date must be after the meeting date")
         return
       }
     }
-
     setMeetings(meetings.map(m => m.id === updatedMeeting.id ? updatedMeeting : m))
     setSelectedMeeting(updatedMeeting)
   }
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault()
-    setIsResizing(true)
-  }
+  const dualListStyle = { border: "1px solid var(--border-2)", borderRadius: "4px", height: "192px", overflowY: "auto" as const, background: "var(--surf-2)" }
+  const dualLabelStyle = { fontSize: "var(--text-label)", color: "var(--text-3)", display: "block", marginBottom: "4px" }
 
   return (
-    <div className="p-8">
-      <div className="mb-6">
-        <Button
-          variant="ghost"
+    <div style={{ padding: "32px" }}>
+      {/* Header */}
+      <div style={{ marginBottom: "24px" }}>
+        <button
           onClick={handleCancel}
-          className="mb-4"
+          style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "none", border: "none", color: "var(--text-2)", cursor: "pointer", fontSize: "var(--text-label)", marginBottom: "16px", padding: "4px 0" }}
+          onMouseEnter={e => (e.currentTarget.style.color = "var(--text-1)")}
+          onMouseLeave={e => (e.currentTarget.style.color = "var(--text-2)")}
         >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to People
-        </Button>
-        <h1 className="text-2xl text-gray-100 font-bold">{formData.name}</h1>
-        <p className="text-sm text-gray-400">{formData.role}</p>
+          <ArrowLeft style={{ width: "14px", height: "14px" }} /> Back to People
+        </button>
+        <h1>{formData.name}</h1>
+        <p style={{ marginTop: "2px" }}>{formData.role}</p>
       </div>
 
-      <Card>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-2 gap-6">
-            {/* Left Column - Form Fields */}
-            <div className="grid gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Name *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g. Sarah Miller"
-                  required
-                />
+      {/* Profile card */}
+      <div style={{ background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "8px", padding: "24px", marginBottom: "24px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+          {/* Left column */}
+          <div style={{ display: "grid", gap: "16px" }}>
+            <div style={{ display: "grid", gap: "6px" }}>
+              <Label htmlFor="name">Name *</Label>
+              <Input id="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="e.g. Sarah Miller" required />
+            </div>
+            <div style={{ display: "grid", gap: "6px" }}>
+              <Label htmlFor="role">Role *</Label>
+              <Input id="role" value={formData.role ?? ''} onChange={(e) => setFormData({ ...formData, role: e.target.value })} placeholder="e.g. Senior Software Engineer" required />
+            </div>
+            <div style={{ display: "grid", gap: "6px" }}>
+              <Label>Seniority Level</Label>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                {LEVEL_CHIPS.map(({ label, bg, color }) => {
+                  const isOther = label === "Other"
+                  const isSelected = isOther
+                    ? (formData.level !== null && formData.level !== "" && !["Junior", "Mid", "Senior", "Staff", "Principal"].includes(formData.level ?? ""))
+                    : formData.level === label
+                  return (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, level: isOther ? "" : label })}
+                      style={{
+                        padding: "3px 10px", borderRadius: "4px", fontSize: "var(--text-label)", fontWeight: 500,
+                        fontFamily: "var(--font-sans)", background: isSelected ? bg : "var(--surf-2)",
+                        color: isSelected ? color : "var(--text-3)", border: `1px solid ${isSelected ? color + "40" : "var(--border-2)"}`,
+                        cursor: "pointer",
+                      }}
+                    >{label}</button>
+                  )
+                })}
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="role">Role *</Label>
-                <Input
-                  id="role"
-                  value={formData.role ?? ''}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  placeholder="e.g. Senior Software Engineer"
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="level">Seniority Level *</Label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  <Button
-                    type="button" variant="outline" size="sm"
-                    onClick={() => setFormData({ ...formData, level: "Junior" })}
-                    className={formData.level === "Junior" ? "!bg-green-100 !text-green-700 !border-green-300 hover:!bg-green-200" : "hover:!bg-green-100 hover:!text-green-700 hover:!border-green-300"}
-                  >Junior</Button>
-                  <Button
-                    type="button" variant="outline" size="sm"
-                    onClick={() => setFormData({ ...formData, level: "Mid" })}
-                    className={formData.level === "Mid" ? "!bg-yellow-100 !text-yellow-700 !border-yellow-300 hover:!bg-yellow-200" : "hover:!bg-yellow-100 hover:!text-yellow-700 hover:!border-yellow-300"}
-                  >Mid</Button>
-                  <Button
-                    type="button" variant="outline" size="sm"
-                    onClick={() => setFormData({ ...formData, level: "Senior" })}
-                    className={formData.level === "Senior" ? "!bg-pink-100 !text-pink-700 !border-pink-300 hover:!bg-pink-200" : "hover:!bg-pink-100 hover:!text-pink-700 hover:!border-pink-300"}
-                  >Senior</Button>
-                  <Button
-                    type="button" variant="outline" size="sm"
-                    onClick={() => setFormData({ ...formData, level: "Staff" })}
-                    className={formData.level === "Staff" ? "!bg-blue-100 !text-blue-700 !border-blue-300 hover:!bg-blue-200" : "hover:!bg-blue-100 hover:!text-blue-700 hover:!border-blue-300"}
-                  >Staff</Button>
-                  <Button
-                    type="button" variant="outline" size="sm"
-                    onClick={() => setFormData({ ...formData, level: "Principal" })}
-                    className={formData.level === "Principal" ? "!bg-purple-100 !text-purple-700 !border-purple-300 hover:!bg-purple-200" : "hover:!bg-purple-100 hover:!text-purple-700 hover:!border-purple-300"}
-                  >Principal</Button>
-                  <Button
-                    type="button" variant="outline" size="sm"
-                    onClick={() => setFormData({ ...formData, level: "Other" })}
-                    className={formData.level !== null && formData.level !== '' && !["Junior", "Mid", "Senior", "Staff", "Principal"].includes(formData.level) ? "!bg-gray-100 !text-gray-700 !border-gray-300 hover:!bg-gray-200" : "hover:!bg-gray-100 hover:!text-gray-700 hover:!border-gray-300"}
-                  >Other</Button>
+              <Input id="level" value={formData.level ?? ''} onChange={(e) => setFormData({ ...formData, level: e.target.value })} placeholder="Or type custom level" />
+            </div>
+            <div style={{ display: "grid", gap: "6px" }}>
+              <Label htmlFor="startDate">Start Date</Label>
+              <Input id="startDate" type="date" value={formData.startDate ?? ''} onChange={(e) => setFormData({ ...formData, startDate: e.target.value })} />
+            </div>
+
+            {/* Teams dual-list */}
+            <div style={{ display: "grid", gap: "6px" }}>
+              <Label>Teams</Label>
+              <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                <div style={{ flex: 1 }}>
+                  <label style={dualLabelStyle}>Available Teams</label>
+                  <div style={dualListStyle}>
+                    {availableTeamsList.length > 0 ? availableTeamsList.map((team) => (
+                      <div key={team.id} onClick={() => toggleAvailableSelection(team.id!)} onDoubleClick={() => handleDoubleClickAvailable(team.id!)} className="dual-list-item"
+                        style={{ padding: "6px 12px", fontSize: "var(--text-label)", cursor: "pointer", userSelect: "none", color: selectedAvailable.includes(team.id!) ? "#111" : "var(--text-2)", borderLeft: selectedAvailable.includes(team.id!) ? "2px solid #00f058" : "2px solid transparent" }}>
+                        {team.name}
+                      </div>
+                    )) : (
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: "var(--text-label)", color: "var(--text-3)" }}>All teams assigned</div>
+                    )}
+                  </div>
                 </div>
-                <Input
-                  id="level"
-                  value={formData.level ?? ''}
-                  onChange={(e) => setFormData({ ...formData, level: e.target.value })}
-                  placeholder="Or type custom level"
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="startDate">Start Date *</Label>
-                <Input
-                  id="startDate"
-                  type="date"
-                  value={formData.startDate ?? ''}
-                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label>Teams</Label>
-                <div className="flex gap-3 items-center">
-                  {/* Available Teams */}
-                  <div className="flex-1">
-                    <Label className="text-gray-400 mb-1">Available Teams</Label>
-                    <div className="border border-[#383838] rounded-md h-48 overflow-y-auto bg-[#262626]">
-                      {availableTeamsList.length > 0 ? (
-                        availableTeamsList.map((team) => (
-                          <div
-                            key={team.id}
-                            onClick={() => toggleAvailableSelection(team.id!)}
-                            onDoubleClick={() => handleDoubleClickAvailable(team.id!)}
-                            className={`px-3 py-2 text-sm cursor-pointer dual-list-item select-none text-gray-200 ${
-                              selectedAvailable.includes(team.id!) ? 'bg-primary-50 bg-primary-dark-900/30 bg-primary-dark-900/30 border-l-2 border-primary-600 border-primary-dark-600 border-primary-dark-400' : ''
-                            }`}
-                          >
-                            {team.name}
-                          </div>
-                        ))
-                      ) : (
-                        <div className="flex items-center justify-center h-full text-gray-400">
-                          All teams assigned
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Arrow Buttons */}
-                  <div className="flex flex-col gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={handleAddToTeams}
-                      disabled={selectedAvailable.length === 0}
-                      className="h-8 w-8"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={handleRemoveFromTeams}
-                      disabled={selectedTeamMembers.length === 0}
-                      className="h-8 w-8"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                  </div>
-
-                  {/* Assigned Teams */}
-                  <div className="flex-1">
-                    <Label className="text-gray-400 mb-1">Assigned Teams ({assignedTeamsList.length})</Label>
-                    <div className="border border-[#383838] rounded-md h-48 overflow-y-auto bg-[#262626]">
-                      {assignedTeamsList.length > 0 ? (
-                        assignedTeamsList.map((team) => (
-                          <div
-                            key={team.id}
-                            onClick={() => toggleTeamMemberSelection(team.id!)}
-                            onDoubleClick={() => handleDoubleClickTeamMember(team.id!)}
-                            className={`px-3 py-2 text-sm cursor-pointer dual-list-item select-none text-gray-200 ${
-                              selectedTeamMembers.includes(team.id!) ? 'bg-primary-50 bg-primary-dark-900/30 bg-primary-dark-900/30 border-l-2 border-primary-600 border-primary-dark-600 border-primary-dark-400' : ''
-                            }`}
-                          >
-                            {team.name}
-                          </div>
-                        ))
-                      ) : (
-                        <div className="flex items-center justify-center h-full text-gray-400">
-                          No teams assigned
-                        </div>
-                      )}
-                    </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <button type="button" onClick={handleAddToTeams} disabled={selectedAvailable.length === 0}
+                    style={{ width: "32px", height: "32px", borderRadius: "4px", border: "1px solid var(--border-2)", background: "var(--surf-2)", color: "var(--text-2)", cursor: selectedAvailable.length === 0 ? "not-allowed" : "pointer", opacity: selectedAvailable.length === 0 ? 0.4 : 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <ChevronRight style={{ width: "16px", height: "16px" }} />
+                  </button>
+                  <button type="button" onClick={handleRemoveFromTeams} disabled={selectedTeamMembers.length === 0}
+                    style={{ width: "32px", height: "32px", borderRadius: "4px", border: "1px solid var(--border-2)", background: "var(--surf-2)", color: "var(--text-2)", cursor: selectedTeamMembers.length === 0 ? "not-allowed" : "pointer", opacity: selectedTeamMembers.length === 0 ? 0.4 : 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <ChevronLeft style={{ width: "16px", height: "16px" }} />
+                  </button>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={dualLabelStyle}>Assigned Teams ({assignedTeamsList.length})</label>
+                  <div style={dualListStyle}>
+                    {assignedTeamsList.length > 0 ? assignedTeamsList.map((team) => (
+                      <div key={team.id} onClick={() => toggleTeamMemberSelection(team.id!)} onDoubleClick={() => handleDoubleClickTeamMember(team.id!)} className="dual-list-item"
+                        style={{ padding: "6px 12px", fontSize: "var(--text-label)", cursor: "pointer", userSelect: "none", color: selectedTeamMembers.includes(team.id!) ? "#111" : "var(--text-2)", borderLeft: selectedTeamMembers.includes(team.id!) ? "2px solid #00f058" : "2px solid transparent" }}>
+                        {team.name}
+                      </div>
+                    )) : (
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: "var(--text-label)", color: "var(--text-3)" }}>No teams assigned</div>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Right Column - Notes */}
-            <div className="flex flex-col">
-              <Label className="mb-2">Notes</Label>
-              <div className="flex-1">
-                <MarkdownTextarea
-                  value={formData.notes || ""}
-                  onValueChange={(value) => setFormData({ ...formData, notes: value })}
-                  placeholder="Any additional notes about this person..."
-                  className="h-full resize-none text-sm"
-                />
-              </div>
+          {/* Right column — notes */}
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <Label style={{ marginBottom: "8px" }}>Notes</Label>
+            <div style={{ flex: 1 }}>
+              <MarkdownTextarea value={formData.notes || ""} onValueChange={(value) => setFormData({ ...formData, notes: value })} placeholder="Any additional notes about this person..." className="h-full resize-none" />
             </div>
           </div>
+        </div>
 
-          <div className="flex justify-end gap-2 mt-6">
-            <Button type="button" variant="outline" onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Button onClick={handleSave}>Save Changes</Button>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "24px" }}>
+          <Button type="button" variant="outline" onClick={handleCancel}>Cancel</Button>
+          <Button onClick={handleSave}>Save Changes</Button>
+        </div>
+      </div>
+
+      {/* Meetings section */}
+      <div style={{ background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "8px", overflow: "hidden" }}>
+        <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border-1)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div>
+            <h2>Meetings</h2>
+            <p style={{ marginTop: "2px" }}>All meetings involving {formData.name}</p>
           </div>
-        </CardContent>
-      </Card>
+          <button
+            onClick={() => setIsAddMeetingDialogOpen(true)}
+            style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "linear-gradient(90deg, #00ffe5 0%, #00f058 100%)", border: "none", color: "#0a1a0a", padding: "4px 10px", borderRadius: "4px", fontSize: "var(--text-caption)", fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-sans)" }}
+          >
+            <Plus style={{ width: "11px", height: "11px" }} /> Log meeting
+          </button>
+        </div>
 
-      {/* Meetings Section */}
-      <Card className="mt-6">
-        <CardContent className="p-6">
-          <div className="mb-4">
-            <h2 className="text-sm text-gray-100 font-semibold">Meetings</h2>
-            <p className="text-xs text-gray-400 mt-1">All meetings involving {formData.name}</p>
-          </div>
-
-          <div id="meetings-section" className="flex border h-[900px] border-[#383838] rounded-lg overflow-hidden">
-            {/* Left Panel - Tree View */}
-            <div
-              className="border-[#383838] bg-[#262626] overflow-y-auto flex-shrink-0"
-              style={{ width: `${leftPanelWidth}px` }}
-            >
-              <div className="p-4 border-[#383838] bg-[#1c1c1c]">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm text-gray-100 font-semibold">Meeting History</h3>
-                  <Button onClick={() => setIsAddMeetingDialogOpen(true)}>
-                    <Plus className="h-4 w-4 mr-1" />
-                    Log
-                  </Button>
+        <div id="meetings-section" style={{ display: "flex", height: "600px", overflow: "hidden" }}>
+          {/* Left panel */}
+          <div style={{ width: `${leftPanelWidth}px`, flexShrink: 0, background: "var(--surf-2)", borderRight: "1px solid var(--border-1)", overflowY: "auto" }}>
+            <div style={{ padding: "8px 0" }}>
+              {Object.keys(tree).length === 0 ? (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 16px", textAlign: "center" }}>
+                  <p style={{ marginBottom: "16px" }}>No meetings logged yet</p>
+                  <button onClick={() => setIsAddMeetingDialogOpen(true)}
+                    style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "linear-gradient(90deg, #00ffe5 0%, #00f058 100%)", border: "none", color: "#0a1a0a", padding: "4px 10px", borderRadius: "4px", fontSize: "var(--text-caption)", fontWeight: 600, cursor: "pointer" }}>
+                    <Plus style={{ width: "11px", height: "11px" }} /> Log First Meeting
+                  </button>
                 </div>
-                <p className="text-gray-400 mt-1">
-                  {getPersonMeetings().length} {getPersonMeetings().length === 1 ? 'meeting' : 'meetings'}
-                </p>
-              </div>
-
-              <div className="p-2">
-                {Object.keys(tree).length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <p className="text-gray-400 mb-4">No meetings logged yet</p>
-                    <Button onClick={() => setIsAddMeetingDialogOpen(true)}>
-                      <Plus className="h-4 w-4 mr-1" />
-                      Log First Meeting
-                    </Button>
-                  </div>
-                ) : (
-                  Object.entries(tree).map(([type, node]) => (
-                    <div key={type} className="mb-1">
-                      {/* Meeting Type */}
-                      <button
-                        onClick={() => toggleType(type)}
-                        className="flex hover:bg-[#2a2a2a] rounded items-center gap-2 w-full px-2 py-1.5 text-gray-100 font-medium"
-                      >
-                        {expandedTypes.has(type) ? (
-                          <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4 flex-shrink-0" />
-                        )}
-                        {type} ({node.meetings.length})
-                      </button>
-
-                      {/* Meetings */}
-                      {expandedTypes.has(type) && (
-                        <div className="ml-4">
-                          {node.meetings.map((meeting) => (
-                            <button
-                              key={meeting.id}
-                              onClick={() => setSelectedMeeting(meeting)}
-                              className={`block w-full text-left px-2 py-1.5 text-xs rounded ${
-                                selectedMeeting?.id === meeting.id
-                                  ? "bg-primary-50 bg-primary-dark-900/30 bg-primary-dark-900/30 text-primary-700 text-primary-dark-400 text-primary-dark-400 font-medium"
-                                  : "text-gray-300 hover:bg-[#2a2a2a]"
-                              }`}
+              ) : (
+                Object.entries(tree).map(([type, node]) => (
+                  <div key={type}>
+                    <button onClick={() => toggleType(type)}
+                      style={{ display: "flex", alignItems: "center", gap: "6px", width: "100%", padding: "6px 12px", background: "none", border: "none", cursor: "pointer", fontSize: "var(--text-meta)", fontWeight: 500, color: "var(--text-2)", textAlign: "left" }}
+                      onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "var(--surf-3)")}
+                      onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "none")}
+                    >
+                      {expandedTypes.has(type) ? <ChevronDown style={{ width: "12px", height: "12px" }} /> : <ChevronRight style={{ width: "12px", height: "12px" }} />}
+                      {type} ({node.meetings.length})
+                    </button>
+                    {expandedTypes.has(type) && (
+                      <div style={{ paddingLeft: "20px" }}>
+                        {node.meetings.map((meeting) => {
+                          const isActive = selectedMeeting?.id === meeting.id
+                          return (
+                            <button key={meeting.id} onClick={() => setSelectedMeeting(meeting)}
+                              style={{ display: "block", width: "100%", padding: "5px 12px", background: isActive ? "var(--surf-3)" : "none", borderTop: "none", borderRight: "none", borderBottom: "none", borderLeft: `2px solid ${isActive ? "#00f058" : "transparent"}`, cursor: "pointer", fontSize: "var(--text-caption)", color: isActive ? "#00f058" : "var(--text-3)", textAlign: "left" }}
+                              onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "var(--surf-3)" }}
+                              onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "none" }}
                             >
                               {formatDate(meeting.date)}
                             </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            {/* Resizable Divider */}
-            <div
-              className={`w-1 bg-gray-200 bg-[#383838] hover:bg-primary-400 hover:bg-primary-dark-400 cursor-col-resize flex-shrink-0 ${
-                isResizing ? 'bg-primary-500' : ''
-              }`}
-              onMouseDown={handleMouseDown}
-            />
-
-            {/* Right Panel - Meeting Details */}
-            <div className="flex-1 overflow-y-auto bg-[#1c1c1c]">
-              {selectedMeeting ? (
-                <div className="p-6">
-                  <div className="space-y-4">
-                    {/* Date and Next Meeting Date */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="grid gap-1">
-                        <Label className="text-gray-300 font-medium">Date</Label>
-                        <Input
-                          type="date"
-                          value={selectedMeeting.date}
-                          onChange={(e) => handleUpdateMeeting({ ...selectedMeeting, date: e.target.value })}
-                        />
+                          )
+                        })}
                       </div>
-                      {selectedMeeting.type === "1:1" && selectedMeeting.recurrence && selectedMeeting.recurrence !== "none" && selectedMeeting.nextMeetingDate && (
-                        <div className="grid gap-1">
-                          <Label className="text-gray-300 font-medium">Next Meeting</Label>
-                          <Input
-                            type="date"
-                            value={selectedMeeting.nextMeetingDate}
-                            onChange={(e) => handleUpdateMeeting({ ...selectedMeeting, nextMeetingDate: e.target.value })}
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Title and Attendees */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="grid gap-1">
-                        <Label className="text-gray-300 font-medium">Title</Label>
-                        <Input
-                          value={selectedMeeting.title}
-                          onChange={(e) => handleUpdateMeeting({ ...selectedMeeting, title: e.target.value })}
-                          placeholder="Meeting title"
-                        />
-                      </div>
-                      <div className="grid gap-1">
-                        <Label className="text-gray-300 font-medium">Attendees</Label>
-                        <Input
-                          value={selectedMeeting.attendees.join(", ")}
-                          onChange={(e) => handleUpdateMeeting({
-                            ...selectedMeeting,
-                            attendees: e.target.value.split(",").map(a => a.trim()).filter(a => a.length > 0)
-                          })}
-                          placeholder="Enter names separated by commas"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Action Items */}
-                    <div>
-                      <Label className="text-gray-300 font-medium">Action Items</Label>
-                      <MarkdownTextarea
-                        value={selectedMeeting.actionItems || ""}
-                        onValueChange={(value) => handleUpdateMeeting({ ...selectedMeeting, actionItems: value })}
-                        placeholder={"- Action item 1\n- Action item 2"}
-                        rows={4}
-                        className="mt-1 text-sm"
-                      />
-                    </div>
-
-                    {/* Meeting Notes */}
-                    <div>
-                      <Label className="text-gray-300 font-medium">Meeting Notes</Label>
-                      <MarkdownTextarea
-                        value={selectedMeeting.notes || ""}
-                        onValueChange={(value) => handleUpdateMeeting({ ...selectedMeeting, notes: value })}
-                        placeholder="Meeting notes, discussion points, decisions..."
-                        rows={8}
-                        className="mt-1 text-sm"
-                      />
-                    </div>
+                    )}
                   </div>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center h-full">
-                  <div className="text-center">
-                    <p className="text-gray-400 mb-2">Select a meeting to view details</p>
-                    <p className="text-gray-500">or log a new meeting</p>
-                  </div>
-                </div>
+                ))
               )}
             </div>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Meeting Form Dialog */}
+          {/* Resizable divider */}
+          <div style={{ width: "4px", background: "var(--border-1)", cursor: "col-resize", flexShrink: 0 }}
+            onMouseDown={(e) => { e.preventDefault(); setIsResizing(true) }}
+            onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "var(--border-2)")}
+            onMouseLeave={e => { if (!isResizing) (e.currentTarget as HTMLElement).style.background = "var(--border-1)" }}
+          />
+
+          {/* Right panel */}
+          <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
+            {selectedMeeting ? (
+              <div style={{ display: "grid", gap: "16px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <div style={{ display: "grid", gap: "4px" }}>
+                    <Label>Date</Label>
+                    <Input type="date" value={selectedMeeting.date} onChange={(e) => handleUpdateMeeting({ ...selectedMeeting, date: e.target.value })} />
+                  </div>
+                  {selectedMeeting.type === "1:1" && selectedMeeting.recurrence && selectedMeeting.recurrence !== "none" && selectedMeeting.nextMeetingDate && (
+                    <div style={{ display: "grid", gap: "4px" }}>
+                      <Label>Next Meeting</Label>
+                      <Input type="date" value={selectedMeeting.nextMeetingDate} onChange={(e) => handleUpdateMeeting({ ...selectedMeeting, nextMeetingDate: e.target.value })} />
+                    </div>
+                  )}
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <div style={{ display: "grid", gap: "4px" }}>
+                    <Label>Title</Label>
+                    <Input value={selectedMeeting.title} onChange={(e) => handleUpdateMeeting({ ...selectedMeeting, title: e.target.value })} placeholder="Meeting title" />
+                  </div>
+                  <div style={{ display: "grid", gap: "4px" }}>
+                    <Label>Attendees</Label>
+                    <Input value={selectedMeeting.attendees.join(", ")} onChange={(e) => handleUpdateMeeting({ ...selectedMeeting, attendees: e.target.value.split(",").map(a => a.trim()).filter(a => a.length > 0) })} placeholder="Names separated by commas" />
+                  </div>
+                </div>
+                <div style={{ display: "grid", gap: "4px" }}>
+                  <Label>Action Items</Label>
+                  <MarkdownTextarea value={selectedMeeting.actionItems || ""} onValueChange={(value) => handleUpdateMeeting({ ...selectedMeeting, actionItems: value })} placeholder={"- Action item 1\n- Action item 2"} rows={4} />
+                </div>
+                <div style={{ display: "grid", gap: "4px" }}>
+                  <Label>Meeting Notes</Label>
+                  <MarkdownTextarea value={selectedMeeting.notes || ""} onValueChange={(value) => handleUpdateMeeting({ ...selectedMeeting, notes: value })} placeholder="Meeting notes, discussion points, decisions..." rows={8} />
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", textAlign: "center" }}>
+                <p>Select a meeting to view details</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       <MeetingFormDialog
         open={isAddMeetingDialogOpen}
         onOpenChange={setIsAddMeetingDialogOpen}
