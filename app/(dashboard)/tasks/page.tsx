@@ -311,16 +311,21 @@ export default function TasksPage() {
   // Show a loading state until mounted to prevent hydration mismatch
   if (!isMounted) {
     return (
-      <div className="flex flex-col gap-8 p-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl text-gray-100 font-bold">Tasks</h1>
-            <p className="text-sm text-gray-400 mt-1">Manage your tasks and priorities</p>
-          </div>
+      <>
+        {/* Top bar */}
+        <div style={{
+          background: "var(--bg-surface)",
+          borderBottom: "1px solid var(--border-subtle)",
+          height: "48px",
+          padding: "0 24px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}>
+          <span style={{ fontSize: "13px", color: "var(--text-secondary)" }}>Tasks &amp; priorities</span>
         </div>
-        <div className="text-sm text-gray-400 py-12">Loading...</div>
-      </div>
+        <div style={{ fontSize: "13px", color: "var(--text-tertiary)", padding: "48px 32px" }}>Loading...</div>
+      </>
     )
   }
 
@@ -332,44 +337,108 @@ export default function TasksPage() {
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex flex-col gap-8 p-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl text-gray-100 font-bold">Tasks</h1>
-            <p className="text-sm text-gray-400 mt-1">Manage your tasks and priorities</p>
-          </div>
-        </div>
+      {/* Top bar */}
+      <div style={{
+        background: "var(--bg-surface)",
+        borderBottom: "1px solid var(--border-subtle)",
+        height: "48px",
+        padding: "0 24px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        position: "sticky",
+        top: 0,
+        zIndex: 10,
+      }}>
+        <span style={{ fontSize: "13px", color: "var(--text-secondary)" }}>Tasks &amp; priorities</span>
+        <button
+          onClick={handleNewTaskHeader}
+          style={{
+            background: "#84cc16",
+            color: "#0d1a00",
+            fontSize: "12px",
+            fontWeight: 500,
+            padding: "5px 12px",
+            borderRadius: "6px",
+            border: "none",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: "5px",
+          }}
+        >
+          <Plus className="h-3.5 w-3.5" />
+          New task
+        </button>
+      </div>
 
+      <div className="flex flex-col gap-8 p-6">
         {/* This Week Board */}
         <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm text-gray-100 font-semibold">This week</h2>
-            <Button onClick={handleNewTaskHeader}>
-              <Plus className="h-4 w-4 mr-2" />
-              New task
-            </Button>
-          </div>
-          <div className="rounded-lg p-4 max-md:p-2">
-            {/* Desktop: grid layout unchanged, Mobile: horizontal scroll */}
-            <div className="grid grid-cols-4 gap-6 max-md:px-2">
-              {TASK_STATUSES.map((status) => (
-                <BoardColumn
-                  key={status}
-                  status={status}
-                  tasks={weekTasks.filter((t) => t.status === status)}
-                  onEdit={handleEditTask}
-                  onDelete={handleDeleteRequest}
-                  onQuickAdd={handleQuickAddBoard}
-                />
-              ))}
+          {/* Section header */}
+          <div className="flex items-center justify-between mb-3">
+            <span style={{
+              fontSize: "11px",
+              fontWeight: 500,
+              letterSpacing: "0.07em",
+              color: "var(--text-tertiary)",
+              textTransform: "uppercase",
+            }}>This week</span>
+            <div style={{ display: "flex", gap: "6px" }}>
+              <button style={{
+                background: "transparent",
+                border: "1px solid var(--border-default)",
+                color: "var(--text-secondary)",
+                fontSize: "12px",
+                padding: "5px 10px",
+                borderRadius: "6px",
+                cursor: "pointer",
+              }}
+                onMouseEnter={e => { e.currentTarget.style.color = "var(--text-primary)" }}
+                onMouseLeave={e => { e.currentTarget.style.color = "var(--text-secondary)" }}
+              >Filter</button>
+              <button style={{
+                background: "transparent",
+                border: "1px solid var(--border-default)",
+                color: "var(--text-secondary)",
+                fontSize: "12px",
+                padding: "5px 10px",
+                borderRadius: "6px",
+                cursor: "pointer",
+              }}
+                onMouseEnter={e => { e.currentTarget.style.color = "var(--text-primary)" }}
+                onMouseLeave={e => { e.currentTarget.style.color = "var(--text-secondary)" }}
+              >Sort</button>
             </div>
+          </div>
+
+          {/* Kanban grid */}
+          <div className="grid grid-cols-4 gap-3 max-md:px-2">
+            {TASK_STATUSES.map((status) => (
+              <BoardColumn
+                key={status}
+                status={status}
+                tasks={weekTasks.filter((t) => t.status === status)}
+                onEdit={handleEditTask}
+                onDelete={handleDeleteRequest}
+                onQuickAdd={handleQuickAddBoard}
+              />
+            ))}
           </div>
         </div>
 
         {/* Backlog */}
         <div>
-          <h2 className="text-sm text-gray-100 font-semibold mb-4">Backlog</h2>
+          {/* Section header */}
+          <div className="flex items-center justify-between mb-3">
+            <span style={{
+              fontSize: "11px",
+              fontWeight: 500,
+              letterSpacing: "0.07em",
+              color: "var(--text-tertiary)",
+              textTransform: "uppercase",
+            }}>Backlog</span>
+          </div>
           <BacklogTable
             tasks={backlogTasks}
             onUpdateTask={handleUpdateTask}

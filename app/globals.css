@@ -16,32 +16,46 @@
 
 @layer base {
   :root {
-    /* Dark theme only */
-    --background: 0 0% 9%;           /* #171717 - very dark charcoal page background */
-    --foreground: 0 0% 92%;          /* #ebebeb - soft off-white text, not harsh */
+    /* Design system tokens */
+    --bg-base:        #0d0d10;
+    --bg-surface:     #131317;
+    --bg-surface-2:   #18181d;
+    --bg-surface-3:   #1e1e25;
+    --border-subtle:  #252530;
+    --border-default: #2e2e3a;
+    --text-primary:   #e4e4f0;
+    --text-secondary: #8a8a9e;
+    --text-tertiary:  #555565;
+    --brand:          #84cc16;
+    --brand-bg:       #1a2e04;
+    --brand-text:     #0d1a00;
 
-    --card: 0 0% 13%;                /* #212121 - cards slightly lighter than background for elevation */
-    --card-foreground: 0 0% 92%;
+    /* shadcn/ui compatibility tokens */
+    --background: 240 6% 6%;
+    --foreground: 240 20% 92%;
 
-    --popover: 0 0% 11%;             /* #1c1c1c - popover/dropdown surfaces */
-    --popover-foreground: 0 0% 92%;
+    --card: 240 7% 9%;
+    --card-foreground: 240 20% 92%;
 
-    --secondary: 0 0% 16%;           /* #292929 - secondary surfaces, subtle contrast */
-    --secondary-foreground: 0 0% 92%;
+    --popover: 240 7% 8%;
+    --popover-foreground: 240 20% 92%;
 
-    --muted: 0 0% 20%;               /* #333333 - muted backgrounds for hover states */
-    --muted-foreground: 0 0% 58%;    /* #949494 - subdued text, clearly secondary */
+    --secondary: 240 7% 11%;
+    --secondary-foreground: 240 20% 92%;
 
-    --accent: 0 0% 18%;              /* #2e2e2e - accent surfaces */
-    --accent-foreground: 0 0% 92%;
+    --muted: 240 7% 13%;
+    --muted-foreground: 240 7% 55%;
 
-    --destructive: 0 68% 48%;        /* Muted red for destructive actions, not oversaturated */
+    --accent: 240 7% 12%;
+    --accent-foreground: 240 20% 92%;
+
+    --destructive: 0 68% 48%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 22%;              /* #383838 - subtle borders, low contrast */
-    --input: 0 0% 15%;               /* #262626 - input backgrounds, slightly lighter than card */
+    --border: 240 8% 16%;
+    --input: 240 7% 10%;
 
-    --paragraph: lab(75 -1.44 -8.32); /* Paragraph text color */
+    --paragraph: lab(75 -1.44 -8.32);
 
     --radius: 0.5rem;
   }
@@ -84,8 +98,8 @@ input:-webkit-autofill:active {
 }
 
 body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
+  background-color: var(--bg-base);
+  color: var(--text-primary);
   font-feature-settings: "rlig" 1, "calt" 1;
 }
 

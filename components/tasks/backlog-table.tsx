@@ -3,10 +3,7 @@
 import { useState, useMemo } from "react"
 import { Task, TaskStatus, TaskPriority, TaskCategory, TASK_STATUSES, TASK_PRIORITIES, TASK_CATEGORIES } from "@/lib/types/task"
 import { BadgeSelect } from "@/components/ui/badge-select"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Search, Plus, ArrowUpDown, Filter, GripVertical, Trash2 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Plus, ArrowUpDown, GripVertical, Search } from "lucide-react"
 import { useDroppable } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { DraggableTableRow } from "./draggable-table-row"
@@ -22,6 +19,32 @@ interface BacklogTableProps {
 type SortField = "title" | "dueDate" | "priority" | "status" | "category"
 type SortDirection = "asc" | "desc"
 
+const PRIORITY_PILL_BG: Record<TaskPriority, string> = {
+  "Low":       "#0f1526",
+  "Medium":    "#1e1a00",
+  "High":      "#2a1400",
+  "Very High": "#2a0a0a",
+}
+const PRIORITY_PILL_TEXT: Record<TaskPriority, string> = {
+  "Low":       "#818cf8",
+  "Medium":    "#facc15",
+  "High":      "#fb923c",
+  "Very High": "#f87171",
+}
+
+const STATUS_PILL_BG: Record<TaskStatus, string> = {
+  "Not started": "#1a1a22",
+  "In progress": "#0c1a3d",
+  "Blocked":     "#2a1200",
+  "Done":        "#0d2015",
+}
+const STATUS_PILL_TEXT: Record<TaskStatus, string> = {
+  "Not started": "#6b7280",
+  "In progress": "#60a5fa",
+  "Blocked":     "#f97316",
+  "Done":        "#4ade80",
+}
+
 export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete }: BacklogTableProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<TaskStatus | "all">("all")
@@ -33,9 +56,7 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
 
   const { setNodeRef, isOver } = useDroppable({
     id: "backlog-table",
-    data: {
-      type: "backlog",
-    },
+    data: { type: "backlog" },
   })
 
   const handleSort = (field: SortField) => {
@@ -58,16 +79,16 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
 
     filtered.sort((a, b) => {
       let comparison = 0
-
       switch (sortField) {
         case "title":
           comparison = a.title.localeCompare(b.title)
           break
-        case "dueDate":
+        case "dueDate": {
           const dateA = a.dueDate ? new Date(a.dueDate).getTime() : Infinity
           const dateB = b.dueDate ? new Date(b.dueDate).getTime() : Infinity
           comparison = dateA - dateB
           break
+        }
         case "priority": {
           const priorityOrder: Record<TaskPriority, number> = { "Very High": 4, High: 3, Medium: 2, Low: 1 }
           comparison = priorityOrder[a.priority] - priorityOrder[b.priority]
@@ -82,219 +103,215 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
           comparison = a.category.localeCompare(b.category)
           break
       }
-
       return sortDirection === "asc" ? comparison : -comparison
     })
 
     return filtered
   }, [tasks, searchQuery, statusFilter, priorityFilter, categoryFilter, sortField, sortDirection])
 
-  const getPriorityBadgeClass = (priority: TaskPriority) => {
-    switch (priority) {
-      case "Very High":
-        return "text-white"
-      case "High":
-        return "bg-red-100 text-red-700"
-      case "Medium":
-        return "bg-yellow-100 text-yellow-700"
-      case "Low":
-        return "bg-green-100 text-green-700"
-    }
-  }
-
-  const getPriorityBadgeStyle = (priority: TaskPriority) => {
-    if (priority === "Very High") {
-      return { backgroundColor: "lab(34 43.72 6.02)" }
-    }
-    return undefined
-  }
-
-  const getStatusBadgeClass = (status: TaskStatus) => {
-    switch (status) {
-      case "Not started":
-        return "bg-gray-100 text-gray-700"
-      case "In progress":
-        return "bg-blue-100 text-blue-700"
-      case "Blocked":
-        return "bg-red-100 text-red-700"
-      case "Done":
-        return "bg-green-100 text-green-700"
-    }
-  }
-
-  const getCategoryBadgeClass = (_category: TaskCategory) => {
-    return "bg-gray-100 text-gray-700";
-    // switch (category) {
-    //   case "Task":
-    //     return "bg-orange-100 text-orange-700"
-    //   case "Meeting":
-    //     return "bg-blue-100 text-blue-700"
-    //   case "Career Growth":
-    //     return "bg-purple-100 text-purple-700"
-    //   case "People":
-    //     return "bg-pink-100 text-pink-700"
-    //   case "Delivery":
-    //     return "bg-cyan-100 text-cyan-700"
-    //   case "Admin":
-    //     return "bg-gray-100 text-gray-700"
-    //   case "Management":
-    //     return "bg-indigo-100 text-indigo-700"
-    // }
-  }
-
   const formatDate = (date: string | null) => {
     if (!date) return ""
-    return new Date(date).toLocaleDateString('en-GB', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    })
+    return new Date(date).toLocaleDateString("en-GB", { month: "short", day: "numeric", year: "numeric" })
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2 flex-1">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute -translate-y-1/2 left-3 top-1/2 h-4 w-4 text-gray-400" />
-            <Input
+    <div className="space-y-0">
+      {/* Controls row */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", marginBottom: "12px" }}>
+        {/* Left: search + filters button */}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {/* Search */}
+          <div style={{ position: "relative" }}>
+            <Search
+              className="absolute"
+              style={{
+                width: "14px",
+                height: "14px",
+                left: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "var(--text-tertiary)",
+                pointerEvents: "none",
+              }}
+            />
+            <input
+              type="text"
               placeholder="Search tasks..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
+              style={{
+                background: "var(--bg-surface)",
+                border: "1px solid var(--border-subtle)",
+                borderRadius: "6px",
+                padding: "5px 10px 5px 30px",
+                fontSize: "12px",
+                color: "var(--text-primary)",
+                width: "180px",
+                outline: "none",
+              }}
+              onFocus={e => (e.currentTarget.style.borderColor = "var(--border-default)")}
+              onBlur={e => (e.currentTarget.style.borderColor = "var(--border-subtle)")}
             />
           </div>
-          <Button
-            variant={showFilters ? "default" : "outline"}
-            size="sm"
+
+          {/* Filters button */}
+          <button
             onClick={() => setShowFilters(!showFilters)}
+            style={{
+              background: showFilters ? "var(--bg-surface-3)" : "transparent",
+              border: "1px solid var(--border-default)",
+              color: "var(--text-secondary)",
+              fontSize: "12px",
+              padding: "5px 10px",
+              borderRadius: "6px",
+              cursor: "pointer",
+            }}
+            onMouseEnter={e => (e.currentTarget.style.color = "var(--text-primary)")}
+            onMouseLeave={e => (e.currentTarget.style.color = "var(--text-secondary)")}
           >
-            <Filter className="h-4 w-4 mr-2" />
             Filters
-          </Button>
+          </button>
         </div>
-        <Button onClick={onQuickAdd}>
-          <Plus className="h-4 w-4 mr-2" />
+
+        {/* Right: New task */}
+        <button
+          onClick={onQuickAdd}
+          style={{
+            background: "#84cc16",
+            color: "#0d1a00",
+            fontSize: "12px",
+            fontWeight: 500,
+            padding: "5px 12px",
+            borderRadius: "6px",
+            border: "none",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: "5px",
+          }}
+        >
+          <Plus className="h-3.5 w-3.5" />
           New task
-        </Button>
+        </button>
       </div>
 
+      {/* Filter row */}
       {showFilters && (
-        <div className="flex border items-center gap-4 p-4 bg-[#262626] rounded-lg border-[#383838]">
-          <div className="flex items-center gap-2">
-            <label className="text-gray-100 font-medium">Status:</label>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as TaskStatus | "all")}
-              className="border text-sm border-gray-300 rounded-md px-2 py-1"
-            >
-              <option value="all">All</option>
-              {TASK_STATUSES.map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="text-gray-100 font-medium">Priority:</label>
-            <select
-              value={priorityFilter}
-              onChange={(e) => setPriorityFilter(e.target.value as TaskPriority | "all")}
-              className="border text-sm border-gray-300 rounded-md px-2 py-1"
-            >
-              <option value="all">All</option>
-              {TASK_PRIORITIES.map((priority) => (
-                <option key={priority} value={priority}>
-                  {priority}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="text-gray-100 font-medium">Category:</label>
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value as TaskCategory | "all")}
-              className="border text-sm border-gray-300 rounded-md px-2 py-1"
-            >
-              <option value="all">All</option>
-              {TASK_CATEGORIES.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "16px",
+          padding: "12px 16px",
+          background: "var(--bg-surface)",
+          border: "1px solid var(--border-subtle)",
+          borderRadius: "8px",
+          marginBottom: "12px",
+        }}>
+          {[
+            { label: "Status", value: statusFilter, onChange: (v: string) => setStatusFilter(v as TaskStatus | "all"), options: TASK_STATUSES },
+            { label: "Priority", value: priorityFilter, onChange: (v: string) => setPriorityFilter(v as TaskPriority | "all"), options: TASK_PRIORITIES },
+            { label: "Category", value: categoryFilter, onChange: (v: string) => setCategoryFilter(v as TaskCategory | "all"), options: TASK_CATEGORIES },
+          ].map(({ label, value, onChange, options }) => (
+            <div key={label} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <label style={{ fontSize: "12px", color: "var(--text-secondary)", fontWeight: 500 }}>{label}:</label>
+              <select
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                style={{
+                  background: "var(--bg-surface-2)",
+                  border: "1px solid var(--border-default)",
+                  borderRadius: "4px",
+                  padding: "3px 6px",
+                  fontSize: "12px",
+                  color: "var(--text-primary)",
+                  cursor: "pointer",
+                }}
+              >
+                <option value="all">All</option>
+                {options.map((opt) => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+            </div>
+          ))}
         </div>
       )}
 
+      {/* Table */}
       <div
         ref={setNodeRef}
-        className={cn(
-          "border border-[#383838] rounded-lg bg-white bg-[#262626] transition-colors max-md:overflow-x-auto",
-          isOver && "ring-2 ring-primary-500 ring-primary-dark-500 bg-primary-50 bg-primary-dark-900/30 bg-primary-dark-900/30"
-        )}
+        style={{
+          background: "var(--bg-surface)",
+          border: isOver ? "1px solid var(--border-default)" : "1px solid var(--border-subtle)",
+          borderRadius: "8px",
+          overflow: "hidden",
+        }}
+        className="max-md:overflow-x-auto"
       >
         <table className="w-full border-collapse">
           <colgroup>
-            <col className="w-12 max-md:w-10" />
-            <col className="w-auto max-md:min-w-[280px]" />
-            <col className="w-32 max-md:min-w-[120px]" />
-            <col className="w-32 max-md:min-w-[120px]" />
-            <col className="w-32 max-md:min-w-[120px]" />
-            <col className="w-32 max-md:min-w-[120px]" />
-            <col className="w-12 max-md:w-10" />
+            <col style={{ width: "36px" }} />
+            <col />
+            <col style={{ width: "140px" }} />
+            <col style={{ width: "120px" }} />
+            <col style={{ width: "120px" }} />
+            <col style={{ width: "120px" }} />
+            <col style={{ width: "80px" }} />
           </colgroup>
           <thead>
-            <tr className="border-[#383838]">
-              <th className="p-3 bg-[#262626]"></th>
-              <th className="text-left p-3 bg-[#262626] font-semibold text-sm text-gray-100">
-                <button
-                  onClick={() => handleSort("title")}
-                  className="flex hover:text-[#84ffc4] items-center gap-1 text-gray-300"
-                >
-                  Name
-                  <ArrowUpDown className="h-3 w-3" />
-                </button>
-              </th>
-              <th className="text-left p-3 bg-[#262626] font-semibold text-sm text-gray-100">
-                <button
-                  onClick={() => handleSort("status")}
-                  className="flex hover:text-[#84ffc4] items-center gap-1 text-gray-300"
-                >
-                  Status
-                  <ArrowUpDown className="h-3 w-3" />
-                </button>
-              </th>
-              <th className="text-left p-3 bg-[#262626] font-semibold text-sm text-gray-100">
-                <button
-                  onClick={() => handleSort("dueDate")}
-                  className="flex hover:text-[#84ffc4] items-center gap-1 text-gray-300"
-                >
-                  Due Date
-                  <ArrowUpDown className="h-3 w-3" />
-                </button>
-              </th>
-              <th className="text-left p-3 bg-[#262626] font-semibold text-sm text-gray-100">
-                <button
-                  onClick={() => handleSort("priority")}
-                  className="flex hover:text-[#84ffc4] items-center gap-1 text-gray-300"
-                >
-                  Priority
-                  <ArrowUpDown className="h-3 w-3" />
-                </button>
-              </th>
-              <th className="text-left p-3 bg-[#262626] font-semibold text-sm text-gray-100">
-                <button
-                  onClick={() => handleSort("category")}
-                  className="flex hover:text-[#84ffc4] items-center gap-1 text-gray-300"
-                >
-                  Category
-                  <ArrowUpDown className="h-3 w-3" />
-                </button>
-              </th>
-              <th className="p-3 bg-[#262626]"></th>
+            <tr style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+              {/* Drag handle col */}
+              <th style={{ padding: "8px 12px", background: "var(--bg-surface)" }} />
+              {/* Sortable columns */}
+              {(["title", "status", "dueDate", "priority", "category"] as SortField[]).map((field) => {
+                const labels: Record<SortField, string> = {
+                  title: "Name",
+                  status: "Status",
+                  dueDate: "Due Date",
+                  priority: "Priority",
+                  category: "Category",
+                }
+                return (
+                  <th
+                    key={field}
+                    style={{
+                      textAlign: "left",
+                      padding: "8px 12px",
+                      background: "var(--bg-surface)",
+                      fontWeight: 500,
+                      fontSize: "11px",
+                      color: "var(--text-tertiary)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.06em",
+                    }}
+                  >
+                    <button
+                      onClick={() => handleSort(field)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        color: "var(--text-tertiary)",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        fontSize: "11px",
+                        fontWeight: 500,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.06em",
+                        padding: 0,
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.color = "var(--text-secondary)")}
+                      onMouseLeave={e => (e.currentTarget.style.color = "var(--text-tertiary)")}
+                    >
+                      {labels[field]}
+                      <ArrowUpDown style={{ width: "11px", height: "11px", flexShrink: 0 }} />
+                    </button>
+                  </th>
+                )
+              })}
+              {/* Actions col */}
+              <th style={{ padding: "8px 12px", background: "var(--bg-surface)" }} />
             </tr>
           </thead>
           <tbody>
@@ -305,70 +322,143 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
                   task={task}
                   onDoubleClick={() => onEdit(task)}
                 >
+                  {/* Drag handle */}
                   <td
-                    className="p-3 text-center"
+                    style={{ padding: "9px 12px", textAlign: "center" }}
                     onDoubleClick={(e) => e.stopPropagation()}
                   >
                     <div className="active:cursor-grabbing drag-handle cursor-grab inline-flex">
-                      <GripVertical className="h-4 w-4 text-gray-400" />
+                      <GripVertical style={{ width: "14px", height: "14px", color: "var(--text-tertiary)" }} />
                     </div>
                   </td>
+
+                  {/* Name */}
                   <td
-                    className="p-3 font-medium text-gray-100 overflow-hidden"
+                    style={{ padding: "9px 12px", color: "var(--text-primary)", fontSize: "13px", overflow: "hidden" }}
                     title={task.title}
                   >
                     <div className="line-clamp-2 break-all max-md:break-words">{task.title}</div>
                   </td>
-                  <td className="p-3" onClick={(e) => e.stopPropagation()}>
+
+                  {/* Status */}
+                  <td style={{ padding: "9px 12px" }} onClick={(e) => e.stopPropagation()}>
                     <BadgeSelect
                       value={task.status}
                       onValueChange={(value) => onUpdateTask(task.id, { status: value as TaskStatus })}
                       options={TASK_STATUSES.map((status) => ({
                         value: status,
                         label: status,
-                        className: getStatusBadgeClass(status),
+                        className: "",
+                        style: {
+                          background: STATUS_PILL_BG[status],
+                          color: STATUS_PILL_TEXT[status],
+                          fontSize: "11px",
+                          fontFamily: "ui-monospace, monospace",
+                          fontWeight: 500,
+                          borderRadius: "4px",
+                          padding: "2px 7px",
+                        },
                       }))}
                     />
                   </td>
-                  <td className="p-3 text-gray-300">{formatDate(task.dueDate)}</td>
-                  <td className="p-3" onClick={(e) => e.stopPropagation()}>
+
+                  {/* Due date */}
+                  <td style={{
+                    padding: "9px 12px",
+                    fontSize: "11px",
+                    color: "var(--text-tertiary)",
+                    fontFamily: "ui-monospace, monospace",
+                  }}>
+                    {formatDate(task.dueDate) || "—"}
+                  </td>
+
+                  {/* Priority */}
+                  <td style={{ padding: "9px 12px" }} onClick={(e) => e.stopPropagation()}>
                     <BadgeSelect
                       value={task.priority}
                       onValueChange={(value) => onUpdateTask(task.id, { priority: value as TaskPriority })}
                       options={TASK_PRIORITIES.map((priority) => ({
                         value: priority,
                         label: priority,
-                        className: getPriorityBadgeClass(priority),
-                        style: getPriorityBadgeStyle(priority),
+                        className: "",
+                        style: {
+                          background: PRIORITY_PILL_BG[priority],
+                          color: PRIORITY_PILL_TEXT[priority],
+                          fontSize: "11px",
+                          fontFamily: "ui-monospace, monospace",
+                          fontWeight: 500,
+                          borderRadius: "4px",
+                          padding: "2px 7px",
+                        },
                       }))}
                     />
                   </td>
-                  <td className="p-3" onClick={(e) => e.stopPropagation()}>
+
+                  {/* Category */}
+                  <td style={{ padding: "9px 12px" }} onClick={(e) => e.stopPropagation()}>
                     <BadgeSelect
                       value={task.category}
                       onValueChange={(value) => onUpdateTask(task.id, { category: value as TaskCategory })}
                       options={TASK_CATEGORIES.map((category) => ({
                         value: category,
                         label: category,
-                        className: getCategoryBadgeClass(category),
+                        className: "",
+                        style: {
+                          background: "var(--bg-surface-3)",
+                          color: "var(--text-secondary)",
+                          fontSize: "11px",
+                          fontFamily: "ui-monospace, monospace",
+                          fontWeight: 500,
+                          borderRadius: "4px",
+                          padding: "2px 7px",
+                        },
                       }))}
                     />
                   </td>
+
+                  {/* Actions */}
                   <td
-                    className="p-3 text-center"
+                    style={{ padding: "9px 12px", textAlign: "center" }}
                     onClick={(e) => e.stopPropagation()}
                     onDoubleClick={(e) => e.stopPropagation()}
                   >
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        if (onDelete) onDelete(task.id)
-                      }}
-                      className="hover:text-red-600 text-gray-400 cursor-pointer transition-colors"
-                      aria-label="Delete task"
-                    >
-                      <Trash2 className="h-4 w-4 inline-block" />
-                    </button>
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 justify-center">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onEdit(task) }}
+                        style={{
+                          border: "1px solid var(--border-default)",
+                          color: "var(--text-tertiary)",
+                          borderRadius: "4px",
+                          padding: "2px 7px",
+                          fontSize: "11px",
+                          background: "none",
+                          cursor: "pointer",
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.color = "var(--text-primary)")}
+                        onMouseLeave={e => (e.currentTarget.style.color = "var(--text-tertiary)")}
+                      >
+                        Edit
+                      </button>
+                      {onDelete && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onDelete(task.id) }}
+                          style={{
+                            border: "1px solid var(--border-default)",
+                            color: "var(--text-tertiary)",
+                            borderRadius: "4px",
+                            padding: "2px 7px",
+                            fontSize: "11px",
+                            background: "none",
+                            cursor: "pointer",
+                          }}
+                          onMouseEnter={e => (e.currentTarget.style.color = "#f87171")}
+                          onMouseLeave={e => (e.currentTarget.style.color = "var(--text-tertiary)")}
+                          aria-label="Delete task"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </DraggableTableRow>
               ))}

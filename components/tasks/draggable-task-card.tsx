@@ -36,8 +36,13 @@ export function DraggableTaskCard({ task, onEdit, onDelete }: DraggableTaskCardP
   if (isDragging) {
     return (
       <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-        {/* Dashed placeholder with fade */}
-        <div className="h-[120px] border-gray-600 rounded-[10px] bg-[#292929]/50 animate-in fade-in duration-100" />
+        <div style={{
+          height: "80px",
+          border: "1px dashed var(--border-default)",
+          borderRadius: "6px",
+          background: "var(--bg-surface-2)",
+          opacity: 0.5,
+        }} />
       </div>
     )
   }

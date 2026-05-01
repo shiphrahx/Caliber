@@ -54,15 +54,25 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
   return (
     <div className={cn(
-      "flex h-full flex-col border-r bg-white bg-[#212121] border-[#383838] transition-all duration-300",
+      "flex h-full flex-col transition-all duration-300",
+      "border-r",
       isOpen ? "w-64" : "w-16"
-    )}>
+    )}
+      style={{
+        background: "var(--bg-surface)",
+        borderColor: "var(--border-subtle)",
+      }}
+    >
       {/* Logo */}
-      <div className="flex h-16 items-center border-[#383838]">
+      <div className="flex h-16 items-center">
         <Link href="/" className={cn(
-          "flex items-center gap-3 hover:bg-[#292929] transition-colors flex-1",
+          "flex items-center gap-3 transition-colors flex-1",
           isOpen ? "px-6" : "px-3 justify-center"
-        )}>
+        )}
+          style={{ ["--tw-hover-bg" as string]: "var(--bg-surface-2)" }}
+          onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-surface-2)")}
+          onMouseLeave={e => (e.currentTarget.style.background = "")}
+        >
           <Image
             src="/logo_transparent.png"
             alt="Cadence"
@@ -77,25 +87,30 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         {isOpen && (
           <button
             onClick={onToggle}
-            className="hover:bg-[#292929] px-3 h-full transition-colors"
+            className="px-3 h-full transition-colors"
+            style={{ color: "var(--text-tertiary)" }}
+            onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-surface-2)")}
+            onMouseLeave={e => (e.currentTarget.style.background = "")}
             aria-label="Collapse sidebar"
           >
-            <ChevronLeft className="h-5 w-5 text-gray-400" />
+            <ChevronLeft className="h-5 w-5" />
           </button>
         )}
       </div>
 
       {/* Main Navigation */}
-      <nav className="relative flex-1 space-y-1 p-4">
+      <nav className="relative flex-1 space-y-0.5 p-3">
         {!isOpen && (
           <button
             onClick={onToggle}
-            className="flex hover:bg-gray-100 hover:bg-[#292929] items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors"
+            className="flex items-center gap-3 rounded-md px-2 py-2 transition-colors w-full justify-center"
+            style={{ color: "var(--text-tertiary)" }}
+            onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-surface-2)")}
+            onMouseLeave={e => (e.currentTarget.style.background = "")}
             aria-label="Expand sidebar"
           >
-            <ChevronRight className="h-5 w-5 text-gray-400" />
+            <ChevronRight className="h-5 w-5" />
           </button>
-
         )}
         {navigation.map((item) => {
           const isActive = pathname === item.href
@@ -104,15 +119,32 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
               key={item.name}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-primary-50 bg-[#292929] text-primary-700 text-[#84ffc4]"
-                  : "text-gray-700 hover:bg-gray-100 hover:text-gray-900 text-gray-300 hover:bg-[#292929] hover:text-gray-100",
+                "flex items-center gap-3 rounded-md transition-colors",
                 !isOpen && "justify-center"
               )}
+              style={{
+                fontSize: "13px",
+                padding: "6px 16px",
+                color: isActive ? "var(--text-primary)" : "var(--text-secondary)",
+                background: isActive ? "var(--bg-surface-3)" : "transparent",
+                borderRight: isActive ? "2px solid #84cc16" : "2px solid transparent",
+                fontWeight: 400,
+              }}
+              onMouseEnter={e => {
+                if (!isActive) {
+                  e.currentTarget.style.background = "var(--bg-surface-2)"
+                  e.currentTarget.style.color = "var(--text-primary)"
+                }
+              }}
+              onMouseLeave={e => {
+                if (!isActive) {
+                  e.currentTarget.style.background = "transparent"
+                  e.currentTarget.style.color = "var(--text-secondary)"
+                }
+              }}
               title={!isOpen ? item.name : undefined}
             >
-              <item.icon className="h-5 w-5 flex-shrink-0" />
+              <item.icon className="h-4 w-4 flex-shrink-0" />
               {isOpen && item.name}
             </Link>
           )
@@ -120,14 +152,31 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       </nav>
 
       {/* User Profile → Settings */}
-      <div className="border-[#383838] p-4">
+      <div className="p-3">
         <Link
           href="/settings"
           className={cn(
-            "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-            pathname === "/settings" ? "bg-[#292929] text-[#84ffc4]" : "text-gray-300 hover:bg-[#292929] hover:text-gray-100",
+            "flex w-full items-center gap-3 rounded-md transition-colors",
             !isOpen && "justify-center"
           )}
+          style={{
+            padding: "6px 12px",
+            color: pathname === "/settings" ? "var(--text-primary)" : "var(--text-secondary)",
+            background: pathname === "/settings" ? "var(--bg-surface-3)" : "transparent",
+            fontSize: "13px",
+          }}
+          onMouseEnter={e => {
+            if (pathname !== "/settings") {
+              e.currentTarget.style.background = "var(--bg-surface-2)"
+              e.currentTarget.style.color = "var(--text-primary)"
+            }
+          }}
+          onMouseLeave={e => {
+            if (pathname !== "/settings") {
+              e.currentTarget.style.background = "transparent"
+              e.currentTarget.style.color = "var(--text-secondary)"
+            }
+          }}
           title={!isOpen ? "Settings" : undefined}
         >
           {userAvatar ? (
@@ -138,14 +187,16 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
               className="h-8 w-8 min-w-[2rem] rounded-full object-cover flex-shrink-0"
             />
           ) : (
-            <div className="flex h-8 w-8 min-w-[2rem] items-center justify-center rounded-full bg-[#292929] text-[#84ffc4] flex-shrink-0">
-              <span className="text-sm font-semibold">{userInitials}</span>
+            <div className="flex h-8 w-8 min-w-[2rem] items-center justify-center rounded-full flex-shrink-0"
+              style={{ background: "var(--bg-surface-3)", color: "#84cc16" }}
+            >
+              <span style={{ fontSize: "13px", fontWeight: 500 }}>{userInitials}</span>
             </div>
           )}
           {isOpen && (
             <div className="flex-1 text-left overflow-hidden">
-              <div className="text-sm text-gray-100 font-medium truncate">{userName}</div>
-              <div className="text-xs text-gray-400">Settings</div>
+              <div className="truncate" style={{ fontSize: "13px", color: "var(--text-primary)", fontWeight: 400 }}>{userName}</div>
+              <div style={{ fontSize: "11px", color: "var(--text-tertiary)" }}>Settings</div>
             </div>
           )}
         </Link>

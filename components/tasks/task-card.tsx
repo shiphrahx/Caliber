@@ -1,8 +1,7 @@
 "use client"
 
 import { Task } from "@/lib/types/task"
-import { Circle, CheckCircle2, MoreVertical } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { MoreVertical } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 
 interface TaskCardProps {
@@ -12,86 +11,112 @@ interface TaskCardProps {
   isDragging?: boolean
 }
 
+// Status left-border accent
+const STATUS_BORDER: Record<Task["status"], string> = {
+  "Not started": "#3a3a58",
+  "In progress": "#2563eb",
+  "Blocked":     "#ea580c",
+  "Done":        "#84cc16",
+}
+
+// Priority pill colours: [bg, text, dot]
+const PRIORITY_PILL: Record<Task["priority"], [string, string, string]> = {
+  "Low":       ["#0f1526", "#818cf8", "#818cf8"],
+  "Medium":    ["#1e1a00", "#facc15", "#facc15"],
+  "High":      ["#2a1400", "#fb923c", "#fb923c"],
+  "Very High": ["#2a0a0a", "#f87171", "#f87171"],
+}
+
+// Status pill colours: [bg, text, dot]
+const STATUS_PILL: Record<Task["status"], [string, string, string]> = {
+  "Not started": ["#1a1a22", "#6b7280", "#6b7280"],
+  "In progress": ["#0c1a3d", "#60a5fa", "#3b82f6"],
+  "Blocked":     ["#2a1200", "#f97316", "#ea580c"],
+  "Done":        ["#0d2015", "#4ade80", "#22c55e"],
+}
+
+function PriorityPill({ priority }: { priority: Task["priority"] }) {
+  const [bg, text, dot] = PRIORITY_PILL[priority]
+  return (
+    <span style={{
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "4px",
+      padding: "2px 7px",
+      borderRadius: "4px",
+      fontSize: "11px",
+      fontWeight: 500,
+      fontFamily: "ui-monospace, monospace",
+      background: bg,
+      color: text,
+    }}>
+      <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: dot, flexShrink: 0 }} />
+      {priority}
+    </span>
+  )
+}
+
+function StatusPill({ status }: { status: Task["status"] }) {
+  const [bg, text, dot] = STATUS_PILL[status]
+  return (
+    <span style={{
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "4px",
+      padding: "2px 7px",
+      borderRadius: "4px",
+      fontSize: "11px",
+      fontWeight: 500,
+      fontFamily: "ui-monospace, monospace",
+      background: bg,
+      color: text,
+    }}>
+      <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: dot, flexShrink: 0 }} />
+      {status}
+    </span>
+  )
+}
+
+const formatDate = (date: string | null) => {
+  if (!date) return null
+  const d = new Date(date)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const taskDate = new Date(d)
+  taskDate.setHours(0, 0, 0, 0)
+
+  if (taskDate.getTime() === today.getTime()) return "Today"
+  if (taskDate.getTime() === today.getTime() + 86400000) return "Tomorrow"
+  return d.toLocaleDateString("en-GB", { month: "short", day: "numeric" })
+}
+
 export function TaskCard({ task, onEdit, onDelete, isDragging = false }: TaskCardProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
-  // Close menu on click outside or Escape
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setMenuOpen(false)
       }
     }
-
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setMenuOpen(false)
-      }
+      if (event.key === "Escape") setMenuOpen(false)
     }
-
     if (menuOpen) {
       document.addEventListener("mousedown", handleClickOutside)
       document.addEventListener("keydown", handleEscape)
     }
-
     return () => {
       document.removeEventListener("mousedown", handleClickOutside)
       document.removeEventListener("keydown", handleEscape)
     }
   }, [menuOpen])
 
-  const getPriorityChipColor = (priority: Task["priority"]) => {
-    switch (priority) {
-      case "Very High":
-        return "text-white"
-      case "High":
-        return "bg-red-100 text-red-700 bg-red-900/30 text-red-400"
-      case "Medium":
-        return "bg-orange-100 text-orange-700 bg-orange-900/30 text-orange-400"
-      case "Low":
-        return "bg-green-100 text-green-700 bg-green-900/30 text-green-400"
-    }
-  }
-
-  const getPriorityChipStyle = (priority: Task["priority"]) => {
-    if (priority === "Very High") {
-      return { backgroundColor: "lab(34 43.72 6.02)" }
-    }
-    return undefined
-  }
-
-  const getStatusChipColor = (status: Task["status"]) => {
-    switch (status) {
-      case "Not started":
-        return "bg-gray-100 text-gray-700 bg-gray-800 text-gray-300"
-      case "In progress":
-        return "bg-blue-100 text-blue-700 bg-blue-900/30 text-blue-400"
-      case "Blocked":
-        return "bg-red-100 text-red-700 bg-red-900/30 text-red-400"
-      case "Done":
-        return "bg-green-100 text-green-700 bg-green-900/30 text-green-400"
-    }
-  }
-
-  const formatDate = (date: string | null) => {
-    if (!date) return null
-    const d = new Date(date)
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const taskDate = new Date(d)
-    taskDate.setHours(0, 0, 0, 0)
-
-    if (taskDate.getTime() === today.getTime()) {
-      return "Today"
-    } else if (taskDate.getTime() === today.getTime() + 86400000) {
-      return "Tomorrow"
-    } else {
-      return d.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })
-    }
-  }
-
-  const isDone = task.status === "Done"
+  // Left border: Very High + In progress → red override
+  const leftBorder = (task.priority === "Very High" && task.status === "In progress")
+    ? "#f87171"
+    : STATUS_BORDER[task.status]
 
   const handleMenuClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -107,38 +132,84 @@ export function TaskCard({ task, onEdit, onDelete, isDragging = false }: TaskCar
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation()
     setMenuOpen(false)
-    if (onDelete) {
-      onDelete(task.id)
-    }
+    if (onDelete) onDelete(task.id)
   }
 
   return (
     <div
-      className={cn(
-        "group relative bg-white bg-[#292929] border border-gray-100 border-[#383838] rounded-[10px] p-3 cursor-grab transition-all duration-200",
-        "hover:shadow-md hover:border-gray-200 hover:border-[#4a4a4a]",
-        isDragging && "shadow-lg scale-[1.02] opacity-90 border-gray-300 border-gray-600 cursor-grabbing"
-      )}
+      className="group relative"
+      style={{
+        background: isDragging ? "var(--bg-surface-3)" : "var(--bg-surface-2)",
+        border: `1px solid ${isDragging ? "var(--border-default)" : "var(--border-subtle)"}`,
+        borderLeft: `3px solid ${leftBorder}`,
+        borderRadius: "6px",
+        padding: "10px 12px",
+        cursor: isDragging ? "grabbing" : "pointer",
+        transition: "background 150ms, border-color 150ms",
+      }}
+      onMouseEnter={e => {
+        if (!isDragging) {
+          (e.currentTarget as HTMLDivElement).style.background = "var(--bg-surface-3)"
+          ;(e.currentTarget as HTMLDivElement).style.borderColor = `var(--border-default)`
+          ;(e.currentTarget as HTMLDivElement).style.borderLeftColor = leftBorder
+        }
+      }}
+      onMouseLeave={e => {
+        if (!isDragging) {
+          (e.currentTarget as HTMLDivElement).style.background = "var(--bg-surface-2)"
+          ;(e.currentTarget as HTMLDivElement).style.borderColor = "var(--border-subtle)"
+          ;(e.currentTarget as HTMLDivElement).style.borderLeftColor = leftBorder
+        }
+      }}
     >
-      {/* Kebab Menu - Top Right, visible on hover */}
+      {/* Kebab menu — top right, visible on hover */}
       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20" ref={menuRef}>
         <button
           onClick={handleMenuClick}
           onPointerDown={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
-          className="hover:bg-gray-100 hover:bg-[#333333] rounded p-1 cursor-pointer"
+          style={{
+            background: "none",
+            border: "none",
+            color: "var(--text-tertiary)",
+            cursor: "pointer",
+            padding: "2px",
+            borderRadius: "4px",
+          }}
           aria-label="Task actions"
         >
-          <MoreVertical className="h-4 w-4 text-gray-400" />
+          <MoreVertical className="h-4 w-4" />
         </button>
 
         {menuOpen && (
-          <div className="absolute border right-0 mt-1 w-32 bg-[#292929] border-[#383838] rounded-lg shadow-lg z-50">
+          <div style={{
+            position: "absolute",
+            right: 0,
+            marginTop: "4px",
+            width: "128px",
+            background: "var(--bg-surface-2)",
+            border: "1px solid var(--border-default)",
+            borderRadius: "8px",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+            zIndex: 50,
+            overflow: "hidden",
+          }}>
             <button
               onClick={handleEdit}
               onPointerDown={(e) => e.stopPropagation()}
               onMouseDown={(e) => e.stopPropagation()}
-              className="hover:bg-gray-50 hover:bg-[#333333] w-full text-gray-200 px-3 py-2 cursor-pointer rounded-t-lg"
+              style={{
+                width: "100%",
+                textAlign: "left",
+                padding: "8px 12px",
+                fontSize: "12px",
+                color: "var(--text-primary)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-surface-3)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "none")}
             >
               Edit
             </button>
@@ -147,7 +218,18 @@ export function TaskCard({ task, onEdit, onDelete, isDragging = false }: TaskCar
                 onClick={handleDelete}
                 onPointerDown={(e) => e.stopPropagation()}
                 onMouseDown={(e) => e.stopPropagation()}
-                className="hover:bg-red-50 hover:bg-red-900/30 w-full text-red-400 px-3 py-2 cursor-pointer rounded-b-lg"
+                style={{
+                  width: "100%",
+                  textAlign: "left",
+                  padding: "8px 12px",
+                  fontSize: "12px",
+                  color: "#f87171",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-surface-3)")}
+                onMouseLeave={e => (e.currentTarget.style.background = "none")}
               >
                 Delete
               </button>
@@ -156,45 +238,38 @@ export function TaskCard({ task, onEdit, onDelete, isDragging = false }: TaskCar
         )}
       </div>
 
-      {/* Row 1: Status Icon + Title */}
-      <div className="flex items-start gap-2 mb-2">
-        {isDone ? (
-          <CheckCircle2 className="h-4 w-4 text-green-400 flex-shrink-0 mt-0.5" />
-        ) : (
-          <Circle className="h-4 w-4 text-gray-600 flex-shrink-0 mt-0.5" />
+      {/* Task name */}
+      <p style={{
+        fontSize: "13px",
+        fontWeight: 400,
+        color: "var(--text-primary)",
+        marginBottom: "9px",
+        lineHeight: 1.4,
+        paddingRight: "20px",
+      }}
+        className="line-clamp-2 break-words"
+      >
+        {task.title}
+      </p>
+
+      {/* Meta row */}
+      <div style={{ display: "flex", alignItems: "center", gap: "5px", flexWrap: "wrap" }}>
+        <PriorityPill priority={task.priority} />
+        <StatusPill status={task.status} />
+        {task.dueDate && (
+          <span style={{
+            fontSize: "11px",
+            color: "var(--text-tertiary)",
+            fontFamily: "ui-monospace, monospace",
+            marginLeft: "auto",
+          }}>
+            {formatDate(task.dueDate)}
+          </span>
         )}
-        <h4 className="text-sm text-gray-100 font-semibold line-clamp-2 break-words overflow-hidden flex-1 leading-tight">
-          {task.title}
-        </h4>
       </div>
-
-      {/* Row 2: Priority + Status Chips - Asana pill style */}
-      <div className="flex items-center gap-1.5 mb-2">
-        <span
-          className={cn(
-            "inline-flex items-center rounded-full px-2 py-0.5 mr-2 text-xs font-medium",
-            getPriorityChipColor(task.priority)
-          )}
-          style={getPriorityChipStyle(task.priority)}
-        >
-          {task.priority}
-        </span>
-        <span
-          className={cn(
-            "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
-            getStatusChipColor(task.status)
-          )}
-        >
-          {task.status}
-        </span>
-      </div>
-
-      {/* Row 3: Meta (Due Date) */}
-      {task.dueDate && (
-        <div className="flex items-center">
-          <p className="text-xs text-gray-400">{formatDate(task.dueDate)}</p>
-        </div>
-      )}
     </div>
   )
 }
+
+// Export pills for reuse in backlog table
+export { PriorityPill, StatusPill }

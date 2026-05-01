@@ -36,9 +36,15 @@ export function DraggableTableRow({ task, children, onDoubleClick }: DraggableTa
   // Show minimal placeholder while dragging
   if (isDragging) {
     return (
-      <tr ref={setNodeRef} style={style} {...attributes} className="border-[#383838]">
-        <td colSpan={7} className="p-3">
-          <div className="rounded h-8 border-gray-600 bg-[#292929]/50" />
+      <tr ref={setNodeRef} style={style} {...attributes}>
+        <td colSpan={7} style={{ padding: "6px 12px" }}>
+          <div style={{
+            height: "32px",
+            border: "1px dashed var(--border-default)",
+            borderRadius: "4px",
+            background: "var(--bg-surface-2)",
+            opacity: 0.5,
+          }} />
         </td>
       </tr>
     )
@@ -60,10 +66,12 @@ export function DraggableTableRow({ task, children, onDoubleClick }: DraggableTa
   return (
     <tr
       ref={setNodeRef}
-      style={style}
+      style={{ ...style, borderBottom: "1px solid var(--border-subtle)" }}
       {...attributes}
       onDoubleClick={onDoubleClick}
-      className="hover:bg-[#2a2a2a] border-[#383838] transition-colors cursor-pointer"
+      className="group transition-colors cursor-pointer"
+      onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "var(--bg-surface-2)")}
+      onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "transparent")}
     >
       {modifiedChildren}
     </tr>
