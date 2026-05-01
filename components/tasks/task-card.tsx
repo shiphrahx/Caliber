@@ -44,7 +44,7 @@ function PriorityPill({ priority }: { priority: Task["priority"] }) {
       gap: "4px",
       padding: "2px 7px",
       borderRadius: "4px",
-      fontSize: "9px",
+      fontSize: "var(--text-overline)",
       fontWeight: 500,
       fontFamily: "var(--font-mono)",
       background: bg,
@@ -65,7 +65,7 @@ function StatusPill({ status }: { status: Task["status"] }) {
       gap: "4px",
       padding: "2px 7px",
       borderRadius: "4px",
-      fontSize: "9px",
+      fontSize: "var(--text-overline)",
       fontWeight: 500,
       fontFamily: "var(--font-mono)",
       background: bg,
@@ -202,7 +202,7 @@ export function TaskCard({ task, onEdit, onDelete, isDragging = false }: TaskCar
                 width: "100%",
                 textAlign: "left",
                 padding: "8px 12px",
-                fontSize: "12px",
+                fontSize: "var(--text-label)",
                 color: "var(--text-1)",
                 background: "none",
                 border: "none",
@@ -222,7 +222,7 @@ export function TaskCard({ task, onEdit, onDelete, isDragging = false }: TaskCar
                   width: "100%",
                   textAlign: "left",
                   padding: "8px 12px",
-                  fontSize: "12px",
+                  fontSize: "var(--text-label)",
                   color: "#f87171",
                   background: "none",
                   border: "none",
@@ -240,7 +240,7 @@ export function TaskCard({ task, onEdit, onDelete, isDragging = false }: TaskCar
 
       {/* Task name */}
       <p style={{
-        fontSize: "11px",
+        fontSize: "var(--text-meta)",
         fontWeight: 400,
         color: "var(--text-1)",
         marginBottom: "9px",
@@ -258,7 +258,7 @@ export function TaskCard({ task, onEdit, onDelete, isDragging = false }: TaskCar
         <StatusPill status={task.status} />
         {task.dueDate && (
           <span style={{
-            fontSize: "9px",
+            fontSize: "var(--text-overline)",
             color: "var(--text-3)",
             fontFamily: "var(--font-mono)",
             marginLeft: "auto",
