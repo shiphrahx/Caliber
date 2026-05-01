@@ -174,24 +174,30 @@ export function TeamFormDialog({ open, onOpenChange, team, onSave, availablePeop
                 <Label>Team Members</Label>
                 <div className="flex gap-3 items-center">
                   {/* Available People */}
-                  <div className="flex-1">
-                    <Label className="text-gray-600 mb-1">Available People</Label>
-                    <div className="border border-gray-300 rounded-md h-48 overflow-y-auto">
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: "var(--text-label)", color: "var(--text-3)", display: "block", marginBottom: "4px" }}>Available People</label>
+                    <div style={{ border: "1px solid var(--border-2)", borderRadius: "4px", height: "192px", overflowY: "auto", background: "var(--surf-2)" }}>
                       {availablePeopleList.length > 0 ? (
                         availablePeopleList.map((person) => (
                           <div
                             key={person.id}
                             onClick={() => toggleAvailableSelection(person.id!)}
                             onDoubleClick={() => handleDoubleClickAvailable(person.id!)}
-                            className={`px-3 py-2 text-sm cursor-pointer dual-list-item select-none ${
-                              selectedAvailable.includes(person.id!) ? 'bg-primary-50 bg-primary-dark-900/30 border-l-2 border-primary-600' : ''
-                            }`}
+                            className="dual-list-item"
+                            style={{
+                              padding: "6px 12px",
+                              fontSize: "var(--text-label)",
+                              cursor: "pointer",
+                              userSelect: "none",
+                              color: selectedAvailable.includes(person.id!) ? "#111" : "var(--text-2)",
+                              borderLeft: selectedAvailable.includes(person.id!) ? "2px solid #00f058" : "2px solid transparent",
+                            }}
                           >
                             {person.name}
                           </div>
                         ))
                       ) : (
-                        <div className="flex items-center justify-center h-full text-gray-500">
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: "var(--text-label)", color: "var(--text-3)" }}>
                           All people assigned
                         </div>
                       )}
@@ -199,48 +205,50 @@ export function TeamFormDialog({ open, onOpenChange, team, onSave, availablePeop
                   </div>
 
                   {/* Arrow Buttons */}
-                  <div className="flex flex-col gap-2">
-                    <Button
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <button
                       type="button"
-                      variant="outline"
-                      size="icon"
                       onClick={handleAddToTeam}
                       disabled={selectedAvailable.length === 0}
-                      className="h-8 w-8"
+                      style={{ width: "32px", height: "32px", borderRadius: "4px", border: "1px solid var(--border-2)", background: "var(--surf-2)", color: "var(--text-2)", cursor: selectedAvailable.length === 0 ? "not-allowed" : "pointer", opacity: selectedAvailable.length === 0 ? 0.4 : 1, display: "flex", alignItems: "center", justifyContent: "center" }}
                     >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                    <Button
+                      <ChevronRight style={{ width: "16px", height: "16px" }} />
+                    </button>
+                    <button
                       type="button"
-                      variant="outline"
-                      size="icon"
                       onClick={handleRemoveFromTeam}
                       disabled={selectedMembers.length === 0}
-                      className="h-8 w-8"
+                      style={{ width: "32px", height: "32px", borderRadius: "4px", border: "1px solid var(--border-2)", background: "var(--surf-2)", color: "var(--text-2)", cursor: selectedMembers.length === 0 ? "not-allowed" : "pointer", opacity: selectedMembers.length === 0 ? 0.4 : 1, display: "flex", alignItems: "center", justifyContent: "center" }}
                     >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
+                      <ChevronLeft style={{ width: "16px", height: "16px" }} />
+                    </button>
                   </div>
 
                   {/* Team Members */}
-                  <div className="flex-1">
-                    <Label className="text-gray-600 mb-1">Team Members ({teamMembersList.length})</Label>
-                    <div className="border border-gray-300 rounded-md h-48 overflow-y-auto">
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: "var(--text-label)", color: "var(--text-3)", display: "block", marginBottom: "4px" }}>Team Members ({teamMembersList.length})</label>
+                    <div style={{ border: "1px solid var(--border-2)", borderRadius: "4px", height: "192px", overflowY: "auto", background: "var(--surf-2)" }}>
                       {teamMembersList.length > 0 ? (
                         teamMembersList.map((person) => (
                           <div
                             key={person.id}
                             onClick={() => toggleMemberSelection(person.id!)}
                             onDoubleClick={() => handleDoubleClickMember(person.id!)}
-                            className={`px-3 py-2 text-sm cursor-pointer dual-list-item select-none ${
-                              selectedMembers.includes(person.id!) ? 'bg-primary-50 bg-primary-dark-900/30 border-l-2 border-primary-600' : ''
-                            }`}
+                            className="dual-list-item"
+                            style={{
+                              padding: "6px 12px",
+                              fontSize: "var(--text-label)",
+                              cursor: "pointer",
+                              userSelect: "none",
+                              color: selectedMembers.includes(person.id!) ? "#111" : "var(--text-2)",
+                              borderLeft: selectedMembers.includes(person.id!) ? "2px solid #00f058" : "2px solid transparent",
+                            }}
                           >
                             {person.name}
                           </div>
                         ))
                       ) : (
-                        <div className="flex items-center justify-center h-full text-gray-500">
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: "var(--text-label)", color: "var(--text-3)" }}>
                           No members yet
                         </div>
                       )}
