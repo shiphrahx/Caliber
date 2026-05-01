@@ -112,7 +112,7 @@ export default function PeoplePage() {
         top: 0,
         zIndex: 10,
       }}>
-        <span style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-1)", fontFamily: "var(--font-sans)" }}>
+        <span style={{ fontSize: "var(--text-label)", fontWeight: 500, color: "var(--text-1)", fontFamily: "var(--font-sans)" }}>
           People
         </span>
         <button
@@ -126,7 +126,7 @@ export default function PeoplePage() {
             color: "#0a1a0a",
             padding: "4px 10px",
             borderRadius: "4px",
-            fontSize: "10px",
+            fontSize: "var(--text-caption)",
             fontWeight: 600,
             cursor: "pointer",
             fontFamily: "var(--font-sans)",
@@ -150,13 +150,13 @@ export default function PeoplePage() {
               borderRadius: "6px",
               padding: "10px 12px",
             }}>
-              <div style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "4px" }}>
+              <div style={{ fontSize: "var(--text-overline)", color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "4px" }}>
                 {label}
               </div>
               <div style={{ fontSize: "20px", fontWeight: 500, color: "var(--text-1)", fontFamily: "var(--font-mono)" }}>
                 {value}
               </div>
-              <div style={{ fontSize: "9px", color: "var(--text-3)", marginTop: "2px" }}>
+              <div style={{ fontSize: "var(--text-overline)", color: "var(--text-3)", marginTop: "2px" }}>
                 {sub}
               </div>
             </div>
