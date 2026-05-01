@@ -4,7 +4,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
-import type { Task, TaskStatus, TaskPriority } from '@/lib/types/task'
+import type { Task, TaskStatus, TaskPriority, TaskCategory } from '@/lib/types/task'
 
 // Determine list based on due date — 'week' if due date is this week or overdue
 function resolveList(dueDate: string | null): 'week' | 'backlog' {
@@ -76,6 +76,29 @@ function mapUiPriorityToDb(priority: TaskPriority): 'low' | 'medium' | 'high' | 
   return map[priority] || 'medium'
 }
 
+// Map DB source to UI category
+function mapDbSourceToCategory(source: string): TaskCategory {
+  const map: Record<string, TaskCategory> = {
+    manual: 'Task',
+    meeting_action: 'Meeting',
+    recurring_meeting: 'Meeting',
+    growth: 'Career Growth',
+    performance: 'People',
+  }
+  return map[source] ?? 'Task'
+}
+
+// Map UI category to DB source
+function mapCategoryToDbSource(category: TaskCategory): string {
+  const map: Record<TaskCategory, string> = {
+    'Task': 'manual',
+    'Meeting': 'meeting_action',
+    'Career Growth': 'growth',
+    'People': 'performance',
+  }
+  return map[category] ?? 'manual'
+}
+
 /**
  * Get all tasks for the current user
  */
@@ -101,7 +124,7 @@ export async function getTasks(): Promise<Task[]> {
     description: task.description || undefined,
     dueDate: task.due_date,
     priority: mapDbPriorityToUi(task.priority),
-    category: 'Task', // Default category for now
+    category: mapDbSourceToCategory(task.source),
     status: mapDbStatusToUi(task.status),
     list: effectiveList(task.list, task.due_date),
   }))
@@ -125,7 +148,7 @@ export async function createTask(task: Omit<Task, 'id'>): Promise<Task> {
       priority: mapUiPriorityToDb(task.priority),
       status: mapUiStatusToDb(task.status),
       list: effectiveList(task.list || null, task.dueDate || null),
-      source: 'manual',
+      source: mapCategoryToDbSource(task.category),
       owning_user_id: user.id,
     } as any)
     .select()
@@ -139,7 +162,7 @@ export async function createTask(task: Omit<Task, 'id'>): Promise<Task> {
     description: (data as any).description || undefined,
     dueDate: (data as any).due_date,
     priority: mapDbPriorityToUi((data as any).priority),
-    category: 'Task',
+    category: mapDbSourceToCategory((data as any).source),
     status: mapDbStatusToUi((data as any).status),
     list: effectiveList((data as any).list, (data as any).due_date),
   }
@@ -157,6 +180,7 @@ export async function updateTask(id: string, updates: Partial<Task>): Promise<Ta
   if (updates.dueDate !== undefined) dbUpdates.due_date = updates.dueDate || null
   if (updates.priority !== undefined) dbUpdates.priority = mapUiPriorityToDb(updates.priority)
   if (updates.list !== undefined) dbUpdates.list = updates.list
+  if (updates.category !== undefined) dbUpdates.source = mapCategoryToDbSource(updates.category)
   if (updates.status !== undefined) {
     dbUpdates.status = mapUiStatusToDb(updates.status)
     // Set completion date if marking as done
@@ -182,7 +206,7 @@ export async function updateTask(id: string, updates: Partial<Task>): Promise<Ta
     description: (data as any).description || undefined,
     dueDate: (data as any).due_date,
     priority: mapDbPriorityToUi((data as any).priority),
-    category: 'Task',
+    category: mapDbSourceToCategory((data as any).source),
     status: mapDbStatusToUi((data as any).status),
     list: effectiveList((data as any).list, (data as any).due_date),
   }

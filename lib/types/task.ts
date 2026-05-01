@@ -5,9 +5,6 @@ export type TaskCategory =
   | "Meeting"
   | "Career Growth"
   | "People"
-  | "Delivery"
-  | "Admin"
-  | "Management"
 export type TaskList = "week" | "backlog"
 
 export interface Task {
@@ -28,7 +25,4 @@ export const TASK_CATEGORIES: TaskCategory[] = [
   "Meeting",
   "Career Growth",
   "People",
-  "Delivery",
-  "Admin",
-  "Management"
 ]
