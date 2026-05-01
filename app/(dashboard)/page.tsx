@@ -45,8 +45,8 @@ export default async function DashboardPage() {
     <div className="flex flex-col gap-6 p-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl text-gray-100 font-bold">Dashboard</h1>
-        <p className="text-sm text-gray-400 mt-1">{label}</p>
+        <h1>Dashboard</h1>
+        <p style={{ marginTop: "4px" }}>{label}</p>
       </div>
 
       {/* ── Widgets row ── */}
@@ -57,8 +57,8 @@ export default async function DashboardPage() {
         {/* Priority breakdown placeholder */}
         <div className="bg-[#1c1c1c] border border-[#383838] rounded-xl p-5">
           <div className="mb-4">
-            <h2 className="text-gray-100 font-semibold text-sm">Priority Breakdown</h2>
-            <p className="text-gray-500 text-xs mt-0.5">Tasks by priority</p>
+            <h2>Priority Breakdown</h2>
+            <p style={{ marginTop: "2px" }}>Tasks by priority</p>
           </div>
           <TaskPriorityChart />
         </div>
