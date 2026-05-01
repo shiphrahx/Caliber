@@ -42,7 +42,7 @@ export function TeamsTable({
       header: "Team Name",
       accessorKey: "name",
       cell: (team) => (
-        <span style={{ fontWeight: 500, color: "var(--text-1)", fontSize: "11px" }}>{team.name}</span>
+        <span style={{ fontWeight: 500, color: "var(--text-1)", fontSize: "var(--text-meta)" }}>{team.name}</span>
       ),
     },
     {
@@ -50,7 +50,7 @@ export function TeamsTable({
       header: "Description",
       accessorKey: "description",
       cell: (team) => (
-        <span style={{ color: "var(--text-2)", fontSize: "11px" }}>{team.description}</span>
+        <span style={{ color: "var(--text-2)", fontSize: "var(--text-meta)" }}>{team.description}</span>
       ),
     },
     {
@@ -58,7 +58,7 @@ export function TeamsTable({
       header: "Members",
       accessorKey: "memberCount",
       cell: (team) => (
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-1)" }}>{team.memberCount}</span>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-meta)", color: "var(--text-1)" }}>{team.memberCount}</span>
       ),
     },
     {
@@ -66,7 +66,7 @@ export function TeamsTable({
       header: "Created",
       accessorKey: "createdAt",
       cell: (team) => (
-        <span style={{ color: "var(--text-3)", fontSize: "9px", fontFamily: "var(--font-mono)" }}>
+        <span style={{ color: "var(--text-3)", fontSize: "var(--text-overline)", fontFamily: "var(--font-mono)" }}>
           {new Date(team.createdAt).toLocaleDateString("en-GB", {
             day: "2-digit",
             month: "short",
@@ -82,7 +82,7 @@ export function TeamsTable({
       cell: (team) => (
         <span style={{
           color: team.status === "active" ? "#00f058" : "var(--text-3)",
-          fontSize: "10px",
+          fontSize: "var(--text-caption)",
         }}>
           ● {team.status}
         </span>
@@ -107,7 +107,7 @@ export function TeamsTable({
               borderRadius: "3px",
               padding: "2px 6px",
               cursor: "pointer",
-              fontSize: "10px",
+              fontSize: "var(--text-caption)",
             }}
             onMouseEnter={e => (e.currentTarget.style.color = "var(--text-1)")}
             onMouseLeave={e => (e.currentTarget.style.color = "var(--text-3)")}
@@ -130,7 +130,7 @@ export function TeamsTable({
               <button
                 onClick={(e) => { e.stopPropagation(); onEdit(team); setSelectedTeamMenu(null) }}
                 className="menu-item"
-                style={{ display: "flex", width: "100%", alignItems: "center", gap: "6px", padding: "7px 10px", fontSize: "11px", color: "var(--text-2)", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+                style={{ display: "flex", width: "100%", alignItems: "center", gap: "6px", padding: "7px 10px", fontSize: "var(--text-meta)", color: "var(--text-2)", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
                 onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-3)")}
                 onMouseLeave={e => (e.currentTarget.style.background = "none")}
               >
@@ -139,7 +139,7 @@ export function TeamsTable({
               <button
                 onClick={(e) => { e.stopPropagation(); onToggleStatus(team) }}
                 className="menu-item"
-                style={{ display: "flex", width: "100%", alignItems: "center", gap: "6px", padding: "7px 10px", fontSize: "11px", color: "var(--text-2)", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+                style={{ display: "flex", width: "100%", alignItems: "center", gap: "6px", padding: "7px 10px", fontSize: "var(--text-meta)", color: "var(--text-2)", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
                 onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-3)")}
                 onMouseLeave={e => (e.currentTarget.style.background = "none")}
               >
@@ -150,7 +150,7 @@ export function TeamsTable({
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); onDelete(team); setSelectedTeamMenu(null) }}
-                style={{ display: "flex", width: "100%", alignItems: "center", gap: "6px", padding: "7px 10px", fontSize: "11px", color: "#f87171", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+                style={{ display: "flex", width: "100%", alignItems: "center", gap: "6px", padding: "7px 10px", fontSize: "var(--text-meta)", color: "#f87171", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
                 onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-3)")}
                 onMouseLeave={e => (e.currentTarget.style.background = "none")}
               >
