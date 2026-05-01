@@ -1,11 +1,9 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { MarkdownTextarea } from "@/components/ui/markdown-textarea"
-import { Button } from "@/components/ui/button"
 import {
   Select,
   SelectContent,
@@ -21,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Plus, Trash2, Target, TrendingUp, Zap, Award, Pencil } from "lucide-react"
+import { Trash2, Target, TrendingUp, Zap, Award, Pencil } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 import { BadgeSelect } from "@/components/ui/badge-select"
 import {
@@ -497,7 +495,7 @@ export default function CareerGoalsPage() {
 
     if (total === 0) {
       return (
-        <div className="flex items-center justify-center h-64 text-gray-500">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "160px", fontSize: "10px", color: "var(--text-3)" }}>
           No goals yet
         </div>
       )
@@ -509,7 +507,7 @@ export default function CareerGoalsPage() {
     const centerY = 120
 
     return (
-      <div className="flex flex-col items-center gap-4">
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
         <svg width="240" height="240" viewBox="0 0 240 240">
           {categories.map((category) => {
             const count = distribution[category] || 0
@@ -541,13 +539,13 @@ export default function CareerGoalsPage() {
             startAngle = endAngle
             return slice
           })}
-          <circle cx={centerX} cy={centerY} r="40" className="fill-[#262626]" />
+          <circle cx={centerX} cy={centerY} r="40" fill="var(--surf)" />
           <text
             x={centerX}
             y={centerY}
             textAnchor="middle"
             dominantBaseline="middle"
-            className="text-4xl font-bold fill-[#ebebeb]"
+            style={{ fontSize: "20px", fontWeight: 700, fill: "#f0f0f0" }}
           >
             {total}
           </text>
@@ -556,26 +554,25 @@ export default function CareerGoalsPage() {
             y={centerY + 25}
             textAnchor="middle"
             dominantBaseline="middle"
-            className="text-xs fill-[#9ca3af]"
+            style={{ fontSize: "10px", fill: "#555555" }}
           >
             Total
           </text>
         </svg>
 
-        <div className="flex flex-wrap gap-y-2 justify-center max-w-md">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "center", maxWidth: "300px" }}>
           {categories.map((category) => {
             const count = distribution[category] || 0
             const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : "0.0"
             const truncatedCategory = category.length > 30 ? category.substring(0, 30) + "..." : category
 
             return (
-              <div key={category} className="flex items-center gap-2 text-xs" title={category}>
+              <div key={category} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "9px" }} title={category}>
                 <div
-                  className="w-3 h-3 rounded-sm flex-shrink-0"
-                  style={{ backgroundColor: getCategoryColor(category) }}
+                  style={{ width: "10px", height: "10px", borderRadius: "2px", flexShrink: 0, backgroundColor: getCategoryColor(category) }}
                 />
-                <span className="text-gray-300">{truncatedCategory}</span>
-                <span className="text-gray-400">({percentage}%)</span>
+                <span style={{ color: "var(--text-2)" }}>{truncatedCategory}</span>
+                <span style={{ color: "var(--text-3)" }}>({percentage}%)</span>
               </div>
             )
           })}
@@ -585,33 +582,42 @@ export default function CareerGoalsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 p-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl text-gray-100 font-bold">Career Goals</h1>
-          <p className="text-sm text-gray-400 mt-1">
-            Plan your career progression and track your goals
-          </p>
-        </div>
+    <>
+      {/* Top bar */}
+      <div style={{
+        height: "40px",
+        padding: "0 16px",
+        borderBottom: "1px solid var(--border-1)",
+        background: "var(--surf)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        flexShrink: 0,
+        position: "sticky",
+        top: 0,
+        zIndex: 10,
+      }}>
+        <span style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-1)", fontFamily: "var(--font-sans)" }}>
+          Career Goals
+        </span>
       </div>
 
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px", padding: "16px" }}>
+
       {/* Starting Point & Destination */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5" />
+      <div style={{ background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "6px", overflow: "hidden" }}>
+        <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border-1)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 500, color: "var(--text-1)" }}>
+            <Target style={{ width: "13px", height: "13px" }} />
             Starting Point & Destination
-          </CardTitle>
-          <p className="text-sm text-gray-400 mt-2">
+          </div>
+          <p style={{ fontSize: "10px", color: "var(--text-3)", marginTop: "4px", lineHeight: 1.5 }}>
             Reflect on your current role, responsibilities, and capabilities.
             Be honest about your strengths, areas for improvement, and what motivates you at work.
-            This section helps you establish your baseline before setting goals.
             Describe your long-term aspiration or next career milestone.
-            Think about what role, level, or scope you want to achieve and what success looks like for you.
           </p>
-        </CardHeader>
-        <CardContent>
+        </div>
+        <div style={{ padding: "16px" }}>
           <div className="grid grid-cols-2 gap-6">
             <div className="grid gap-2">
               <Label>Where you are now</Label>
@@ -635,78 +641,82 @@ export default function CareerGoalsPage() {
               />
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Gap Analysis */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-start justify-between gap-6">
-            <div className="flex-1">
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5" />
-                Gap Analysis
-              </CardTitle>
-              <p className="text-sm text-gray-600 mt-2">
-                Identify the gaps between your current position and your desired destination.
-                These could be technical, behavioural, or contextual.
-                The goal is to clearly see where you should focus more of your efforts to close the gap between where you are now and where you want to be.
-              </p>
+      <div style={{ background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "6px", overflow: "hidden" }}>
+        <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border-1)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "16px" }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 500, color: "var(--text-1)" }}>
+              <TrendingUp style={{ width: "13px", height: "13px" }} />
+              Gap Analysis
             </div>
-            <Button onClick={openAddGapDialog} className="flex-shrink-0">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Category
-            </Button>
+            <p style={{ fontSize: "10px", color: "var(--text-3)", marginTop: "4px", lineHeight: 1.5 }}>
+              Identify the gaps between your current position and your desired destination.
+              These could be technical, behavioural, or contextual.
+            </p>
           </div>
-        </CardHeader>
-        <CardContent>
+          <button
+            onClick={openAddGapDialog}
+            style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "linear-gradient(90deg, #00ffe5 0%, #00f058 100%)", border: "none", color: "#0a1a0a", padding: "4px 10px", borderRadius: "4px", fontSize: "10px", fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-sans)", flexShrink: 0 }}
+          >
+            + Add Category
+          </button>
+        </div>
+        <div style={{ padding: "16px" }}>
           {gapAnalysis.length === 0 ? (
-            <div className="flex border flex-col items-center justify-center py-12 text-center border-[#383838] rounded-lg bg-[#262626]">
-              <TrendingUp className="h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-gray-100 font-medium mb-1">No categories yet</h3>
-              <p className="text-gray-400 mb-4">
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "48px 0", textAlign: "center", border: "1px solid var(--border-1)", borderRadius: "6px", background: "var(--surf-2)" }}>
+              <TrendingUp style={{ width: "32px", height: "32px", color: "var(--text-3)", marginBottom: "12px" }} />
+              <div style={{ fontSize: "11px", fontWeight: 500, color: "var(--text-1)", marginBottom: "4px" }}>No categories yet</div>
+              <p style={{ fontSize: "10px", color: "var(--text-3)", marginBottom: "12px" }}>
                 Add your first category to start your gap analysis
               </p>
-              <Button onClick={openAddGapDialog}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add First Category
-              </Button>
+              <button
+                onClick={openAddGapDialog}
+                style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "linear-gradient(90deg, #00ffe5 0%, #00f058 100%)", border: "none", color: "#0a1a0a", padding: "4px 10px", borderRadius: "4px", fontSize: "10px", fontWeight: 600, cursor: "pointer" }}
+              >
+                + Add First Category
+              </button>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse table-fixed">
+            <div style={{ overflowX: "auto" }}>
+              <table className="w-full border-collapse table-fixed" style={{ borderRadius: "6px", overflow: "hidden", border: "1px solid var(--border-1)" }}>
                 <thead>
-                  <tr className="border-[#383838]">
-                    <th className="text-sm text-gray-100 p-3 bg-[#262626] font-semibold w-[20%]">Category</th>
-                    <th className="text-sm text-gray-100 p-3 bg-[#262626] font-semibold w-[35%]">Current State</th>
-                    <th className="text-sm text-gray-100 p-3 bg-[#262626] font-semibold w-[35%]">Desired State</th>
-                    <th className="text-sm text-gray-100 p-3 bg-[#262626] font-semibold w-[10%]">Actions</th>
+                  <tr style={{ borderBottom: "1px solid var(--border-1)", background: "var(--surf-2)" }}>
+                    <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "20%" }}>Category</th>
+                    <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "35%" }}>Current State</th>
+                    <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "35%" }}>Desired State</th>
+                    <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "10%" }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {gapAnalysis.map((row) => (
-                    <tr key={row.id} className="hover:bg-gray-50 hover:bg-[#292929] border-[#383838]">
-                      <td className="p-3 font-medium text-gray-100 break-words">{row.category}</td>
-                      <td className="p-3 text-gray-300 break-words">{row.currentState}</td>
-                      <td className="p-3 text-gray-300 break-words">{row.desiredState}</td>
-                      <td className="p-3">
-                        <div className="flex items-center justify-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
+                    <tr key={row.id} style={{ borderBottom: "1px solid var(--border-1)" }}
+                      onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-2)")}
+                      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                    >
+                      <td style={{ padding: "10px 12px", fontSize: "11px", fontWeight: 500, color: "var(--text-1)", wordBreak: "break-word" }}>{row.category}</td>
+                      <td style={{ padding: "10px 12px", fontSize: "11px", color: "var(--text-2)", wordBreak: "break-word" }}>{row.currentState}</td>
+                      <td style={{ padding: "10px 12px", fontSize: "11px", color: "var(--text-2)", wordBreak: "break-word" }}>{row.desiredState}</td>
+                      <td style={{ padding: "10px 12px" }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "4px" }}>
+                          <button
                             onClick={() => openEditGapDialog(row)}
+                            style={{ background: "none", border: "1px solid var(--border-2)", color: "var(--text-3)", borderRadius: "3px", padding: "2px 6px", cursor: "pointer" }}
+                            onMouseEnter={e => (e.currentTarget.style.color = "var(--text-1)")}
+                            onMouseLeave={e => (e.currentTarget.style.color = "var(--text-3)")}
                           >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
+                            <Pencil style={{ width: "11px", height: "11px" }} />
+                          </button>
+                          <button
                             onClick={() => handleDeleteGap(row.id)}
+                            style={{ background: "none", border: "1px solid var(--border-2)", color: "#f87171", borderRadius: "3px", padding: "2px 6px", cursor: "pointer" }}
+                            onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-3)")}
+                            onMouseLeave={e => (e.currentTarget.style.background = "none")}
                           >
-                            <Trash2 className="h-4 w-4 text-red-600" />
-                          </Button>
+                            <Trash2 style={{ width: "11px", height: "11px" }} />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -715,40 +725,42 @@ export default function CareerGoalsPage() {
               </table>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Short-term Goals (0-4 months) */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5" />
+      <div style={{ background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "6px", overflow: "hidden" }}>
+        <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border-1)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 500, color: "var(--text-1)" }}>
+            <Zap style={{ width: "13px", height: "13px" }} />
             Short-term (0-4 months)
-          </CardTitle>
-          <p className="text-gray-600 mt-2">
-            Focus on quick wins and foundational improvements you can achieve in the next few months. 
-            These goals should help you build momentum by strengthening the skills, habits, and knowledge you'll need to progress further.
+          </div>
+          <p style={{ fontSize: "10px", color: "var(--text-3)", marginTop: "4px", lineHeight: 1.5 }}>
+            Focus on quick wins and foundational improvements you can achieve in the next few months.
           </p>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
+        </div>
+        <div style={{ padding: "16px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {/* Desired Focus Distribution */}
             {categories.length > 0 && (
               <div>
-                <h3 className="text-sm text-gray-100 font-semibold mb-3">Desired Focus Distribution</h3>
-                <div className="border overflow-x-auto border-[#383838] rounded-lg bg-[#262626]">
+                <div style={{ fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px" }}>Desired Focus Distribution</div>
+                <div style={{ overflowX: "auto", border: "1px solid var(--border-1)", borderRadius: "6px" }}>
                   <table className="w-full border-collapse table-fixed">
                     <thead>
-                      <tr className="border-[#383838]">
-                        <th className="text-sm text-gray-100 p-3 bg-[#262626] font-semibold w-[30%]">Category</th>
-                        <th className="text-sm text-gray-100 p-3 bg-[#262626] font-semibold w-[10%]">Focus %</th>
-                        <th className="text-sm text-gray-100 p-3 bg-[#262626] font-semibold w-[60%]">Why</th>
+                      <tr style={{ borderBottom: "1px solid var(--border-1)", background: "var(--surf-2)" }}>
+                        <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "30%" }}>Category</th>
+                        <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "10%" }}>Focus %</th>
+                        <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "60%" }}>Why</th>
                       </tr>
                     </thead>
                     <tbody>
                       {shortTermFocus.map((item) => (
-                        <tr key={item.category} className="hover:bg-gray-50 hover:bg-[#292929] border-[#383838]">
-                          <td className="truncate p-3 font-medium text-gray-100 max-w-[300px]" title={item.category}>{item.category}</td>
+                        <tr key={item.category} style={{ borderBottom: "1px solid var(--border-1)" }}
+                          onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-2)")}
+                          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                        >
+                          <td style={{ padding: "8px 12px", fontSize: "11px", fontWeight: 500, color: "var(--text-1)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "300px" }} title={item.category}>{item.category}</td>
                           <td className="p-3">
                             <Input
                               type="number"
@@ -781,8 +793,8 @@ export default function CareerGoalsPage() {
                   const total = shortTermFocus.reduce((sum, item) => sum + item.focusPercent, 0)
                   if (total !== 100 && total > 0) {
                     return (
-                      <div className="border mt-2 text-amber-700 bg-amber-50 border-amber-200 rounded-md p-3">
-                        <strong>Warning:</strong> Total focus percentage is {total}%. It should equal 100%.
+                      <div style={{ marginTop: "6px", padding: "8px 12px", background: "#1a1200", border: "1px solid #6b4c00", borderRadius: "4px", fontSize: "10px", color: "#c9a227" }}>
+                        Warning: Total focus percentage is {total}%. It should equal 100%.
                       </div>
                     )
                   }
@@ -795,26 +807,26 @@ export default function CareerGoalsPage() {
             <div className="grid grid-cols-[60%_40%] gap-6">
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm text-gray-100 font-semibold">Goals</h3>
-                  <Button onClick={() => addGoal('short_term', setShortTermGoals, shortTermGoals)}>
-                    <Plus className="h-4 w-4 mr-1" />
-                    Add Goal
-                  </Button>
+                  <span style={{ fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Goals</span>
+                  <button onClick={() => addGoal('short_term', setShortTermGoals, shortTermGoals)} style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "transparent", border: "1px solid var(--border-2)", color: "var(--text-2)", padding: "3px 8px", borderRadius: "4px", fontSize: "10px", cursor: "pointer" }}
+                    onMouseEnter={e => (e.currentTarget.style.color = "var(--text-1)")}
+                    onMouseLeave={e => (e.currentTarget.style.color = "var(--text-2)")}
+                  >+ Add Goal</button>
                 </div>
-                <div className="border overflow-x-auto border-[#383838] rounded-lg bg-[#262626]">
+                <div style={{ overflowX: "auto", border: "1px solid var(--border-1)", borderRadius: "6px" }}>
                   <table className="w-full border-collapse">
                     <thead>
-                      <tr className="border-[#383838] bg-[#262626]">
-                        <th className="text-sm text-gray-100 p-2 font-semibold w-[45%]">Goal</th>
-                        <th className="text-sm text-gray-100 p-2 font-semibold w-[12%]">Type</th>
-                        <th className="text-sm text-gray-100 p-2 font-semibold w-[18%]">Category</th>
-                        <th className="text-sm text-gray-100 p-2 font-semibold w-[15%]">Status</th>
-                        <th className="text-sm p-2 font-semibold w-10"></th>
+                      <tr style={{ borderBottom: "1px solid var(--border-1)", background: "var(--surf-2)" }}>
+                        <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "45%" }}>Goal</th>
+                        <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "12%" }}>Type</th>
+                        <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "18%" }}>Category</th>
+                        <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "15%" }}>Status</th>
+                        <th style={{ padding: "8px 12px", width: "40px" }}></th>
                       </tr>
                     </thead>
                     <tbody>
                       {shortTermGoals.map((goal) => (
-                        <tr key={goal.id} className="border-[#383838]">
+                        <tr key={goal.id} style={{ borderBottom: "1px solid var(--border-1)" }}>
                           <td className="p-2">
                             <Textarea
                               value={goal.goal}
@@ -830,8 +842,8 @@ export default function CareerGoalsPage() {
                               value={goal.type}
                               onValueChange={(value) => updateGoal(setShortTermGoals, shortTermGoals, goal.id, "type", value)}
                               options={[
-                                { value: "Core", label: "Core", className: "bg-gray-100 text-gray-700" },
-                                { value: "Stretch", label: "Stretch", className: "bg-pink-100 text-pink-700" },
+                                { value: "Core", label: "Core", className: "", style: { background: "#0d1420", color: "#818cf8", fontSize: "9px", fontFamily: "var(--font-mono)", fontWeight: 500, borderRadius: "3px", padding: "2px 7px" } },
+                                { value: "Stretch", label: "Stretch", className: "", style: { background: "#1a0d0d", color: "#f87171", fontSize: "9px", fontFamily: "var(--font-mono)", fontWeight: 500, borderRadius: "3px", padding: "2px 7px" } },
                               ]}
                             />
                           </td>
@@ -842,7 +854,8 @@ export default function CareerGoalsPage() {
                               options={categories.map((cat) => ({
                                 value: cat,
                                 label: cat.length > 20 ? cat.substring(0, 20) + "..." : cat,
-                                className: "bg-red-100 text-red-700",
+                                className: "",
+                                style: { background: "var(--surf-3)", color: "var(--text-2)", fontSize: "9px", fontFamily: "var(--font-mono)", fontWeight: 500, borderRadius: "3px", padding: "2px 7px" },
                               }))}
                             />
                           </td>
@@ -853,30 +866,31 @@ export default function CareerGoalsPage() {
                               options={goalStatuses.map((status) => ({
                                 value: status,
                                 label: status,
-                                className: status === "Completed"
-                                  ? "bg-green-100 text-green-700"
-                                  : status === "In progress"
-                                  ? "bg-yellow-100 text-yellow-700"
-                                  : "bg-blue-100 text-blue-700",
+                                className: "",
+                                style: {
+                                  background: status === "Completed" ? "#0d2015" : status === "In progress" ? "#0c1a3d" : "#1a1a22",
+                                  color: status === "Completed" ? "#4ade80" : status === "In progress" ? "#60a5fa" : "#6b7280",
+                                  fontSize: "9px", fontFamily: "var(--font-mono)", fontWeight: 500, borderRadius: "3px", padding: "2px 7px",
+                                },
                               }))}
                             />
                           </td>
                           <td className="p-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
+                            <button
                               onClick={() => deleteGoal(setShortTermGoals, shortTermGoals, goal.id)}
+                              style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", padding: "2px" }}
+                              onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-3)")}
+                              onMouseLeave={e => (e.currentTarget.style.background = "none")}
                             >
-                              <Trash2 className="h-4 w-4 text-red-600" />
-                            </Button>
+                              <Trash2 style={{ width: "11px", height: "11px" }} />
+                            </button>
                           </td>
                         </tr>
                       ))}
                       {shortTermGoals.length === 0 && (
                         <tr>
-                          <td colSpan={5} className="p-4 text-gray-500">
-                            No goals yet. Click "Add Goal" to create one.
+                          <td colSpan={5} style={{ padding: "12px", fontSize: "10px", color: "var(--text-3)" }}>
+                            No goals yet. Click &quot;Add Goal&quot; to create one.
                           </td>
                         </tr>
                       )}
@@ -886,7 +900,7 @@ export default function CareerGoalsPage() {
               </div>
 
               <div>
-                <h3 className="text-sm text-gray-100 font-semibold mb-3">Current Focus Distribution</h3>
+                <div style={{ fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px" }}>Current Focus Distribution</div>
                 {renderPieChart(shortTermGoals)}
                 {(() => {
                   const currentDist = calculateGoalDistribution(shortTermGoals)
@@ -905,9 +919,9 @@ export default function CareerGoalsPage() {
 
                   if (mismatches.length > 0) {
                     return (
-                      <div className="border mt-4 text-amber-700 bg-amber-50 border-amber-200 rounded-md p-3">
-                        <strong>Note:</strong> Current focus differs from desired:
-                        <ul className="mt-1 ml-4 list-disc">
+                      <div style={{ marginTop: "8px", padding: "8px 12px", background: "#1a1200", border: "1px solid #6b4c00", borderRadius: "4px", fontSize: "10px", color: "#c9a227" }}>
+                        Note: Current focus differs from desired:
+                        <ul style={{ marginTop: "4px", marginLeft: "16px", listStyleType: "disc" }}>
                           {mismatches.map((msg, i) => <li key={i}>{msg}</li>)}
                         </ul>
                       </div>
@@ -918,42 +932,42 @@ export default function CareerGoalsPage() {
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Mid-term Goals (4-8 months) */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
+      <div style={{ background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "6px", overflow: "hidden" }}>
+        <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border-1)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 500, color: "var(--text-1)" }}>
+            <TrendingUp style={{ width: "13px", height: "13px" }} />
             Mid-term (4-8 months)
-          </CardTitle>
-          <p className="text-sm text-gray-400 mt-2">
-            Focus on goals that show deeper growth and sustained progress.
-            At this stage, you should be applying your foundational skills to more complex situations,
-            building consistency, and demonstrating broader impact. These goals should reflect maturity,
-            expanding your scope, strengthening your expertise, and improving how you collaborate and influence others.
+          </div>
+          <p style={{ fontSize: "10px", color: "var(--text-3)", marginTop: "4px", lineHeight: 1.5 }}>
+            Focus on goals that show deeper growth and sustained progress. Build consistency and demonstrate broader impact.
           </p>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
+        </div>
+        <div style={{ padding: "16px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {/* Desired Focus Distribution */}
             {categories.length > 0 && (
               <div>
-                <h3 className="text-sm text-gray-100 font-semibold mb-3">Desired Focus Distribution</h3>
-                <div className="border overflow-x-auto border-[#383838] rounded-lg bg-[#262626]">
+                <div style={{ fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px" }}>Desired Focus Distribution</div>
+                <div style={{ overflowX: "auto", border: "1px solid var(--border-1)", borderRadius: "6px" }}>
                   <table className="w-full border-collapse table-fixed">
                     <thead>
-                      <tr className="border-[#383838]">
-                        <th className="text-sm text-gray-100 p-3 bg-[#262626] font-semibold w-[30%]">Category</th>
-                        <th className="text-sm text-gray-100 p-3 bg-[#262626] font-semibold w-[10%]">Focus %</th>
-                        <th className="text-sm text-gray-100 p-3 bg-[#262626] font-semibold w-[60%]">Why</th>
+                      <tr style={{ borderBottom: "1px solid var(--border-1)", background: "var(--surf-2)" }}>
+                        <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "30%" }}>Category</th>
+                        <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "10%" }}>Focus %</th>
+                        <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "60%" }}>Why</th>
                       </tr>
                     </thead>
                     <tbody>
                       {midTermFocus.map((item) => (
-                        <tr key={item.category} className="hover:bg-gray-50 hover:bg-[#292929] border-[#383838]">
-                          <td className="truncate p-3 font-medium text-gray-100 max-w-[300px]" title={item.category}>{item.category}</td>
+                        <tr key={item.category} style={{ borderBottom: "1px solid var(--border-1)" }}
+                          onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-2)")}
+                          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                        >
+                          <td style={{ padding: "8px 12px", fontSize: "11px", fontWeight: 500, color: "var(--text-1)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "300px" }} title={item.category}>{item.category}</td>
                           <td className="p-3">
                             <Input
                               type="number"
@@ -986,8 +1000,8 @@ export default function CareerGoalsPage() {
                   const total = midTermFocus.reduce((sum, item) => sum + item.focusPercent, 0)
                   if (total !== 100 && total > 0) {
                     return (
-                      <div className="border mt-2 text-amber-700 bg-amber-50 border-amber-200 rounded-md p-3">
-                        <strong>Warning:</strong> Total focus percentage is {total}%. It should equal 100%.
+                      <div style={{ marginTop: "6px", padding: "8px 12px", background: "#1a1200", border: "1px solid #6b4c00", borderRadius: "4px", fontSize: "10px", color: "#c9a227" }}>
+                        Warning: Total focus percentage is {total}%. It should equal 100%.
                       </div>
                     )
                   }
@@ -1000,26 +1014,26 @@ export default function CareerGoalsPage() {
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm text-gray-100 font-semibold">Goals</h3>
-                  <Button onClick={() => addGoal('mid_term', setMidTermGoals, midTermGoals)}>
-                    <Plus className="h-4 w-4 mr-1" />
-                    Add Goal
-                  </Button>
+                  <span style={{ fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Goals</span>
+                  <button onClick={() => addGoal('mid_term', setMidTermGoals, midTermGoals)} style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "transparent", border: "1px solid var(--border-2)", color: "var(--text-2)", padding: "3px 8px", borderRadius: "4px", fontSize: "10px", cursor: "pointer" }}
+                    onMouseEnter={e => (e.currentTarget.style.color = "var(--text-1)")}
+                    onMouseLeave={e => (e.currentTarget.style.color = "var(--text-2)")}
+                  >+ Add Goal</button>
                 </div>
-                <div className="border overflow-x-auto border-[#383838] rounded-lg bg-[#262626]">
+                <div style={{ overflowX: "auto", border: "1px solid var(--border-1)", borderRadius: "6px" }}>
                   <table className="w-full border-collapse">
                     <thead>
-                      <tr className="border-[#383838] bg-[#262626]">
-                        <th className="text-sm text-gray-100 p-2 font-semibold w-[45%]">Goal</th>
-                        <th className="text-sm text-gray-100 p-2 font-semibold w-[12%]">Type</th>
-                        <th className="text-sm text-gray-100 p-2 font-semibold w-[18%]">Category</th>
-                        <th className="text-sm text-gray-100 p-2 font-semibold w-[15%]">Status</th>
-                        <th className="text-sm p-2 font-semibold w-10"></th>
+                      <tr style={{ borderBottom: "1px solid var(--border-1)", background: "var(--surf-2)" }}>
+                        <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "45%" }}>Goal</th>
+                        <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "12%" }}>Type</th>
+                        <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "18%" }}>Category</th>
+                        <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "15%" }}>Status</th>
+                        <th style={{ padding: "8px 12px", width: "40px" }}></th>
                       </tr>
                     </thead>
                     <tbody>
                       {midTermGoals.map((goal) => (
-                        <tr key={goal.id} className="border-[#383838]">
+                        <tr key={goal.id} style={{ borderBottom: "1px solid var(--border-1)" }}>
                           <td className="p-2">
                             <Textarea
                               value={goal.goal}
@@ -1035,8 +1049,8 @@ export default function CareerGoalsPage() {
                               value={goal.type}
                               onValueChange={(value) => updateGoal(setMidTermGoals, midTermGoals, goal.id, "type", value)}
                               options={[
-                                { value: "Core", label: "Core", className: "bg-gray-100 text-gray-700" },
-                                { value: "Stretch", label: "Stretch", className: "bg-pink-100 text-pink-700" },
+                                { value: "Core", label: "Core", className: "", style: { background: "#0d1420", color: "#818cf8", fontSize: "9px", fontFamily: "var(--font-mono)", fontWeight: 500, borderRadius: "3px", padding: "2px 7px" } },
+                                { value: "Stretch", label: "Stretch", className: "", style: { background: "#1a0d0d", color: "#f87171", fontSize: "9px", fontFamily: "var(--font-mono)", fontWeight: 500, borderRadius: "3px", padding: "2px 7px" } },
                               ]}
                             />
                           </td>
@@ -1047,7 +1061,8 @@ export default function CareerGoalsPage() {
                               options={categories.map((cat) => ({
                                 value: cat,
                                 label: cat.length > 30 ? cat.substring(0, 30) + "..." : cat,
-                                className: "bg-blue-100 text-blue-700",
+                                className: "",
+                                style: { background: "var(--surf-3)", color: "var(--text-2)", fontSize: "9px", fontFamily: "var(--font-mono)", fontWeight: 500, borderRadius: "3px", padding: "2px 7px" },
                               }))}
                             />
                           </td>
@@ -1058,30 +1073,31 @@ export default function CareerGoalsPage() {
                               options={goalStatuses.map((status) => ({
                                 value: status,
                                 label: status,
-                                className: status === "Completed"
-                                  ? "bg-green-100 text-green-700"
-                                  : status === "In progress"
-                                  ? "bg-yellow-100 text-yellow-700"
-                                  : "bg-blue-100 text-blue-700",
+                                className: "",
+                                style: {
+                                  background: status === "Completed" ? "#0d2015" : status === "In progress" ? "#0c1a3d" : "#1a1a22",
+                                  color: status === "Completed" ? "#4ade80" : status === "In progress" ? "#60a5fa" : "#6b7280",
+                                  fontSize: "9px", fontFamily: "var(--font-mono)", fontWeight: 500, borderRadius: "3px", padding: "2px 7px",
+                                },
                               }))}
                             />
                           </td>
                           <td className="p-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
+                            <button
                               onClick={() => deleteGoal(setMidTermGoals, midTermGoals, goal.id)}
+                              style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", padding: "2px" }}
+                              onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-3)")}
+                              onMouseLeave={e => (e.currentTarget.style.background = "none")}
                             >
-                              <Trash2 className="h-4 w-4 text-red-600" />
-                            </Button>
+                              <Trash2 style={{ width: "11px", height: "11px" }} />
+                            </button>
                           </td>
                         </tr>
                       ))}
                       {midTermGoals.length === 0 && (
                         <tr>
-                          <td colSpan={5} className="p-4 text-gray-500">
-                            No goals yet. Click "Add Goal" to create one.
+                          <td colSpan={5} style={{ padding: "12px", fontSize: "10px", color: "var(--text-3)" }}>
+                            No goals yet. Click &quot;Add Goal&quot; to create one.
                           </td>
                         </tr>
                       )}
@@ -1091,7 +1107,7 @@ export default function CareerGoalsPage() {
               </div>
 
               <div>
-                <h3 className="text-sm text-gray-100 font-semibold mb-3">Current Focus Distribution</h3>
+                <div style={{ fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px" }}>Current Focus Distribution</div>
                 {renderPieChart(midTermGoals)}
                 {(() => {
                   const currentDist = calculateGoalDistribution(midTermGoals)
@@ -1110,9 +1126,9 @@ export default function CareerGoalsPage() {
 
                   if (mismatches.length > 0) {
                     return (
-                      <div className="border mt-4 text-amber-700 bg-amber-50 border-amber-200 rounded-md p-3">
-                        <strong>Note:</strong> Current focus differs from desired:
-                        <ul className="mt-1 ml-4 list-disc">
+                      <div style={{ marginTop: "8px", padding: "8px 12px", background: "#1a1200", border: "1px solid #6b4c00", borderRadius: "4px", fontSize: "10px", color: "#c9a227" }}>
+                        Note: Current focus differs from desired:
+                        <ul style={{ marginTop: "4px", marginLeft: "16px", listStyleType: "disc" }}>
                           {mismatches.map((msg, i) => <li key={i}>{msg}</li>)}
                         </ul>
                       </div>
@@ -1123,39 +1139,42 @@ export default function CareerGoalsPage() {
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Long-term Goals (8-12 months) */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Award className="h-5 w-5" />
+      <div style={{ background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "6px", overflow: "hidden" }}>
+        <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border-1)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 500, color: "var(--text-1)" }}>
+            <Award style={{ width: "13px", height: "13px" }} />
             Long-term (8-12 months)
-          </CardTitle>
-          <p className="text-sm text-gray-400 mt-2">
-            These goals should represent the next level of growth in your role. Focus on demonstrating autonomy, technical depth, and influence across teams. Long-term goals often involve shaping technical direction, mentoring others, and driving improvements that have a lasting impact. Think about how your work connects to broader business or customer outcomes, not just technical execution.
+          </div>
+          <p style={{ fontSize: "10px", color: "var(--text-3)", marginTop: "4px", lineHeight: 1.5 }}>
+            Focus on demonstrating autonomy, technical depth, and influence across teams. Shape technical direction, mentor others, and drive lasting improvements.
           </p>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
+        </div>
+        <div style={{ padding: "16px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {/* Desired Focus Distribution */}
             {categories.length > 0 && (
               <div>
-                <h3 className="text-sm text-gray-100 font-semibold mb-3">Desired Focus Distribution</h3>
-                <div className="border overflow-x-auto border-[#383838] rounded-lg bg-[#262626]">
+                <div style={{ fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px" }}>Desired Focus Distribution</div>
+                <div style={{ overflowX: "auto", border: "1px solid var(--border-1)", borderRadius: "6px" }}>
                   <table className="w-full border-collapse table-fixed">
                     <thead>
-                      <tr className="border-[#383838]">
-                        <th className="text-sm text-gray-100 p-3 bg-[#262626] font-semibold w-[30%]">Category</th>
-                        <th className="text-sm text-gray-100 p-3 bg-[#262626] font-semibold w-[10%]">Focus %</th>
-                        <th className="text-sm text-gray-100 p-3 bg-[#262626] font-semibold w-[60%]">Why</th>
+                      <tr style={{ borderBottom: "1px solid var(--border-1)", background: "var(--surf-2)" }}>
+                        <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "30%" }}>Category</th>
+                        <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "10%" }}>Focus %</th>
+                        <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "60%" }}>Why</th>
                       </tr>
                     </thead>
                     <tbody>
                       {longTermFocus.map((item) => (
-                        <tr key={item.category} className="hover:bg-gray-50 hover:bg-[#292929] border-[#383838]">
-                          <td className="truncate p-3 font-medium text-gray-100 max-w-[300px]" title={item.category}>{item.category}</td>
+                        <tr key={item.category} style={{ borderBottom: "1px solid var(--border-1)" }}
+                          onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-2)")}
+                          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                        >
+                          <td style={{ padding: "8px 12px", fontSize: "11px", fontWeight: 500, color: "var(--text-1)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "300px" }} title={item.category}>{item.category}</td>
                           <td className="p-3">
                             <Input
                               type="number"
@@ -1188,8 +1207,8 @@ export default function CareerGoalsPage() {
                   const total = longTermFocus.reduce((sum, item) => sum + item.focusPercent, 0)
                   if (total !== 100 && total > 0) {
                     return (
-                      <div className="border mt-2 text-amber-700 bg-amber-50 border-amber-200 rounded-md p-3">
-                        <strong>Warning:</strong> Total focus percentage is {total}%. It should equal 100%.
+                      <div style={{ marginTop: "6px", padding: "8px 12px", background: "#1a1200", border: "1px solid #6b4c00", borderRadius: "4px", fontSize: "10px", color: "#c9a227" }}>
+                        Warning: Total focus percentage is {total}%. It should equal 100%.
                       </div>
                     )
                   }
@@ -1202,26 +1221,26 @@ export default function CareerGoalsPage() {
             <div className="grid grid-cols-[60%_40%] gap-6">
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm text-gray-100 font-semibold">Goals</h3>
-                  <Button onClick={() => addGoal('long_term', setLongTermGoals, longTermGoals)}>
-                    <Plus className="h-4 w-4 mr-1" />
-                    Add Goal
-                  </Button>
+                  <span style={{ fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Goals</span>
+                  <button onClick={() => addGoal('long_term', setLongTermGoals, longTermGoals)} style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "transparent", border: "1px solid var(--border-2)", color: "var(--text-2)", padding: "3px 8px", borderRadius: "4px", fontSize: "10px", cursor: "pointer" }}
+                    onMouseEnter={e => (e.currentTarget.style.color = "var(--text-1)")}
+                    onMouseLeave={e => (e.currentTarget.style.color = "var(--text-2)")}
+                  >+ Add Goal</button>
                 </div>
-                <div className="border overflow-x-auto border-[#383838] rounded-lg bg-[#262626]">
+                <div style={{ overflowX: "auto", border: "1px solid var(--border-1)", borderRadius: "6px" }}>
                   <table className="w-full border-collapse">
                     <thead>
-                      <tr className="border-[#383838] bg-[#262626]">
-                        <th className="text-sm text-gray-100 p-2 font-semibold w-[45%]">Goal</th>
-                        <th className="text-sm text-gray-100 p-2 font-semibold w-[12%]">Type</th>
-                        <th className="text-sm text-gray-100 p-2 font-semibold w-[18%]">Category</th>
-                        <th className="text-sm text-gray-100 p-2 font-semibold w-[15%]">Status</th>
-                        <th className="text-sm p-2 font-semibold w-10"></th>
+                      <tr style={{ borderBottom: "1px solid var(--border-1)", background: "var(--surf-2)" }}>
+                        <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "45%" }}>Goal</th>
+                        <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "12%" }}>Type</th>
+                        <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "18%" }}>Category</th>
+                        <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", width: "15%" }}>Status</th>
+                        <th style={{ padding: "8px 12px", width: "40px" }}></th>
                       </tr>
                     </thead>
                     <tbody>
                       {longTermGoals.map((goal) => (
-                        <tr key={goal.id} className="border-[#383838]">
+                        <tr key={goal.id} style={{ borderBottom: "1px solid var(--border-1)" }}>
                           <td className="p-2">
                             <Textarea
                               value={goal.goal}
@@ -1237,8 +1256,8 @@ export default function CareerGoalsPage() {
                               value={goal.type}
                               onValueChange={(value) => updateGoal(setLongTermGoals, longTermGoals, goal.id, "type", value)}
                               options={[
-                                { value: "Core", label: "Core", className: "bg-gray-100 text-gray-700" },
-                                { value: "Stretch", label: "Stretch", className: "bg-pink-100 text-pink-700" },
+                                { value: "Core", label: "Core", className: "", style: { background: "#0d1420", color: "#818cf8", fontSize: "9px", fontFamily: "var(--font-mono)", fontWeight: 500, borderRadius: "3px", padding: "2px 7px" } },
+                                { value: "Stretch", label: "Stretch", className: "", style: { background: "#1a0d0d", color: "#f87171", fontSize: "9px", fontFamily: "var(--font-mono)", fontWeight: 500, borderRadius: "3px", padding: "2px 7px" } },
                               ]}
                             />
                           </td>
@@ -1249,7 +1268,8 @@ export default function CareerGoalsPage() {
                               options={categories.map((cat) => ({
                                 value: cat,
                                 label: cat.length > 30 ? cat.substring(0, 30) + "..." : cat,
-                                className: "bg-blue-100 text-blue-700",
+                                className: "",
+                                style: { background: "var(--surf-3)", color: "var(--text-2)", fontSize: "9px", fontFamily: "var(--font-mono)", fontWeight: 500, borderRadius: "3px", padding: "2px 7px" },
                               }))}
                             />
                           </td>
@@ -1260,30 +1280,31 @@ export default function CareerGoalsPage() {
                               options={goalStatuses.map((status) => ({
                                 value: status,
                                 label: status,
-                                className: status === "Completed"
-                                  ? "bg-green-100 text-green-700"
-                                  : status === "In progress"
-                                  ? "bg-yellow-100 text-yellow-700"
-                                  : "bg-blue-100 text-blue-700",
+                                className: "",
+                                style: {
+                                  background: status === "Completed" ? "#0d2015" : status === "In progress" ? "#0c1a3d" : "#1a1a22",
+                                  color: status === "Completed" ? "#4ade80" : status === "In progress" ? "#60a5fa" : "#6b7280",
+                                  fontSize: "9px", fontFamily: "var(--font-mono)", fontWeight: 500, borderRadius: "3px", padding: "2px 7px",
+                                },
                               }))}
                             />
                           </td>
                           <td className="p-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
+                            <button
                               onClick={() => deleteGoal(setLongTermGoals, longTermGoals, goal.id)}
+                              style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", padding: "2px" }}
+                              onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-3)")}
+                              onMouseLeave={e => (e.currentTarget.style.background = "none")}
                             >
-                              <Trash2 className="h-4 w-4 text-red-600" />
-                            </Button>
+                              <Trash2 style={{ width: "11px", height: "11px" }} />
+                            </button>
                           </td>
                         </tr>
                       ))}
                       {longTermGoals.length === 0 && (
                         <tr>
-                          <td colSpan={5} className="p-4 text-gray-500">
-                            No goals yet. Click "Add Goal" to create one.
+                          <td colSpan={5} style={{ padding: "12px", fontSize: "10px", color: "var(--text-3)" }}>
+                            No goals yet. Click &quot;Add Goal&quot; to create one.
                           </td>
                         </tr>
                       )}
@@ -1293,7 +1314,7 @@ export default function CareerGoalsPage() {
               </div>
 
               <div>
-                <h3 className="text-sm text-gray-100 font-semibold mb-3">Current Focus Distribution</h3>
+                <div style={{ fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px" }}>Current Focus Distribution</div>
                 {renderPieChart(longTermGoals)}
                 {(() => {
                   const currentDist = calculateGoalDistribution(longTermGoals)
@@ -1312,9 +1333,9 @@ export default function CareerGoalsPage() {
 
                   if (mismatches.length > 0) {
                     return (
-                      <div className="border mt-4 text-amber-700 bg-amber-50 border-amber-200 rounded-md p-3">
-                        <strong>Note:</strong> Current focus differs from desired:
-                        <ul className="mt-1 ml-4 list-disc">
+                      <div style={{ marginTop: "8px", padding: "8px 12px", background: "#1a1200", border: "1px solid #6b4c00", borderRadius: "4px", fontSize: "10px", color: "#c9a227" }}>
+                        Note: Current focus differs from desired:
+                        <ul style={{ marginTop: "4px", marginLeft: "16px", listStyleType: "disc" }}>
                           {mismatches.map((msg, i) => <li key={i}>{msg}</li>)}
                         </ul>
                       </div>
@@ -1325,43 +1346,43 @@ export default function CareerGoalsPage() {
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Extra Achievements & Learning */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Award className="h-5 w-5" />
-            Extra Achievements & Learning
-          </CardTitle>
-          <p className="text-sm text-gray-400 mt-2">
-            Use this section to record any additional accomplishments, learning experiences, or initiatives you completed outside your planned goals. These might include certifications, courses, conferences, books, talks, mentoring, or side projects — anything that meaningfully contributed to your professional growth.
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex justify-end">
-              <Button onClick={addAchievement}>
-                <Plus className="h-4 w-4 mr-1" />
-                Add Achievement
-              </Button>
+      <div style={{ background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "6px", overflow: "hidden" }}>
+        <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border-1)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "16px" }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 500, color: "var(--text-1)" }}>
+              <Award style={{ width: "13px", height: "13px" }} />
+              Extra Achievements & Learning
             </div>
-
-            <div className="border overflow-x-auto border-[#383838] rounded-lg bg-[#262626]">
+            <p style={{ fontSize: "10px", color: "var(--text-3)", marginTop: "4px", lineHeight: 1.5 }}>
+              Record additional accomplishments, learning experiences, or initiatives outside your planned goals — certifications, courses, conferences, books, talks, or mentoring.
+            </p>
+          </div>
+          <button
+            onClick={addAchievement}
+            style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "linear-gradient(90deg, #00ffe5 0%, #00f058 100%)", border: "none", color: "#0a1a0a", padding: "4px 10px", borderRadius: "4px", fontSize: "10px", fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-sans)", flexShrink: 0 }}
+          >
+            + Add Achievement
+          </button>
+        </div>
+        <div style={{ padding: "16px" }}>
+            <div style={{ overflowX: "auto", border: "1px solid var(--border-1)", borderRadius: "6px" }}>
               <table className="w-full border-collapse">
                 <thead>
-                  <tr className="border-[#383838]">
-                    <th className="text-sm text-gray-100 p-3 bg-[#262626] font-semibold">Type</th>
-                    <th className="text-sm text-gray-100 p-3 bg-[#262626] font-semibold">Description</th>
-                    <th className="text-sm text-gray-100 p-3 bg-[#262626] font-semibold">Date</th>
-                    <th className="text-sm text-gray-100 p-3 bg-[#262626] font-semibold">Key Takeaway</th>
-                    <th className="text-sm p-3 bg-[#262626] font-semibold w-10"></th>
+                  <tr style={{ borderBottom: "1px solid var(--border-1)", background: "var(--surf-2)" }}>
+                    <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Type</th>
+                    <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Description</th>
+                    <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Date</th>
+                    <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "9px", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Key Takeaway</th>
+                    <th style={{ padding: "8px 12px", width: "40px" }}></th>
                   </tr>
                 </thead>
                 <tbody>
                   {achievements.map((achievement) => (
-                    <tr key={achievement.id} className="border-[#383838]">
+                    <tr key={achievement.id} style={{ borderBottom: "1px solid var(--border-1)" }}>
                       <td className="p-3">
                         <Select
                           value={achievement.type}
@@ -1405,29 +1426,29 @@ export default function CareerGoalsPage() {
                         />
                       </td>
                       <td className="p-3">
-                        <Button
-                          variant="ghost"
-                          size="icon"
+                        <button
                           onClick={() => deleteAchievementById(achievement.id)}
+                          style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", padding: "2px" }}
+                          onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-3)")}
+                          onMouseLeave={e => (e.currentTarget.style.background = "none")}
                         >
-                          <Trash2 className="h-4 w-4 text-red-600" />
-                        </Button>
+                          <Trash2 style={{ width: "11px", height: "11px" }} />
+                        </button>
                       </td>
                     </tr>
                   ))}
                   {achievements.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="p-4 text-gray-500">
-                        No achievements yet. Click "Add Achievement" to create one.
+                      <td colSpan={5} style={{ padding: "12px", fontSize: "10px", color: "var(--text-3)" }}>
+                        No achievements yet. Click &quot;Add Achievement&quot; to create one.
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Gap Analysis Dialog */}
       <Dialog open={isGapDialogOpen} onOpenChange={setIsGapDialogOpen}>
@@ -1476,15 +1497,16 @@ export default function CareerGoalsPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsGapDialogOpen(false)}>
+            <button onClick={() => setIsGapDialogOpen(false)} style={{ background: "transparent", border: "1px solid var(--border-2)", color: "var(--text-2)", padding: "6px 12px", borderRadius: "4px", fontSize: "11px", cursor: "pointer" }}>
               Cancel
-            </Button>
-            <Button onClick={handleSaveGap} disabled={!gapFormData.category.trim()}>
+            </button>
+            <button onClick={handleSaveGap} disabled={!gapFormData.category.trim()} style={{ background: "linear-gradient(90deg, #00ffe5 0%, #00f058 100%)", border: "none", color: "#0a1a0a", padding: "6px 12px", borderRadius: "4px", fontSize: "11px", fontWeight: 600, cursor: "pointer" }}>
               {editingGap ? "Save Changes" : "Add Category"}
-            </Button>
+            </button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
+    </>
   )
 }
