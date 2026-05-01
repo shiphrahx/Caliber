@@ -2,9 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { User } from "lucide-react"
 import { PersonFormDialog } from "@/components/person-form-dialog"
 import { PeopleTable } from "@/components/people-table"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
@@ -20,7 +17,6 @@ export default function PeoplePage() {
   const [deletingPerson, setDeletingPerson] = useState<Person | null>(null)
   const [, setIsLoading] = useState(true)
 
-  // Load people and teams from Supabase on mount
   useEffect(() => {
     loadPeople()
     loadTeams()
@@ -47,29 +43,14 @@ export default function PeoplePage() {
     }
   }
 
-  // Calculate stats
-  const getLevelCounts = () => {
-    const counts: { [key: string]: number } = {}
-    people.forEach(person => {
-      const level = person.level || 'Unknown'
-      counts[level] = (counts[level] || 0) + 1
-    })
-    return counts
-  }
-
   const getRecentHires = () => {
     const thirtyDaysAgo = new Date()
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-
     return people.filter(person => {
       if (!person.startDate) return false
-      const startDate = new Date(person.startDate)
-      return startDate >= thirtyDaysAgo
+      return new Date(person.startDate) >= thirtyDaysAgo
     }).length
   }
-
-  const levelCounts = getLevelCounts()
-  const recentHiresCount = getRecentHires()
 
   const handleAddPerson = async (newPerson: Person) => {
     try {
@@ -112,84 +93,93 @@ export default function PeoplePage() {
     }
   }
 
+  const activePeople = people.filter(p => p.status === "active")
+  const activeTeams = teams.filter(t => t.status === "active")
+
   return (
-    <div className="flex flex-col gap-6 p-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl text-gray-100 font-bold">People</h1>
-          <p className="text-sm text-gray-400 mt-1">
-            Manage your team members and their details
-          </p>
-        </div>
+    <>
+      {/* Top bar */}
+      <div style={{
+        height: "40px",
+        padding: "0 16px",
+        borderBottom: "1px solid var(--border-1)",
+        background: "var(--surf)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        flexShrink: 0,
+        position: "sticky",
+        top: 0,
+        zIndex: 10,
+      }}>
+        <span style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-1)", fontFamily: "var(--font-sans)" }}>
+          People
+        </span>
+        <button
+          onClick={() => setIsAddDialogOpen(true)}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "4px",
+            background: "linear-gradient(90deg, #00ffe5 0%, #00f058 100%)",
+            border: "none",
+            color: "#0a1a0a",
+            padding: "4px 10px",
+            borderRadius: "4px",
+            fontSize: "10px",
+            fontWeight: 600,
+            cursor: "pointer",
+            fontFamily: "var(--font-sans)",
+          }}
+        >
+          + Add person
+        </button>
       </div>
 
-      {/* Stats */}
-      <div className="grid md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active People</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{people.filter(p => p.status === "active").length}</div>
-            <p className="text-sm text-muted-foreground">
-              {people.filter(p => p.status === "inactive").length} inactive
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">By Level</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-2 flex-wrap">
-              {Object.entries(levelCounts).length > 0 ? (
-                Object.entries(levelCounts).map(([level, count]) => (
-                  <Badge key={level} variant="outline">{level}: {count}</Badge>
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground">No people yet</p>
-              )}
+      <div style={{ padding: "16px" }}>
+        {/* Stat cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "7px", marginBottom: "14px" }}>
+          {[
+            { label: "Active people", value: activePeople.length, sub: `${people.filter(p => p.status === "inactive").length} inactive` },
+            { label: "Recent hires", value: getRecentHires(), sub: "In the last 30 days" },
+            { label: "Teams", value: activeTeams.length, sub: "Active teams" },
+          ].map(({ label, value, sub }) => (
+            <div key={label} style={{
+              background: "var(--surf)",
+              border: "1px solid var(--border-1)",
+              borderRadius: "6px",
+              padding: "10px 12px",
+            }}>
+              <div style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "4px" }}>
+                {label}
+              </div>
+              <div style={{ fontSize: "20px", fontWeight: 500, color: "var(--text-1)", fontFamily: "var(--font-mono)" }}>
+                {value}
+              </div>
+              <div style={{ fontSize: "9px", color: "var(--text-3)", marginTop: "2px" }}>
+                {sub}
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          ))}
+        </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Recent Hires</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{recentHiresCount}</div>
-            <p className="text-sm text-muted-foreground">
-              In the last 30 days
-            </p>
-          </CardContent>
-        </Card>
+        {/* People Table */}
+        <PeopleTable
+          people={people}
+          onRowClick={(person) => router.push(`/people/${person.id}`)}
+          onEdit={(person) => setEditingPerson(person)}
+          onDelete={(person) => setDeletingPerson(person)}
+          onToggleStatus={handleToggleStatus}
+          onQuickAdd={() => setIsAddDialogOpen(true)}
+        />
       </div>
 
-      {/* People Table */}
-      <PeopleTable
-        people={people}
-        onRowClick={(person) => router.push(`/people/${person.id}`)}
-        onEdit={(person) => setEditingPerson(person)}
-        onDelete={(person) => setDeletingPerson(person)}
-        onToggleStatus={handleToggleStatus}
-        onQuickAdd={() => setIsAddDialogOpen(true)}
-      />
-
-      {/* Add Person Dialog */}
       <PersonFormDialog
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
         onSave={handleAddPerson}
         availableTeams={teams}
       />
-
-      {/* Edit Person Dialog */}
       <PersonFormDialog
         open={!!editingPerson}
         onOpenChange={(open) => !open && setEditingPerson(null)}
@@ -197,8 +187,6 @@ export default function PeoplePage() {
         onSave={handleEditPerson}
         availableTeams={teams}
       />
-
-      {/* Delete Confirmation Dialog */}
       <DeleteConfirmDialog
         open={!!deletingPerson}
         onOpenChange={(open) => !open && setDeletingPerson(null)}
@@ -207,6 +195,6 @@ export default function PeoplePage() {
         itemType="Person"
         description="This action cannot be undone. This will permanently delete this person and remove all associated data."
       />
-    </div>
+    </>
   )
 }

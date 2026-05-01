@@ -1,8 +1,6 @@
 "use client"
 
 import { DataTable, ColumnDef, FilterDef } from "@/components/ui/data-table"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { MoreHorizontal, Pencil, Trash2, UserX, UserCheck } from "lucide-react"
 import { useState, useEffect } from "react"
 import { type Person } from "@/lib/services/people"
@@ -18,6 +16,39 @@ interface PeopleTableProps {
   onQuickAdd: () => void
 }
 
+// Level chip: [background, text]
+const LEVEL_CHIP: Record<string, [string, string]> = {
+  Junior:    ["#0d1420", "#818cf8"],
+  Mid:       ["#0a1a2e", "#5b9bd5"],
+  Senior:    ["#0f1a0a", "#4ade80"],
+  Staff:     ["#1a1200", "#c9a227"],
+  Principal: ["#1e0d00", "#e07030"],
+  Other:     ["#222222", "#888888"],
+}
+
+function LevelChip({ level }: { level: string }) {
+  const [bg, text] = LEVEL_CHIP[level] ?? LEVEL_CHIP.Other
+  return (
+    <span style={{
+      display: "inline-flex",
+      alignItems: "center",
+      padding: "2px 7px",
+      borderRadius: "3px",
+      fontSize: "9px",
+      fontWeight: 500,
+      fontFamily: "var(--font-mono)",
+      background: bg,
+      color: text,
+    }}>
+      {level}
+    </span>
+  )
+}
+
+function getInitials(name: string) {
+  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+}
+
 export function PeopleTable({
   people,
   onRowClick,
@@ -28,129 +59,112 @@ export function PeopleTable({
 }: PeopleTableProps) {
   const [selectedPersonMenu, setSelectedPersonMenu] = useState<string | null>(null)
 
-  // Close popup when clicking outside
   useEffect(() => {
     const handleClickOutside = () => {
-      if (selectedPersonMenu !== null) {
-        setSelectedPersonMenu(null)
-      }
+      if (selectedPersonMenu !== null) setSelectedPersonMenu(null)
     }
-
     if (selectedPersonMenu !== null) {
       document.addEventListener("click", handleClickOutside)
     }
-
     return () => {
       document.removeEventListener("click", handleClickOutside)
     }
   }, [selectedPersonMenu])
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-  }
-
-  const getLevelBadgeClass = (level: string) => {
-    switch (level) {
-      case "Junior":
-        return "!bg-green-100 !text-green-700 !border-green-300"
-      case "Mid":
-        return "!bg-yellow-100 !text-yellow-700 !border-yellow-300"
-      case "Senior":
-        return "!bg-pink-100 !text-pink-700 !border-pink-300"
-      case "Staff":
-        return "!bg-blue-100 !text-blue-700 !border-blue-300"
-      case "Principal":
-        return "!bg-purple-100 !text-purple-700 !border-purple-300"
-      case "Other":
-        return "!bg-gray-100 !text-gray-700 !border-gray-300"
-      default:
-        return "!bg-gray-100 !text-gray-700 !border-gray-300"
-    }
-  }
-
   const columns: ColumnDef<Person>[] = [
+    {
+      id: "avatar",
+      header: "",
+      sortable: false,
+      cell: (person) => {
+        const isInactive = person.status === "inactive"
+        return (
+          <div style={{
+            width: "24px",
+            height: "24px",
+            borderRadius: "50%",
+            background: "var(--surf-3)",
+            color: "var(--text-2)",
+            fontSize: "9px",
+            fontWeight: 500,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            opacity: isInactive ? 0.4 : 1,
+          }}>
+            {getInitials(person.name)}
+          </div>
+        )
+      },
+    },
     {
       id: "name",
       header: "Name",
       accessorKey: "name",
-      cell: (person) => (
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-dark-900/30 text-primary-dark-400">
-            <span className="text-sm font-semibold">{getInitials(person.name)}</span>
-          </div>
-          <span className="font-medium text-gray-100">{person.name}</span>
-        </div>
-      ),
+      cell: (person) => {
+        const isInactive = person.status === "inactive"
+        return (
+          <span style={{ fontWeight: 500, fontSize: "11px", color: isInactive ? "var(--text-3)" : "var(--text-1)" }}>
+            {person.name}
+          </span>
+        )
+      },
     },
     {
       id: "role",
       header: "Role",
       accessorKey: "role",
-      cell: (person) => (
-        <span className="text-gray-300">{person.role}</span>
-      ),
+      cell: (person) => {
+        const isInactive = person.status === "inactive"
+        return (
+          <span style={{ color: isInactive ? "var(--text-3)" : "var(--text-2)", fontSize: "11px" }}>
+            {person.role}
+          </span>
+        )
+      },
     },
     {
       id: "level",
       header: "Level",
       accessorKey: "level",
-      cell: (person) => (
-        <Badge variant="outline" className={getLevelBadgeClass(person.level || '')}>
-          {person.level}
-        </Badge>
-      ),
+      cell: (person) => person.level ? <LevelChip level={person.level} /> : null,
     },
     {
       id: "teams",
       header: "Teams",
       sortable: false,
-      cell: (person) => (
-        <div className="flex flex-wrap gap-1">
-          {person.teams.map((team, idx) => (
-            <Badge
-              key={idx}
-              variant="secondary"
-              className="text-gray-300 bg-gray-700"
-            >
-              {team}
-            </Badge>
-          ))}
-        </div>
-      ),
-    },
-    {
-      id: "startDate",
-      header: "Start Date",
-      accessorKey: "startDate",
-      cell: (person) => (
-        <span className="text-gray-300">
-          {person.startDate ? new Date(person.startDate).toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          }) : '-'}
-        </span>
-      ),
+      cell: (person) => {
+        const isInactive = person.status === "inactive"
+        return (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "2px" }}>
+            {person.teams.map((team, idx) => (
+              <span key={idx} style={{
+                background: "var(--surf-3)",
+                color: isInactive ? "var(--text-3)" : "var(--text-2)",
+                padding: "1px 5px",
+                borderRadius: "3px",
+                fontSize: "9px",
+                marginRight: "2px",
+              }}>
+                {team}
+              </span>
+            ))}
+          </div>
+        )
+      },
     },
     {
       id: "status",
       header: "Status",
       accessorKey: "status",
       cell: (person) => (
-        <Badge
-          variant={person.status === "active" ? "success" : "secondary"}
-          className={
-            person.status === "active"
-              ? "bg-green-100 text-green-700 bg-green-900/30 text-green-400"
-              : "bg-gray-100 text-gray-700 bg-gray-700 text-gray-300"
-          }
-        >
-          {person.status}
-        </Badge>
+        <span style={{
+          color: person.status === "active" ? "#00f058" : "var(--text-3)",
+          fontSize: "10px",
+        }}>
+          ● {person.status}
+        </span>
       ),
     },
     {
@@ -160,63 +174,65 @@ export function PeopleTable({
       className: "text-right",
       cell: (person) => (
         <div className="relative inline-block">
-          <Button
-            variant="ghost"
-            size="icon"
+          <button
             onClick={(e) => {
               e.stopPropagation()
-              setSelectedPersonMenu(
-                selectedPersonMenu === person.id ? null : person.id
-              )
+              setSelectedPersonMenu(selectedPersonMenu === person.id ? null : person.id)
             }}
+            style={{
+              background: "none",
+              border: "1px solid var(--border-2)",
+              color: "var(--text-3)",
+              borderRadius: "3px",
+              padding: "2px 6px",
+              cursor: "pointer",
+              fontSize: "10px",
+            }}
+            onMouseEnter={e => (e.currentTarget.style.color = "var(--text-1)")}
+            onMouseLeave={e => (e.currentTarget.style.color = "var(--text-3)")}
           >
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
+            <MoreHorizontal style={{ width: "12px", height: "12px" }} />
+          </button>
           {selectedPersonMenu === person.id && (
-            <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-[#262626] ring-gray-700 z-50">
-              <div className="py-1">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onEdit(person)
-                    setSelectedPersonMenu(null)
-                  }}
-                  className="flex menu-item w-full items-center gap-2 px-4 py-2 text-gray-300 cursor-pointer"
-                >
-                  <Pencil className="h-4 w-4" />
-                  Edit
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onToggleStatus(person)
-                  }}
-                  className="flex menu-item w-full items-center gap-2 px-4 py-2 text-gray-300 cursor-pointer"
-                >
-                  {person.status === "active" ? (
-                    <>
-                      <UserX className="h-4 w-4" />
-                      Set Inactive
-                    </>
-                  ) : (
-                    <>
-                      <UserCheck className="h-4 w-4" />
-                      Set Active
-                    </>
-                  )}
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onDelete(person)
-                    setSelectedPersonMenu(null)
-                  }}
-                  className="flex hover:bg-red-50 hover:bg-red-900/20 w-full items-center gap-2 px-4 py-2 text-red-400 cursor-pointer"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Delete
-                </button>
-              </div>
+            <div style={{
+              position: "absolute",
+              right: 0,
+              marginTop: "4px",
+              width: "148px",
+              background: "var(--surf-2)",
+              border: "1px solid var(--border-2)",
+              borderRadius: "4px",
+              boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+              zIndex: 50,
+              overflow: "hidden",
+            }}>
+              <button
+                onClick={(e) => { e.stopPropagation(); onEdit(person); setSelectedPersonMenu(null) }}
+                style={{ display: "flex", width: "100%", alignItems: "center", gap: "6px", padding: "7px 10px", fontSize: "11px", color: "var(--text-2)", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+                onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-3)")}
+                onMouseLeave={e => (e.currentTarget.style.background = "none")}
+              >
+                <Pencil style={{ width: "11px", height: "11px" }} /> Edit
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); onToggleStatus(person) }}
+                style={{ display: "flex", width: "100%", alignItems: "center", gap: "6px", padding: "7px 10px", fontSize: "11px", color: "var(--text-2)", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+                onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-3)")}
+                onMouseLeave={e => (e.currentTarget.style.background = "none")}
+              >
+                {person.status === "active"
+                  ? <><UserX style={{ width: "11px", height: "11px" }} /> Set Inactive</>
+                  : <><UserCheck style={{ width: "11px", height: "11px" }} /> Set Active</>
+                }
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); onDelete(person); setSelectedPersonMenu(null) }}
+                style={{ display: "flex", width: "100%", alignItems: "center", gap: "6px", padding: "7px 10px", fontSize: "11px", color: "#f87171", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+                onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-3)")}
+                onMouseLeave={e => (e.currentTarget.style.background = "none")}
+              >
+                <Trash2 style={{ width: "11px", height: "11px" }} /> Delete
+              </button>
             </div>
           )}
         </div>
