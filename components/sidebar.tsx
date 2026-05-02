@@ -9,7 +9,6 @@ import {
   CheckSquare,
   Users,
   UserCircle,
-  FolderKanban,
   Calendar,
   BookOpen,
   ClipboardCheck,

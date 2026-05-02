@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   ChevronLeft, ChevronRight, AlertCircle, AlertTriangle, Info,
-  CheckCircle, Clock, Calendar, User, ExternalLink
+  CheckCircle, User, ExternalLink
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -211,7 +211,7 @@ export default function WeeklyReviewPage() {
   }, [weekStart])
 
   // Signals
-  const { signals, loading: signalsLoading, refetch: refetchSignals } = useWeeklyReviewSignals(dismissed)
+  const { signals, refetch: refetchSignals } = useWeeklyReviewSignals(dismissed)
 
   // Auto-save notes on blur / debounce
   const handleNotesChange = (val: string) => {
@@ -532,7 +532,7 @@ export default function WeeklyReviewPage() {
                 onDismiss={setDismissTarget}
                 actions={
                   <div style={{ display: 'flex', gap: '6px' }}>
-                    {s.meta?.taskId && (
+                    {Boolean(s.meta?.taskId) && (
                       <ActionBtn onClick={() => handleMarkTaskDone(s.meta!.taskId as string)}>
                         Mark done
                       </ActionBtn>

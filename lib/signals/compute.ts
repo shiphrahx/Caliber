@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/client'
 import type { Signal, SignalSeverity } from './types'
-import type { FollowUp } from '@/lib/services/follow-ups'
 
 const DAYS_MS = 24 * 60 * 60 * 1000
 
@@ -176,7 +175,6 @@ export function computePeopleSignals(
   today: Date
 ): Signal[] {
   const signals: Signal[] = []
-  const todayISO = todayStr()
 
   // Build lookup maps
   const oneOnOneMeetingsByPerson: Record<string, string> = {}

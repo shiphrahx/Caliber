@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import {
   loadSignalData,
   computeTaskSignals,
@@ -47,6 +47,11 @@ export function useWeeklyReviewSignals(dismissedItems: DismissedItem[]): Signals
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const dismissedKey = useMemo(
+    () => dismissedItems.map(d => d.id).join(','),
+    [dismissedItems]
+  )
+
   const fetch = useCallback(async () => {
     setLoading(true)
     setError(null)
@@ -59,7 +64,7 @@ export function useWeeklyReviewSignals(dismissedItems: DismissedItem[]): Signals
       setLoading(false)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(dismissedItems.map(d => d.id))])
+  }, [dismissedKey])
 
   useEffect(() => {
     fetch()

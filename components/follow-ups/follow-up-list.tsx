@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Check, X, ExternalLink, ChevronDown, ChevronRight } from 'lucide-react'
-import { completeFollowUp, cancelFollowUp, deleteFollowUp, type FollowUp } from '@/lib/services/follow-ups'
+import { completeFollowUp, cancelFollowUp, type FollowUp } from '@/lib/services/follow-ups'
 
 interface FollowUpListProps {
   followUps: FollowUp[]

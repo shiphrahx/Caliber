@@ -12,10 +12,9 @@ import {
   deleteFollowUp,
   markFollowUpSurfaced,
   markFollowUpsSurfaced,
-  type FollowUp,
 } from '../follow-ups'
 
-const makeRow = (overrides: Partial<ReturnType<typeof baseRow>> = {}) => ({
+const makeRow = (overrides: Record<string, unknown> = {}) => ({
   ...baseRow(),
   ...overrides,
 })

@@ -2,13 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { Plus, Check, X, ExternalLink } from 'lucide-react'
+import { Plus, ExternalLink } from 'lucide-react'
 import {
   getAllFollowUps,
-  completeFollowUp,
-  cancelFollowUp,
   type FollowUp,
-  type FollowUpStatus,
 } from '@/lib/services/follow-ups'
 import { getPeople, type Person } from '@/lib/services/people'
 import { FollowUpForm } from '@/components/follow-ups/follow-up-form'
@@ -83,15 +80,6 @@ export default function FollowUpsPage() {
     ? Math.round(resolutionTimes.reduce((a, b) => a + b, 0) / resolutionTimes.length)
     : null
 
-  const handleComplete = async (id: string) => {
-    await completeFollowUp(id)
-    load()
-  }
-
-  const handleCancel = async (id: string) => {
-    await cancelFollowUp(id)
-    load()
-  }
 
   return (
     <div style={{ padding: '24px 32px', maxWidth: '900px', margin: '0 auto' }}>

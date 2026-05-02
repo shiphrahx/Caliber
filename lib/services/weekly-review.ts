@@ -10,6 +10,10 @@ export type DismissedItemType =
   | 'upcoming_deadline'
   | 'stale_goal'
   | 'missing_notes'
+  | 'overdue_follow_up'
+  | 'ageing_follow_up'
+  | 'surfaced_follow_up'
+  | 'action_overload'
 
 export interface WeeklyReview {
   id: string

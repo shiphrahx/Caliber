@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
-  AlertCircle, AlertTriangle, Info, User, ChevronDown, ChevronRight, Plus,
+  AlertCircle, AlertTriangle, Info, ChevronDown, ChevronRight, Plus,
   CheckCircle, ExternalLink
 } from 'lucide-react'
 import { useRadar, type PersonAttention } from '@/lib/hooks/use-person-signals'
@@ -12,7 +12,7 @@ import { completeFollowUp, getFollowUpsForPerson, markFollowUpsSurfaced, type Fo
 import { updateTask } from '@/lib/services/tasks'
 import { FollowUpForm } from '@/components/follow-ups/follow-up-form'
 import { FollowUpList } from '@/components/follow-ups/follow-up-list'
-import { scoreToColor, scoreToBg, computeAttentionScore } from '@/lib/signals/types'
+import { scoreToColor, scoreToBg } from '@/lib/signals/types'
 import type { Signal } from '@/lib/signals/types'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -256,7 +256,6 @@ function PersonCard({
 export default function RadarPage() {
   const { people, loading, error, refetch } = useRadar()
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all')
-  const [teamFilter, setTeamFilter] = useState<string>('all')
   const [showAllClear, setShowAllClear] = useState(false)
 
   const needsAttention = people.filter(p => p.score > 0)

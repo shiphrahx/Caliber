@@ -55,7 +55,6 @@ describe('computeAttentionScore', () => {
 
   it('surfaced_follow_up is highest weight signal', () => {
     const surfaced = makeSignal('surfaced_follow_up', 'critical')
-    const overdue = makeSignal('overdue_follow_up', 'critical')
     const scoreSurfaced = SIGNAL_WEIGHTS['surfaced_follow_up'] + CRITICAL_BONUS
     const scoreOverdue = SIGNAL_WEIGHTS['overdue_follow_up'] + CRITICAL_BONUS
     expect(scoreSurfaced).toBeGreaterThan(scoreOverdue)
