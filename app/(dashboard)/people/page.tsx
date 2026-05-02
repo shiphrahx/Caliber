@@ -8,6 +8,9 @@ import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
 import { getPeople, createPerson, updatePerson, deletePerson as deletePersonService, togglePersonStatus, type Person } from "@/lib/services/people"
 import { getTeams, type Team } from "@/lib/services/teams"
 
+const byName = <T extends { name: string }>(arr: T[]) =>
+  [...arr].sort((a, b) => a.name.localeCompare(b.name))
+
 export default function PeoplePage() {
   const router = useRouter()
   const [people, setPeople] = useState<Person[]>([])
@@ -35,7 +38,7 @@ export default function PeoplePage() {
     try {
       setIsLoading(true)
       const data = await getPeople()
-      setPeople(data)
+      setPeople(byName(data))
     } catch (error) {
       console.error('Failed to load people:', error)
     } finally {
@@ -55,7 +58,7 @@ export default function PeoplePage() {
   const handleAddPerson = async (newPerson: Person) => {
     try {
       const person = await createPerson(newPerson)
-      setPeople([...people, person])
+      setPeople(byName([...people, person]))
       setIsAddDialogOpen(false)
     } catch (error) {
       console.error('Failed to create person:', error)
@@ -65,7 +68,7 @@ export default function PeoplePage() {
   const handleEditPerson = async (updatedPerson: Person) => {
     try {
       const person = await updatePerson(updatedPerson.id, updatedPerson)
-      setPeople(people.map(p => p.id === person.id ? person : p))
+      setPeople(byName(people.map(p => p.id === person.id ? person : p)))
       setEditingPerson(null)
     } catch (error) {
       console.error('Failed to update person:', error)
@@ -75,7 +78,7 @@ export default function PeoplePage() {
   const handleToggleStatus = async (person: Person) => {
     try {
       const updatedPerson = await togglePersonStatus(person.id, person.status)
-      setPeople(people.map(p => p.id === updatedPerson.id ? updatedPerson : p))
+      setPeople(byName(people.map(p => p.id === updatedPerson.id ? updatedPerson : p)))
     } catch (error) {
       console.error('Failed to toggle person status:', error)
     }

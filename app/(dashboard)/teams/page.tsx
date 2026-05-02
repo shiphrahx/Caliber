@@ -7,6 +7,9 @@ import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
 import { getTeams, createTeam, updateTeam, deleteTeam as deleteTeamService, toggleTeamStatus, type Team } from "@/lib/services/teams"
 import { getPeople, type Person } from "@/lib/services/people"
 
+const byName = <T extends { name: string }>(arr: T[]) =>
+  [...arr].sort((a, b) => a.name.localeCompare(b.name))
+
 export default function TeamsPage() {
   const [teams, setTeams] = useState<Team[]>([])
   const [people, setPeople] = useState<Person[]>([])
@@ -33,7 +36,7 @@ export default function TeamsPage() {
     try {
       setIsLoading(true)
       const data = await getTeams()
-      setTeams(data)
+      setTeams(byName(data))
     } catch (error) {
       console.error('Failed to load teams:', error)
     } finally {
@@ -44,7 +47,7 @@ export default function TeamsPage() {
   const handleAddTeam = async (newTeam: Team) => {
     try {
       const team = await createTeam(newTeam)
-      setTeams([...teams, team])
+      setTeams(byName([...teams, team]))
       setIsAddDialogOpen(false)
     } catch (error) {
       console.error('Failed to create team:', error)
@@ -54,7 +57,7 @@ export default function TeamsPage() {
   const handleEditTeam = async (updatedTeam: Team) => {
     try {
       const team = await updateTeam(updatedTeam.id, updatedTeam)
-      setTeams(teams.map(t => t.id === team.id ? team : t))
+      setTeams(byName(teams.map(t => t.id === team.id ? team : t)))
       setEditingTeam(null)
     } catch (error) {
       console.error('Failed to update team:', error)
@@ -64,7 +67,7 @@ export default function TeamsPage() {
   const handleToggleStatus = async (team: Team) => {
     try {
       const updatedTeam = await toggleTeamStatus(team.id, team.status)
-      setTeams(teams.map(t => t.id === updatedTeam.id ? updatedTeam : t))
+      setTeams(byName(teams.map(t => t.id === updatedTeam.id ? updatedTeam : t)))
     } catch (error) {
       console.error('Failed to toggle team status:', error)
     }
