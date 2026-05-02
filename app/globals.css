@@ -49,7 +49,7 @@
     --text-page-title:   24px;   /* h1: page headings */
     --text-section:      14px;   /* h2: widget/section titles */
     --text-body:         14px;   /* default body text */
-    --text-label:        12px;   /* secondary labels, captions */
+    --text-label:        14px;   /* secondary labels, captions */
     --text-meta:         12px;   /* table cells, metadata */
     --text-caption:      10px;   /* tags, badges, tiny labels */
     --text-overline:     11px;   /* uppercase column/stat headers */
@@ -187,3 +187,35 @@ h2 { font-size: var(--text-section);    font-weight: var(--weight-section); colo
 h3 { font-size: var(--text-section);    font-weight: var(--weight-section); color: var(--text-1); }
 p  { font-size: var(--text-body);       color: var(--text-2); }
 label { font-size: var(--text-label); color: var(--text-2); }
+
+/* ── Sidebar nav items ── */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 7px;
+  border-radius: 4px;
+  margin-bottom: 1px;
+  font-size: var(--text-meta);
+  font-family: var(--font-sans);
+  color: var(--text-2);
+  background: transparent;
+  border-right: 2px solid transparent;
+  text-decoration: none;
+  justify-content: flex-start;
+  font-weight: 500;
+}
+
+.nav-item:hover {
+  background: var(--surf-2);
+}
+
+.nav-item.active {
+  color: var(--text-1);
+  background: var(--surf-3);
+  border-right-color: #00f058;
+}
+
+.nav-item-collapsed {
+  justify-content: center;
+}

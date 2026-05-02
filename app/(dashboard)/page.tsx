@@ -3,6 +3,7 @@ import { MeetingsWidget } from "@/components/dashboard/meetings-widget"
 import { TasksWidget } from "@/components/dashboard/tasks-widget"
 import { TaskPriorityChart } from "@/components/dashboard/task-priority-chart"
 import { DashboardCalendar, CalendarTask } from "@/components/dashboard/dashboard-calendar"
+import { WeeklyReviewBanner } from "@/components/dashboard/weekly-review-banner"
 
 async function getCalendarTasks(): Promise<CalendarTask[]> {
   const supabase = await createClient()
@@ -48,6 +49,9 @@ export default async function DashboardPage() {
         <h1>Dashboard</h1>
         <p style={{ marginTop: "4px" }}>{label}</p>
       </div>
+
+      {/* Weekly Review prompt */}
+      <WeeklyReviewBanner />
 
       {/* ── Widgets row ── */}
       <div className="grid grid-cols-3 gap-4">

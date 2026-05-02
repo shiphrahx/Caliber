@@ -7,6 +7,7 @@ import { PeopleTable } from "@/components/people-table"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
 import { getPeople, createPerson, updatePerson, deletePerson as deletePersonService, togglePersonStatus, type Person } from "@/lib/services/people"
 import { getTeams, type Team } from "@/lib/services/teams"
+import { useRadar } from "@/lib/hooks/use-person-signals"
 
 const byName = <T extends { name: string }>(arr: T[]) =>
   [...arr].sort((a, b) => a.name.localeCompare(b.name))
@@ -19,6 +20,11 @@ export default function PeoplePage() {
   const [editingPerson, setEditingPerson] = useState<Person | null>(null)
   const [deletingPerson, setDeletingPerson] = useState<Person | null>(null)
   const [, setIsLoading] = useState(true)
+
+  const { people: radarPeople } = useRadar()
+  const attentionScores: Record<string, number> = Object.fromEntries(
+    radarPeople.map(p => [p.personId, p.score])
+  )
 
   useEffect(() => {
     loadPeople()
@@ -172,6 +178,7 @@ export default function PeoplePage() {
           onDelete={(person) => setDeletingPerson(person)}
           onToggleStatus={handleToggleStatus}
           onQuickAdd={() => setIsAddDialogOpen(true)}
+          attentionScores={attentionScores}
         />
       </div>
 

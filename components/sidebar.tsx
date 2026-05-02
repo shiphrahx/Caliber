@@ -9,20 +9,29 @@ import {
   CheckSquare,
   Users,
   UserCircle,
-  FolderKanban,
   Calendar,
+  BookOpen,
+  ClipboardCheck,
+  ScanSearch,
+  ListChecks,
   ChevronLeft,
   ChevronRight
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
+import { fetchSignalCounts } from "@/lib/hooks/use-weekly-review-signals"
+import { getMondayOfWeek, getWeeklyReview } from "@/lib/services/weekly-review"
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Weekly Review", href: "/review", icon: ClipboardCheck },
   { name: "Tasks", href: "/tasks", icon: CheckSquare },
+  { name: "Follow-ups", href: "/follow-ups", icon: ListChecks },
   { name: "Teams", href: "/teams", icon: Users },
   { name: "People", href: "/people", icon: UserCircle },
-  { name: "Projects", href: "/projects", icon: FolderKanban },
+  { name: "People Radar", href: "/radar", icon: ScanSearch },
+  // { name: "Projects", href: "/projects", icon: FolderKanban },
   { name: "Meetings", href: "/meetings", icon: Calendar },
+  { name: "Evidence", href: "/evidence", icon: BookOpen },
   // { name: "Career Goals", href: "/career-goals", icon: Target },
 ]
 
@@ -31,11 +40,16 @@ interface SidebarProps {
   onToggle: () => void
 }
 
+type ReviewIndicator = 'critical' | 'warning' | 'complete' | null
+
 export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const pathname = usePathname()
   const [userName, setUserName] = useState("User")
   const [userAvatar, setUserAvatar] = useState<string | null>(null)
   const [userInitials, setUserInitials] = useState("U")
+  const [reviewIndicator, setReviewIndicator] = useState<ReviewIndicator>(null)
+  const [overdueFollowUps, setOverdueFollowUps] = useState(0)
+  const [radarCritical, setRadarCritical] = useState(0)
 
   useEffect(() => {
     const supabase = createClient()
@@ -47,6 +61,37 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       setUserAvatar(avatar)
       setUserInitials(name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2))
     })
+  }, [])
+
+  useEffect(() => {
+    async function loadIndicators() {
+      try {
+        const supabase = createClient()
+        const weekStart = getMondayOfWeek()
+        const [review, counts, followUpRes] = await Promise.all([
+          getWeeklyReview(weekStart),
+          fetchSignalCounts(),
+          supabase
+            .from('follow_ups')
+            .select('id', { count: 'exact', head: true })
+            .eq('status', 'open')
+            .lt('due_date', new Date().toISOString().slice(0, 10)),
+        ])
+
+        if (review?.status === "completed") setReviewIndicator("complete")
+        else if (counts.critical > 0) setReviewIndicator("critical")
+        else if (counts.warning > 0) setReviewIndicator("warning")
+        else setReviewIndicator(null)
+
+        setOverdueFollowUps(followUpRes.count ?? 0)
+
+        // radar critical: reuse the signal counts from fetchSignalCounts
+        setRadarCritical(counts.critical)
+      } catch {
+        // non-critical — sidebar indicators are best-effort
+      }
+    }
+    loadIndicators()
   }, [])
 
   return (
@@ -100,32 +145,29 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       <nav style={{ flex: 1, padding: "4px 10px", display: "flex", flexDirection: "column" }}>
         {navigation.map((item) => {
           const isActive = pathname === item.href
+          const isReview = item.href === "/review"
+          const isFollowUps = item.href === "/follow-ups"
+          const isRadar = item.href === "/radar"
+
+          const dotColor = isReview
+            ? reviewIndicator === "complete" ? "#00f058"
+            : reviewIndicator === "critical" ? "#ff6b6b"
+            : reviewIndicator === "warning" ? "#ffa94d"
+            : null
+            : null
+
+          const badge = isFollowUps && overdueFollowUps > 0
+            ? overdueFollowUps
+            : isRadar && radarCritical > 0
+            ? radarCritical
+            : null
+
           return (
             <Link
               key={item.name}
               href={item.href}
               title={!isOpen ? item.name : undefined}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "7px",
-                padding: isOpen ? "4px 7px" : "4px 6px",
-                borderRadius: "4px",
-                marginBottom: "1px",
-                fontSize: "var(--text-meta)",
-                fontFamily: "var(--font-sans)",
-                color: isActive ? "var(--text-1)" : "var(--text-2)",
-                background: isActive ? "var(--surf-3)" : "transparent",
-                borderRight: isActive ? "2px solid #00f058" : "2px solid transparent",
-                textDecoration: "none",
-                justifyContent: isOpen ? "flex-start" : "center",
-              }}
-              onMouseEnter={e => {
-                if (!isActive) (e.currentTarget as HTMLElement).style.background = "var(--surf-2)"
-              }}
-              onMouseLeave={e => {
-                if (!isActive) (e.currentTarget as HTMLElement).style.background = "transparent"
-              }}
+              className={`nav-item${isActive ? " active" : ""}${!isOpen ? " nav-item-collapsed" : ""}`}
             >
               <item.icon
                 style={{
@@ -135,7 +177,33 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                   opacity: isActive ? 1 : 0.5,
                 }}
               />
-              {isOpen && item.name}
+              {isOpen && <span style={{ flex: 1 }}>{item.name}</span>}
+              {dotColor && (
+                <span style={{
+                  width: "6px",
+                  height: "6px",
+                  borderRadius: "50%",
+                  background: dotColor,
+                  flexShrink: 0,
+                }} />
+              )}
+              {badge !== null && (
+                <span style={{
+                  background: "#ff6b6b",
+                  color: "#fff",
+                  borderRadius: "10px",
+                  padding: "0 5px",
+                  fontSize: "var(--text-overline)",
+                  fontWeight: 600,
+                  fontFamily: "var(--font-mono)",
+                  lineHeight: "16px",
+                  flexShrink: 0,
+                  minWidth: "16px",
+                  textAlign: "center",
+                }}>
+                  {badge > 99 ? "99+" : badge}
+                </span>
+              )}
             </Link>
           )
         })}
@@ -146,26 +214,8 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         <Link
           href="/settings"
           title={!isOpen ? "Settings" : undefined}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "7px",
-            padding: "4px 7px",
-            borderRadius: "4px",
-            fontSize: "var(--text-meta)",
-            fontFamily: "var(--font-sans)",
-            color: pathname === "/settings" ? "var(--text-1)" : "var(--text-2)",
-            background: pathname === "/settings" ? "var(--surf-3)" : "transparent",
-            borderRight: pathname === "/settings" ? "2px solid #00f058" : "2px solid transparent",
-            textDecoration: "none",
-            justifyContent: isOpen ? "flex-start" : "center",
-          }}
-          onMouseEnter={e => {
-            if (pathname !== "/settings") (e.currentTarget as HTMLElement).style.background = "var(--surf-2)"
-          }}
-          onMouseLeave={e => {
-            if (pathname !== "/settings") (e.currentTarget as HTMLElement).style.background = "transparent"
-          }}
+          className={`nav-item${pathname === "/settings" ? " active" : ""}${!isOpen ? " nav-item-collapsed" : ""}`}
+          style={{ marginBottom: 0 }}
         >
           {userAvatar ? (
             <img

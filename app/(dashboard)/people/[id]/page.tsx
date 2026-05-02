@@ -12,6 +12,13 @@ import { getPeople, updatePerson, type Person } from "@/lib/services/people"
 import { getTeams, type Team } from "@/lib/services/teams"
 import { getMeetingsForPerson, createMeeting, type MeetingType, type RecurrenceType } from "@/lib/services/meetings"
 import { LEVEL_BADGE } from "@/lib/badge-styles"
+import { EvidenceSection } from "@/components/evidence/evidence-section"
+import { FollowUpList } from "@/components/follow-ups/follow-up-list"
+import { FollowUpForm } from "@/components/follow-ups/follow-up-form"
+import { getFollowUpsForPerson, type FollowUp } from "@/lib/services/follow-ups"
+import { usePersonSignals } from "@/lib/hooks/use-person-signals"
+import { scoreToColor, scoreToBg } from "@/lib/signals/types"
+import { AlertCircle, AlertTriangle, Info, Plus as PlusIcon } from "lucide-react"
 
 interface TreeNode {
   type: string
@@ -52,6 +59,11 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
   const [leftPanelWidth, setLeftPanelWidth] = useState(280)
   const [isResizing, setIsResizing] = useState(false)
 
+  const [followUps, setFollowUps] = useState<FollowUp[]>([])
+  const [addingFollowUp, setAddingFollowUp] = useState(false)
+
+  const { signals, score, loading: signalsLoading } = usePersonSignals(personId ?? '')
+
   useEffect(() => {
     params.then(({ id }) => setPersonId(id))
   }, [params])
@@ -75,6 +87,7 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
         personId: m.personId || undefined, teamId: m.teamId || undefined,
       })))
     }).catch(console.error)
+    getFollowUpsForPerson(personId).then(setFollowUps).catch(console.error)
   }, [personId])
 
   const tree = useMemo(() => {
@@ -227,8 +240,43 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
         >
           <ArrowLeft style={{ width: "14px", height: "14px" }} /> Back to People
         </button>
-        <h1>{formData.name}</h1>
-        <p style={{ marginTop: "2px" }}>{formData.role}</p>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: "14px", flexWrap: "wrap" }}>
+          <div>
+            <h1>{formData.name}</h1>
+            <p style={{ marginTop: "2px" }}>{formData.role}</p>
+          </div>
+          {/* Attention indicator */}
+          {!signalsLoading && score > 0 && (
+            <div style={{ marginTop: "4px", display: "flex", flexDirection: "column", gap: "4px" }}>
+              <span style={{
+                fontSize: "var(--text-caption)",
+                fontWeight: 600,
+                color: scoreToColor(score),
+                background: scoreToBg(score),
+                border: `1px solid ${scoreToColor(score)}40`,
+                borderRadius: "4px",
+                padding: "3px 8px",
+                whiteSpace: "nowrap",
+              }}>
+                Needs attention ({score})
+              </span>
+              {signals.slice(0, 3).map((s, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                  {s.severity === "critical"
+                    ? <AlertCircle style={{ width: "11px", height: "11px", color: "#ff6b6b", flexShrink: 0 }} />
+                    : s.severity === "warning"
+                    ? <AlertTriangle style={{ width: "11px", height: "11px", color: "#ffa94d", flexShrink: 0 }} />
+                    : <Info style={{ width: "11px", height: "11px", color: "var(--text-3)", flexShrink: 0 }} />
+                  }
+                  <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>{s.message}</span>
+                </div>
+              ))}
+              {signals.length > 3 && (
+                <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>+{signals.length - 3} more</span>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Profile card */}
@@ -349,7 +397,7 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
           </button>
         </div>
 
-        <div id="meetings-section" style={{ display: "flex", height: "600px", overflow: "hidden" }}>
+        <div id="meetings-section" style={{ display: "flex", height: "900px", overflow: "hidden" }}>
           {/* Left panel */}
           <div style={{ width: `${leftPanelWidth}px`, flexShrink: 0, background: "var(--surf-2)", borderRight: "1px solid var(--border-1)", overflowY: "auto" }}>
             <div style={{ padding: "8px 0" }}>
@@ -444,6 +492,53 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
       </div>
+
+      {/* Follow-ups section */}
+      <div style={{ marginTop: "24px", background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "8px", padding: "20px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
+          <h2 style={{ margin: 0 }}>Follow-ups</h2>
+          <button
+            onClick={() => setAddingFollowUp(true)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
+              background: "var(--surf-3)",
+              border: "1px solid var(--border-2)",
+              borderRadius: "4px",
+              color: "var(--text-2)",
+              fontSize: "var(--text-meta)",
+              padding: "5px 10px",
+              cursor: "pointer",
+              fontFamily: "var(--font-sans)",
+            }}
+          >
+            <PlusIcon style={{ width: "11px", height: "11px" }} /> Add follow-up
+          </button>
+        </div>
+        <FollowUpList
+          followUps={followUps}
+          onChanged={() => getFollowUpsForPerson(personId!).then(setFollowUps).catch(console.error)}
+        />
+      </div>
+
+      {/* Evidence section */}
+      <div style={{ marginTop: "24px" }}>
+        <EvidenceSection personId={personId!} personName={formData.name} />
+      </div>
+
+      {addingFollowUp && personId && (
+        <FollowUpForm
+          personId={personId}
+          personName={formData.name}
+          sourceType="manual"
+          onSaved={() => {
+            setAddingFollowUp(false)
+            getFollowUpsForPerson(personId).then(setFollowUps).catch(console.error)
+          }}
+          onCancel={() => setAddingFollowUp(false)}
+        />
+      )}
 
       <MeetingFormDialog
         open={isAddMeetingDialogOpen}

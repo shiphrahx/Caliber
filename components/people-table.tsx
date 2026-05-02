@@ -4,6 +4,7 @@ import { DataTable, ColumnDef, FilterDef } from "@/components/ui/data-table"
 import { Pencil, Trash2, UserX, UserCheck } from "lucide-react"
 import { type Person } from "@/lib/services/people"
 import { LEVEL_BADGE } from "@/lib/badge-styles"
+import { scoreToColor } from "@/lib/signals/types"
 
 export type { Person }
 
@@ -14,6 +15,7 @@ interface PeopleTableProps {
   onDelete: (person: Person) => void
   onToggleStatus: (person: Person) => void
   onQuickAdd: () => void
+  attentionScores?: Record<string, number>
 }
 
 function LevelChip({ level }: { level: string }) {
@@ -46,6 +48,7 @@ export function PeopleTable({
   onDelete,
   onToggleStatus,
   onQuickAdd,
+  attentionScores = {},
 }: PeopleTableProps) {
   const columns: ColumnDef<Person>[] = [
     {
@@ -80,10 +83,25 @@ export function PeopleTable({
       accessorKey: "name",
       cell: (person) => {
         const isInactive = person.status === "inactive"
+        const score = attentionScores[person.id] ?? 0
         return (
-          <span style={{ fontWeight: 500, fontSize: "var(--text-meta)", color: isInactive ? "var(--text-3)" : "var(--text-1)" }}>
-            {person.name}
-          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            {score > 0 && (
+              <span
+                title={`Attention score: ${score}`}
+                style={{
+                  width: "7px",
+                  height: "7px",
+                  borderRadius: "50%",
+                  background: scoreToColor(score),
+                  flexShrink: 0,
+                }}
+              />
+            )}
+            <span style={{ fontWeight: 500, fontSize: "var(--text-meta)", color: isInactive ? "var(--text-3)" : "var(--text-1)" }}>
+              {person.name}
+            </span>
+          </div>
         )
       },
     },

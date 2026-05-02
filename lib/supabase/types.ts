@@ -439,6 +439,129 @@ export interface Database {
           updated_at?: string
         }
       }
+      evidence_entries: {
+        Row: {
+          id: string
+          owning_user_id: string
+          person_id: string
+          category: 'achievement' | 'feedback_given' | 'feedback_received' | 'concern' | 'growth' | 'delivery' | 'behaviour' | 'promotion_evidence' | 'general'
+          title: string
+          content: string | null
+          occurred_at: string
+          meeting_id: string | null
+          task_id: string | null
+          sentiment: 'positive' | 'neutral' | 'negative' | null
+          review_period_start: string | null
+          review_period_end: string | null
+          included_in_review: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          owning_user_id: string
+          person_id: string
+          category: 'achievement' | 'feedback_given' | 'feedback_received' | 'concern' | 'growth' | 'delivery' | 'behaviour' | 'promotion_evidence' | 'general'
+          title: string
+          content?: string | null
+          occurred_at?: string
+          meeting_id?: string | null
+          task_id?: string | null
+          sentiment?: 'positive' | 'neutral' | 'negative' | null
+          review_period_start?: string | null
+          review_period_end?: string | null
+          included_in_review?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          owning_user_id?: string
+          person_id?: string
+          category?: 'achievement' | 'feedback_given' | 'feedback_received' | 'concern' | 'growth' | 'delivery' | 'behaviour' | 'promotion_evidence' | 'general'
+          title?: string
+          content?: string | null
+          occurred_at?: string
+          meeting_id?: string | null
+          task_id?: string | null
+          sentiment?: 'positive' | 'neutral' | 'negative' | null
+          review_period_start?: string | null
+          review_period_end?: string | null
+          included_in_review?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      review_cycles: {
+        Row: {
+          id: string
+          owning_user_id: string
+          name: string
+          start_date: string
+          end_date: string
+          status: 'active' | 'completed'
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          owning_user_id: string
+          name: string
+          start_date: string
+          end_date: string
+          status?: 'active' | 'completed'
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          owning_user_id?: string
+          name?: string
+          start_date?: string
+          end_date?: string
+          status?: 'active' | 'completed'
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      review_summaries: {
+        Row: {
+          id: string
+          owning_user_id: string
+          person_id: string
+          review_cycle_id: string | null
+          period_start: string
+          period_end: string
+          summary_text: string | null
+          manager_notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          owning_user_id: string
+          person_id: string
+          review_cycle_id?: string | null
+          period_start: string
+          period_end: string
+          summary_text?: string | null
+          manager_notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          owning_user_id?: string
+          person_id?: string
+          review_cycle_id?: string | null
+          period_start?: string
+          period_end?: string
+          summary_text?: string | null
+          manager_notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS public.tasks (
 CREATE TABLE IF NOT EXISTS public.task_relations (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   task_id UUID NOT NULL REFERENCES public.tasks(id) ON DELETE CASCADE,
-  entity_type TEXT NOT NULL CHECK (entity_type IN ('person', 'team')),
+  entity_type TEXT NOT NULL CHECK (entity_type IN ('person', 'team', 'meeting')),
   entity_id UUID NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   -- Prevent duplicate relations
@@ -554,6 +554,224 @@ CREATE POLICY "Users can update own meeting templates" ON public.meeting_templat
 
 CREATE POLICY "Users can delete own meeting templates" ON public.meeting_templates
   FOR DELETE USING (auth.uid() = owning_user_id);
+
+-- ============================================================================
+-- EVIDENCE ENTRIES TABLE
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.evidence_entries (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  owning_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  person_id UUID NOT NULL REFERENCES public.people(id) ON DELETE CASCADE,
+  category TEXT NOT NULL CHECK (category IN (
+    'achievement', 'feedback_given', 'feedback_received', 'concern',
+    'growth', 'delivery', 'behaviour', 'promotion_evidence', 'general'
+  )),
+  title TEXT NOT NULL,
+  content TEXT,
+  occurred_at DATE NOT NULL DEFAULT CURRENT_DATE,
+  meeting_id UUID REFERENCES public.meetings(id) ON DELETE SET NULL,
+  task_id UUID REFERENCES public.tasks(id) ON DELETE SET NULL,
+  sentiment TEXT CHECK (sentiment IN ('positive', 'neutral', 'negative')),
+  review_period_start DATE,
+  review_period_end DATE,
+  included_in_review BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+CREATE INDEX idx_evidence_person ON public.evidence_entries(person_id, occurred_at DESC);
+CREATE INDEX idx_evidence_user ON public.evidence_entries(owning_user_id);
+CREATE INDEX idx_evidence_category ON public.evidence_entries(person_id, category);
+
+CREATE TRIGGER update_evidence_entries_updated_at
+  BEFORE UPDATE ON public.evidence_entries
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE public.evidence_entries ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own evidence" ON public.evidence_entries
+  FOR SELECT USING (auth.uid() = owning_user_id);
+
+CREATE POLICY "Users can insert own evidence" ON public.evidence_entries
+  FOR INSERT WITH CHECK (auth.uid() = owning_user_id);
+
+CREATE POLICY "Users can update own evidence" ON public.evidence_entries
+  FOR UPDATE USING (auth.uid() = owning_user_id);
+
+CREATE POLICY "Users can delete own evidence" ON public.evidence_entries
+  FOR DELETE USING (auth.uid() = owning_user_id);
+
+-- ============================================================================
+-- REVIEW CYCLES TABLE
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.review_cycles (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  owning_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'completed')),
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+CREATE INDEX idx_review_cycles_user ON public.review_cycles(owning_user_id);
+
+CREATE TRIGGER update_review_cycles_updated_at
+  BEFORE UPDATE ON public.review_cycles
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE public.review_cycles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own review cycles" ON public.review_cycles
+  FOR SELECT USING (auth.uid() = owning_user_id);
+
+CREATE POLICY "Users can insert own review cycles" ON public.review_cycles
+  FOR INSERT WITH CHECK (auth.uid() = owning_user_id);
+
+CREATE POLICY "Users can update own review cycles" ON public.review_cycles
+  FOR UPDATE USING (auth.uid() = owning_user_id);
+
+CREATE POLICY "Users can delete own review cycles" ON public.review_cycles
+  FOR DELETE USING (auth.uid() = owning_user_id);
+
+-- ============================================================================
+-- REVIEW SUMMARIES TABLE
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.review_summaries (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  owning_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  person_id UUID NOT NULL REFERENCES public.people(id) ON DELETE CASCADE,
+  review_cycle_id UUID REFERENCES public.review_cycles(id) ON DELETE SET NULL,
+  period_start DATE NOT NULL,
+  period_end DATE NOT NULL,
+  summary_text TEXT,
+  manager_notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  UNIQUE (owning_user_id, person_id, period_start, period_end)
+);
+
+CREATE INDEX idx_review_summaries_person ON public.review_summaries(person_id);
+CREATE INDEX idx_review_summaries_user ON public.review_summaries(owning_user_id);
+
+CREATE TRIGGER update_review_summaries_updated_at
+  BEFORE UPDATE ON public.review_summaries
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE public.review_summaries ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own review summaries" ON public.review_summaries
+  FOR SELECT USING (auth.uid() = owning_user_id);
+
+CREATE POLICY "Users can insert own review summaries" ON public.review_summaries
+  FOR INSERT WITH CHECK (auth.uid() = owning_user_id);
+
+CREATE POLICY "Users can update own review summaries" ON public.review_summaries
+  FOR UPDATE USING (auth.uid() = owning_user_id);
+
+CREATE POLICY "Users can delete own review summaries" ON public.review_summaries
+  FOR DELETE USING (auth.uid() = owning_user_id);
+
+-- ============================================================================
+-- FOLLOW UPS TABLE
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.follow_ups (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  person_id UUID NOT NULL REFERENCES public.people(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT,
+  source_type TEXT CHECK (source_type IN ('meeting', 'manual', 'task')),
+  source_id UUID,
+  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'completed', 'cancelled')),
+  due_date DATE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  completed_at TIMESTAMPTZ,
+  cancelled_at TIMESTAMPTZ,
+  last_surfaced_at TIMESTAMPTZ,
+  times_surfaced INTEGER NOT NULL DEFAULT 0,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_follow_ups_person ON public.follow_ups(person_id, status);
+CREATE INDEX idx_follow_ups_user ON public.follow_ups(user_id, status);
+CREATE INDEX idx_follow_ups_due ON public.follow_ups(user_id, due_date) WHERE status = 'open';
+
+CREATE TRIGGER update_follow_ups_updated_at
+  BEFORE UPDATE ON public.follow_ups
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE public.follow_ups ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage their own follow ups"
+  ON public.follow_ups
+  FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- ============================================================================
+-- WEEKLY REVIEWS TABLE
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.weekly_reviews (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  week_start DATE NOT NULL,
+  status TEXT NOT NULL DEFAULT 'in_progress' CHECK (status IN ('in_progress', 'completed')),
+  completed_at TIMESTAMPTZ,
+  notes TEXT,
+  snapshot JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(user_id, week_start)
+);
+
+CREATE INDEX idx_weekly_reviews_user_week ON public.weekly_reviews(user_id, week_start DESC);
+
+CREATE TRIGGER update_weekly_reviews_updated_at
+  BEFORE UPDATE ON public.weekly_reviews
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE public.weekly_reviews ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage their own weekly reviews"
+  ON public.weekly_reviews
+  FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- ============================================================================
+-- REVIEW DISMISSED ITEMS TABLE
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.review_dismissed_items (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  weekly_review_id UUID NOT NULL REFERENCES public.weekly_reviews(id) ON DELETE CASCADE,
+  item_type TEXT NOT NULL CHECK (item_type IN (
+    'overdue_task',
+    'no_recent_1on1',
+    'unresolved_action',
+    'no_evidence',
+    'upcoming_deadline',
+    'stale_goal',
+    'missing_notes'
+  )),
+  reference_id UUID,
+  reference_type TEXT,
+  dismissed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  note TEXT
+);
+
+CREATE INDEX idx_review_dismissed_review ON public.review_dismissed_items(weekly_review_id);
+CREATE INDEX idx_review_dismissed_user ON public.review_dismissed_items(user_id);
+
+ALTER TABLE public.review_dismissed_items ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage their own dismissed items"
+  ON public.review_dismissed_items
+  FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
 
 -- ============================================================================
 -- SEED DATA (Optional - for development)
