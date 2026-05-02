@@ -12,6 +12,7 @@ import { getPeople, updatePerson, type Person } from "@/lib/services/people"
 import { getTeams, type Team } from "@/lib/services/teams"
 import { getMeetingsForPerson, createMeeting, type MeetingType, type RecurrenceType } from "@/lib/services/meetings"
 import { LEVEL_BADGE } from "@/lib/badge-styles"
+import { EvidenceSection } from "@/components/evidence/evidence-section"
 
 interface TreeNode {
   type: string
@@ -443,6 +444,11 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
             )}
           </div>
         </div>
+      </div>
+
+      {/* Evidence section */}
+      <div style={{ marginTop: "24px" }}>
+        <EvidenceSection personId={personId!} personName={formData.name} />
       </div>
 
       <MeetingFormDialog
