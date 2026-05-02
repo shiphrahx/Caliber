@@ -619,7 +619,7 @@ export default function MeetingsPage() {
               {/* Meta fields grid */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "16px" }}>
                 <div>
-                  <div style={{ fontSize: "var(--text-overline)", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "3px" }}>Date</div>
+                  <div className="form-label">Date</div>
                   <div style={{ background: "var(--surf-2)", border: "1px solid var(--border-1)", borderRadius: "5px", overflow: "hidden" }}>
                     <Input
                       type="date"
@@ -631,7 +631,7 @@ export default function MeetingsPage() {
                 </div>
                 {selectedMeeting.type === "1:1" && selectedMeeting.recurrence && selectedMeeting.recurrence !== "none" && selectedMeeting.nextMeetingDate && (
                   <div>
-                    <div style={{ fontSize: "var(--text-overline)", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "3px" }}>Next Meeting</div>
+                    <div className="form-label">Next Meeting</div>
                     <div style={{ background: "var(--surf-2)", border: "1px solid var(--border-1)", borderRadius: "5px", overflow: "hidden" }}>
                       <Input
                         type="date"
@@ -643,7 +643,7 @@ export default function MeetingsPage() {
                   </div>
                 )}
                 <div>
-                  <div style={{ fontSize: "var(--text-overline)", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "3px" }}>Title</div>
+                  <div className="form-label">Title</div>
                   <div style={{ background: "var(--surf-2)", border: "1px solid var(--border-1)", borderRadius: "5px", overflow: "hidden" }}>
                     <Input
                       value={selectedMeeting.title}
@@ -654,7 +654,7 @@ export default function MeetingsPage() {
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: "var(--text-overline)", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "3px" }}>Attendees</div>
+                  <div className="form-label">Attendees</div>
                   <div style={{ background: "var(--surf-2)", border: "1px solid var(--border-1)", borderRadius: "5px", overflow: "hidden" }}>
                     <Input
                       value={selectedMeeting.attendees.join(", ")}
@@ -671,9 +671,7 @@ export default function MeetingsPage() {
 
               {/* Action items */}
               <div style={{ marginBottom: "16px" }}>
-                <div style={{ fontSize: "var(--text-caption)", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "7px" }}>
-                  Action items
-                </div>
+                <div className="form-section-header">Action items</div>
                 <div style={{
                   background: "var(--surf-2)",
                   border: "1px solid var(--border-1)",
@@ -709,9 +707,7 @@ export default function MeetingsPage() {
 
               {/* Meeting notes */}
               <div>
-                <div style={{ fontSize: "var(--text-caption)", fontWeight: 500, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "7px" }}>
-                  Meeting notes
-                </div>
+                <div className="form-section-header">Meeting notes</div>
                 <div style={{
                   background: "var(--surf-2)",
                   border: "1px solid var(--border-1)",
