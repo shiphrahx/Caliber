@@ -349,7 +349,7 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
           </button>
         </div>
 
-        <div id="meetings-section" style={{ display: "flex", height: "600px", overflow: "hidden" }}>
+        <div id="meetings-section" style={{ display: "flex", height: "900px", overflow: "hidden" }}>
           {/* Left panel */}
           <div style={{ width: `${leftPanelWidth}px`, flexShrink: 0, background: "var(--surf-2)", borderRight: "1px solid var(--border-1)", overflowY: "auto" }}>
             <div style={{ padding: "8px 0" }}>
