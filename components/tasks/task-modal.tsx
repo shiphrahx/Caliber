@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Task, TaskStatus, TaskCategory, TASK_STATUSES, TASK_PRIORITIES, TASK_CATEGORIES } from "@/lib/types/task"
+import { PRIORITY_BADGE } from "@/lib/badge-styles"
 import {
   Dialog,
   DialogContent,
@@ -30,12 +31,6 @@ interface TaskModalProps {
   onDelete?: (taskId: string) => void
 }
 
-const PRIORITY_STYLES: Record<string, { bg: string; color: string }> = {
-  "Low":       { bg: "#0f1526", color: "#818cf8" },
-  "Medium":    { bg: "#1e1a00", color: "#facc15" },
-  "High":      { bg: "#2a1400", color: "#fb923c" },
-  "Very High": { bg: "#2a0a0a", color: "#f87171" },
-}
 
 export function TaskModal({ task, isOpen, onClose, onSave, onDelete }: TaskModalProps) {
   const [formData, setFormData] = useState<Task>({
@@ -128,7 +123,7 @@ export function TaskModal({ task, isOpen, onClose, onSave, onDelete }: TaskModal
               <div style={{ display: "flex", gap: "6px" }}>
                 {TASK_PRIORITIES.map((priority) => {
                   const isSelected = formData.priority === priority
-                  const s = PRIORITY_STYLES[priority]
+                  const s = PRIORITY_BADGE[priority]
                   return (
                     <button
                       key={priority}

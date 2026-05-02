@@ -1,6 +1,7 @@
 "use client"
 
 import { Task } from "@/lib/types/task"
+import { PRIORITY_BADGE, STATUS_BADGE } from "@/lib/badge-styles"
 import { MoreVertical } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 
@@ -19,24 +20,9 @@ const STATUS_BORDER: Record<Task["status"], string> = {
   "Done":        "#00f058",
 }
 
-// Priority pill colours: [bg, text, dot]
-const PRIORITY_PILL: Record<Task["priority"], [string, string, string]> = {
-  "Low":       ["#0f1526", "#818cf8", "#818cf8"],
-  "Medium":    ["#1e1a00", "#facc15", "#facc15"],
-  "High":      ["#2a1400", "#fb923c", "#fb923c"],
-  "Very High": ["#2a0a0a", "#f87171", "#f87171"],
-}
-
-// Status pill colours: [bg, text, dot]
-const STATUS_PILL: Record<Task["status"], [string, string, string]> = {
-  "Not started": ["#1a1a22", "#6b7280", "#6b7280"],
-  "In progress": ["#0c1a3d", "#60a5fa", "#3b82f6"],
-  "Blocked":     ["#2a1200", "#f97316", "#ea580c"],
-  "Done":        ["#0d2015", "#4ade80", "#22c55e"],
-}
 
 function PriorityPill({ priority }: { priority: Task["priority"] }) {
-  const [bg, text, dot] = PRIORITY_PILL[priority]
+  const { bg, color: text, dot } = PRIORITY_BADGE[priority]
   return (
     <span style={{
       display: "inline-flex",
@@ -57,7 +43,7 @@ function PriorityPill({ priority }: { priority: Task["priority"] }) {
 }
 
 function StatusPill({ status }: { status: Task["status"] }) {
-  const [bg, text, dot] = STATUS_PILL[status]
+  const { bg, color: text, dot } = STATUS_BADGE[status]
   return (
     <span style={{
       display: "inline-flex",

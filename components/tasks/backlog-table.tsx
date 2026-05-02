@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { Task, TaskStatus, TaskPriority, TaskCategory, TASK_STATUSES, TASK_PRIORITIES, TASK_CATEGORIES } from "@/lib/types/task"
+import { PRIORITY_BADGE, STATUS_BADGE } from "@/lib/badge-styles"
 import { BadgeSelect } from "@/components/ui/badge-select"
 import { Plus, ArrowUpDown, GripVertical, Search } from "lucide-react"
 import { useDroppable } from "@dnd-kit/core"
@@ -19,31 +20,6 @@ interface BacklogTableProps {
 type SortField = "title" | "dueDate" | "priority" | "status" | "category"
 type SortDirection = "asc" | "desc"
 
-const PRIORITY_PILL_BG: Record<TaskPriority, string> = {
-  "Low":       "#0f1526",
-  "Medium":    "#1e1a00",
-  "High":      "#2a1400",
-  "Very High": "#2a0a0a",
-}
-const PRIORITY_PILL_TEXT: Record<TaskPriority, string> = {
-  "Low":       "#818cf8",
-  "Medium":    "#facc15",
-  "High":      "#fb923c",
-  "Very High": "#f87171",
-}
-
-const STATUS_PILL_BG: Record<TaskStatus, string> = {
-  "Not started": "#1a1a22",
-  "In progress": "#0c1a3d",
-  "Blocked":     "#2a1200",
-  "Done":        "#0d2015",
-}
-const STATUS_PILL_TEXT: Record<TaskStatus, string> = {
-  "Not started": "#6b7280",
-  "In progress": "#60a5fa",
-  "Blocked":     "#f97316",
-  "Done":        "#4ade80",
-}
 
 export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete }: BacklogTableProps) {
   const [searchQuery, setSearchQuery] = useState("")
@@ -350,8 +326,8 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
                         label: status,
                         className: "",
                         style: {
-                          background: STATUS_PILL_BG[status],
-                          color: STATUS_PILL_TEXT[status],
+                          background: STATUS_BADGE[status].bg,
+                          color: STATUS_BADGE[status].color,
                           fontSize: "var(--text-overline)",
                           fontFamily: "var(--font-mono)",
                           fontWeight: 500,
@@ -382,8 +358,8 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
                         label: priority,
                         className: "",
                         style: {
-                          background: PRIORITY_PILL_BG[priority],
-                          color: PRIORITY_PILL_TEXT[priority],
+                          background: PRIORITY_BADGE[priority].bg,
+                          color: PRIORITY_BADGE[priority].color,
                           fontSize: "var(--text-overline)",
                           fontFamily: "var(--font-mono)",
                           fontWeight: 500,
