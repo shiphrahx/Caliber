@@ -108,6 +108,30 @@
   border-color: hsl(var(--border));
 }
 
+/* ── Form elements ── */
+
+/* Label above an input/select inside a form or detail panel */
+.form-label {
+  font-size: var(--text-overline);
+  font-weight: 500;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* Section/block header inside a form or detail panel (e.g. "Action items") */
+.form-section-header {
+  font-size: var(--text-overline);
+  font-weight: 500;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+  display: block;
+}
+
 /* Dropdown menu item hover */
 .menu-item:hover {
   background-color: #2a2a2a;
