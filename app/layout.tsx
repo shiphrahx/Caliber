@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Cadence - Engineering Manager Control Centre",
+  title: "Cadence - EM Control Centre",
   description: "A lightweight web platform for engineering managers to run their day-to-day work effectively",
   icons: {
     icon: [
