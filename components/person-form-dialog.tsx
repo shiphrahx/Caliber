@@ -10,6 +10,7 @@ import { ChevronRight, ChevronLeft } from "lucide-react"
 import { getTodayDate } from "@/lib/utils"
 import { type Person } from "@/lib/services/people"
 import { type Team } from "@/lib/services/teams"
+import { LEVEL_BADGE } from "@/lib/badge-styles"
 
 interface PersonFormDialogProps {
   open: boolean
@@ -142,14 +143,8 @@ export function PersonFormDialog({ open, onOpenChange, person, onSave, available
               <div className="grid gap-2">
                 <Label>Level / Seniority</Label>
                 <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-                  {([
-                    { label: "Junior",    bg: "#0d1420", color: "#818cf8" },
-                    { label: "Mid",       bg: "#0a1a2e", color: "#5b9bd5" },
-                    { label: "Senior",    bg: "#0f1a0a", color: "#4ade80" },
-                    { label: "Staff",     bg: "#1a1200", color: "#c9a227" },
-                    { label: "Principal", bg: "#1e0d00", color: "#e07030" },
-                    { label: "Other",     bg: "#222222", color: "#888888" },
-                  ] as const).map(({ label, bg, color }) => {
+                  {(Object.keys(LEVEL_BADGE) as Array<keyof typeof LEVEL_BADGE>).map((label) => {
+                    const { bg, color } = LEVEL_BADGE[label]
                     const isOther = label === "Other"
                     const isSelected = isOther
                       ? (formData.level !== null && formData.level !== "" && !["Junior", "Mid", "Senior", "Staff", "Principal"].includes(formData.level ?? ""))

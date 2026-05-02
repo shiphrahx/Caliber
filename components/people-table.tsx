@@ -3,6 +3,7 @@
 import { DataTable, ColumnDef, FilterDef } from "@/components/ui/data-table"
 import { Pencil, Trash2, UserX, UserCheck } from "lucide-react"
 import { type Person } from "@/lib/services/people"
+import { LEVEL_BADGE } from "@/lib/badge-styles"
 
 export type { Person }
 
@@ -15,18 +16,8 @@ interface PeopleTableProps {
   onQuickAdd: () => void
 }
 
-// Level chip: [background, text]
-const LEVEL_CHIP: Record<string, [string, string]> = {
-  Junior:    ["#0d1420", "#818cf8"],
-  Mid:       ["#0a1a2e", "#5b9bd5"],
-  Senior:    ["#0f1a0a", "#4ade80"],
-  Staff:     ["#1a1200", "#c9a227"],
-  Principal: ["#1e0d00", "#e07030"],
-  Other:     ["#222222", "#888888"],
-}
-
 function LevelChip({ level }: { level: string }) {
-  const [bg, text] = LEVEL_CHIP[level] ?? LEVEL_CHIP.Other
+  const { bg, color: text } = LEVEL_BADGE[level] ?? LEVEL_BADGE.Other
   return (
     <span style={{
       display: "inline-flex",

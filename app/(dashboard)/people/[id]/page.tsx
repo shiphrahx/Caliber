@@ -11,6 +11,7 @@ import { MeetingFormDialog } from "@/components/meeting-form-dialog"
 import { getPeople, updatePerson, type Person } from "@/lib/services/people"
 import { getTeams, type Team } from "@/lib/services/teams"
 import { getMeetingsForPerson, createMeeting, type MeetingType, type RecurrenceType } from "@/lib/services/meetings"
+import { LEVEL_BADGE } from "@/lib/badge-styles"
 
 interface TreeNode {
   type: string
@@ -33,14 +34,6 @@ interface ExtendedMeeting {
   teamId?: string
 }
 
-const LEVEL_CHIPS = [
-  { label: "Junior",    bg: "#0d1420", color: "#818cf8" },
-  { label: "Mid",       bg: "#0a1a2e", color: "#5b9bd5" },
-  { label: "Senior",    bg: "#0f1a0a", color: "#4ade80" },
-  { label: "Staff",     bg: "#1a1200", color: "#c9a227" },
-  { label: "Principal", bg: "#1e0d00", color: "#e07030" },
-  { label: "Other",     bg: "#222222", color: "#888888" },
-] as const
 
 export default function PersonDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
@@ -256,7 +249,8 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
             <div style={{ display: "grid", gap: "6px" }}>
               <Label>Seniority Level</Label>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                {LEVEL_CHIPS.map(({ label, bg, color }) => {
+                {(Object.keys(LEVEL_BADGE) as Array<keyof typeof LEVEL_BADGE>).map((label) => {
+                  const { bg, color } = LEVEL_BADGE[label]
                   const isOther = label === "Other"
                   const isSelected = isOther
                     ? (formData.level !== null && formData.level !== "" && !["Junior", "Mid", "Senior", "Staff", "Principal"].includes(formData.level ?? ""))
