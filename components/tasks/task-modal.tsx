@@ -200,7 +200,7 @@ export function TaskModal({ task, isOpen, onClose, onSave, onDelete }: TaskModal
           </div>
         </div>
 
-        <DialogFooter className="flex justify-between">
+        <DialogFooter className="sm:flex-row sm:justify-between">
           <div>
             {task && onDelete && (
               <Button variant="destructive" onClick={handleDelete}>
