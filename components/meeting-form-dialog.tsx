@@ -122,7 +122,7 @@ export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availab
           attendees: [defaultPerson],
           personName: defaultPerson,
           personId: personData?.id,
-          title: `1:1 with ${defaultPerson}`
+          title: `${initialData.type} with ${defaultPerson}`
         })
         setPersonInput(defaultPerson)
       } else {
@@ -273,7 +273,15 @@ export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availab
                       <Label htmlFor="type">Meeting Type *</Label>
                       <Select
                         value={formData.type}
-                        onValueChange={(value) => setFormData({ ...formData, type: value })}
+                        onValueChange={(value) => {
+                          const teamBased = ["Team Sync", "Retro", "Planning", "Review", "Standup"]
+                          const newTitle = value === "1:1"
+                            ? (personInput ? `1:1 with ${personInput}` : "")
+                            : teamBased.includes(value)
+                            ? (teamInput ? `${value} - ${teamInput}` : "")
+                            : ""
+                          setFormData({ ...formData, type: value, title: newTitle })
+                        }}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select meeting type" />
@@ -377,7 +385,15 @@ export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availab
                       <Label htmlFor="type">Meeting Type *</Label>
                       <Select
                         value={formData.type}
-                        onValueChange={(value) => setFormData({ ...formData, type: value })}
+                        onValueChange={(value) => {
+                          const teamBased = ["Team Sync", "Retro", "Planning", "Review", "Standup"]
+                          const newTitle = value === "1:1"
+                            ? (personInput ? `1:1 with ${personInput}` : "")
+                            : teamBased.includes(value)
+                            ? (teamInput ? `${value} - ${teamInput}` : "")
+                            : ""
+                          setFormData({ ...formData, type: value, title: newTitle })
+                        }}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select meeting type" />
@@ -490,7 +506,15 @@ export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availab
                       <Label htmlFor="type">Meeting Type *</Label>
                       <Select
                         value={formData.type}
-                        onValueChange={(value) => setFormData({ ...formData, type: value })}
+                        onValueChange={(value) => {
+                          const teamBased = ["Team Sync", "Retro", "Planning", "Review", "Standup"]
+                          const newTitle = value === "1:1"
+                            ? (personInput ? `1:1 with ${personInput}` : "")
+                            : teamBased.includes(value)
+                            ? (teamInput ? `${value} - ${teamInput}` : "")
+                            : ""
+                          setFormData({ ...formData, type: value, title: newTitle })
+                        }}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select meeting type" />
