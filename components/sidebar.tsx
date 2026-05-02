@@ -11,7 +11,6 @@ import {
   UserCircle,
   FolderKanban,
   Calendar,
-  Target,
   ChevronLeft,
   ChevronRight
 } from "lucide-react"

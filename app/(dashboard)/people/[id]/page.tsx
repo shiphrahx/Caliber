@@ -114,8 +114,6 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
     return undefined
   }, [isResizing])
 
-  const getPersonMeetings = () => Object.values(tree).flatMap(node => node.meetings)
-
   if (!formData) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
