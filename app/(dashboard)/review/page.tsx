@@ -411,17 +411,6 @@ export default function WeeklyReviewPage() {
       <span style={{ fontSize: 'var(--text-label)', fontWeight: 500, color: 'var(--text-1)', fontFamily: 'var(--font-sans)' }}>
         Weekly Review
       </span>
-      <span style={{
-        display: 'inline-flex', alignItems: 'center', gap: '4px',
-        fontSize: '10px', padding: '2px 8px', borderRadius: '10px',
-        fontFamily: 'var(--font-mono)',
-        ...(isCompleted
-          ? { background: '#0a1e0a', color: '#00f058' }
-          : { background: '#0a1e28', color: '#60a5fa' }
-        ),
-      }}>
-        {isCompleted ? '✓ Completed' : '◎ In Progress'}
-      </span>
     </div>
   )
 
