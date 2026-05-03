@@ -20,6 +20,10 @@ import {
   type CompetencyAssessment, type GrowthPlan, type PromotionReadiness,
 } from "@/lib/services/competency"
 import { getEvidenceForPerson, type EvidenceEntry } from "@/lib/services/evidence"
+import { AIButton } from "@/components/ui/ai-button"
+import { useAIConfig } from "@/lib/hooks/use-ai-config"
+import { callAI, handleAIError } from "@/lib/services/ai"
+import { GROWTH_PLAN_SYSTEM, buildGrowthPlanPrompt } from "@/lib/ai/prompts"
 
 const LEVEL_COLORS: Record<string, { bg: string; color: string }> = {
   Junior:    { bg: "#0d1420", color: "#818cf8" },
@@ -637,7 +641,9 @@ export function CompetencySection({ personId, personLevel }: CompetencySectionPr
   const [allEvidence, setAllEvidence] = useState<EvidenceEntry[]>([])
   const [growthPlans, setGrowthPlans] = useState<GrowthPlan[]>([])
   const [addingPlan, setAddingPlan] = useState(false)
+  const [suggestingPlan, setSuggestingPlan] = useState(false)
   const [loading, setLoading] = useState(true)
+  const aiConfig = useAIConfig()
 
   useEffect(() => {
     if (!personId) return
@@ -691,6 +697,65 @@ export function CompetencySection({ personId, personLevel }: CompetencySectionPr
     if (!confirm("Delete this growth plan?")) return
     await deleteGrowthPlan(id)
     setGrowthPlans(prev => prev.filter(p => p.id !== id))
+  }
+
+  const handleSuggestGrowthPlan = async () => {
+    // Find the area with the largest gap (assessed < expected)
+    const gapAreas = areas.map(area => {
+      const ass = assessments.find(a => a.areaId === area.id)
+      const levels = areaLevels[area.id] ?? []
+      const expLev = personLevel ? levels.find(l => l.level === personLevel) : null
+      if (!ass || !expLev) return null
+      const assessedScore = ass.score
+      const expectedScore = levels.findIndex(l => l.level === expLev.level) + 1
+      return { area, gap: expectedScore - assessedScore, assessedLevel: ass.assessedLevel, expectedLevel: expLev.level, levels }
+    }).filter(Boolean).sort((a, b) => b!.gap - a!.gap)
+    const top = gapAreas[0]
+    if (!top) return
+
+    setSuggestingPlan(true)
+    try {
+      const area = top.area
+      const levels = top.levels
+      const currentLevObj = levels.find(l => l.level === top.assessedLevel)
+      const targetLevObj = levels.find(l => l.level === top.expectedLevel)
+      const result = await callAI({
+        systemPrompt: GROWTH_PLAN_SYSTEM,
+        userPrompt: buildGrowthPlanPrompt({
+          name: "this engineer",
+          role: null,
+          currentLevel: top.assessedLevel,
+          targetLevel: top.expectedLevel,
+          areaName: area.name,
+          areaDescription: area.description ?? "",
+          currentExpectations: currentLevObj?.expectations ?? "",
+          targetExpectations: targetLevObj?.expectations ?? "",
+        }),
+        maxTokens: 600,
+        temperature: 0.4,
+      })
+      const jsonMatch = result.content.match(/\{[\s\S]*\}/)
+      if (!jsonMatch) return
+      const parsed = JSON.parse(jsonMatch[0])
+      const plan = await createGrowthPlan({
+        personId,
+        title: parsed.title ?? `Improve ${area.name}`,
+        areaId: area.id,
+        targetLevel: top.expectedLevel,
+        targetDate: undefined,
+        description: [
+          parsed.description ?? "",
+          parsed.actions?.length ? "\n**Actions:**\n" + (parsed.actions as string[]).map((a: string) => `- ${a}`).join("\n") : "",
+          parsed.success_criteria ? `\n**Success criteria:** ${parsed.success_criteria}` : "",
+          parsed.suggested_timeline ? `\n**Timeline:** ${parsed.suggested_timeline}` : "",
+        ].filter(Boolean).join(""),
+      })
+      setGrowthPlans(prev => [plan, ...prev])
+    } catch (err) {
+      handleAIError(err)
+    } finally {
+      setSuggestingPlan(false)
+    }
   }
 
   // Radar chart data
@@ -795,17 +860,28 @@ export function CompetencySection({ personId, personLevel }: CompetencySectionPr
         <div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
             <h3 style={{ margin: 0 }}>Growth Plans</h3>
-            <button
-              onClick={() => setAddingPlan(true)}
-              style={{
-                display: "flex", alignItems: "center", gap: "4px",
-                background: "var(--surf-2)", border: "1px solid var(--border-2)", borderRadius: "4px",
-                color: "var(--text-2)", fontSize: "var(--text-label)", padding: "4px 10px",
-                cursor: "pointer", fontFamily: "var(--font-sans)",
-              }}
-            >
-              <Plus style={{ width: "11px", height: "11px" }} /> Add plan
-            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <AIButton
+                configured={aiConfig.configured}
+                loading={aiConfig.loading}
+                generating={suggestingPlan}
+                onClick={handleSuggestGrowthPlan}
+                label="Suggest plan"
+                tooltip={aiConfig.tooltip ?? "Suggests a plan for your biggest competency gap"}
+                showSetupLink={false}
+              />
+              <button
+                onClick={() => setAddingPlan(true)}
+                style={{
+                  display: "flex", alignItems: "center", gap: "4px",
+                  background: "var(--surf-2)", border: "1px solid var(--border-2)", borderRadius: "4px",
+                  color: "var(--text-2)", fontSize: "var(--text-label)", padding: "4px 10px",
+                  cursor: "pointer", fontFamily: "var(--font-sans)",
+                }}
+              >
+                <Plus style={{ width: "11px", height: "11px" }} /> Add plan
+              </button>
+            </div>
           </div>
 
           {addingPlan && (
