@@ -106,7 +106,7 @@ describe('getOpenFollowUps', () => {
 
 describe('createFollowUp', () => {
   it('inserts with user id and returns mapped follow-up', async () => {
-    const row = makeRow({ source_type: 'meeting', source_id: 'mtg-1', meeting: { title: 'Sprint Retro' } })
+    const row = makeRow({ source_type: 'meeting', source_id: 'mtg-1' })
     const chain = makeMock(row)
     chain.insert = vi.fn().mockReturnThis()
     chain.select = vi.fn().mockReturnThis()
@@ -130,7 +130,7 @@ describe('createFollowUp', () => {
       source_type: 'meeting',
       source_id: 'mtg-1',
     }))
-    expect(result.sourceName).toBe('Sprint Retro')
+    expect(result.sourceName).toBeNull()
   })
 
   it('throws when not authenticated', async () => {

@@ -19,27 +19,30 @@ import {
   ChevronLeft,
   ChevronRight,
   Award,
+  Search,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { fetchSignalCounts } from "@/lib/hooks/use-weekly-review-signals"
 import { getMondayOfWeek, getWeeklyReview } from "@/lib/services/weekly-review"
 
-type NavItem = { name: string; href: string; icon: React.ComponentType<{ style?: React.CSSProperties }> } | { divider: true }
+type NavItem =
+  | { name: string; href: string; icon: React.ComponentType<{ style?: React.CSSProperties }> }
+  | { label: string }
 
 const navigation: NavItem[] = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Weekly Review", href: "/review", icon: ClipboardCheck },
-  { name: "Weekly Summary", href: "/summary", icon: FileText },
-  { divider: true },
-  { name: "People", href: "/people", icon: UserCircle },
-  { name: "Teams", href: "/teams", icon: Users },
   { name: "People Radar", href: "/radar", icon: ScanSearch },
-  { name: "Evidence", href: "/evidence", icon: BookOpen },
-  { name: "Career Framework", href: "/framework", icon: Award },
-  { divider: true },
+  { label: "Manage" },
   { name: "Tasks", href: "/tasks", icon: CheckSquare },
-  { name: "Follow-ups", href: "/follow-ups", icon: ListChecks },
+  { name: "Teams", href: "/teams", icon: Users },
+  { name: "People", href: "/people", icon: UserCircle },
   { name: "Meetings", href: "/meetings", icon: Calendar },
+  { name: "Evidence", href: "/evidence", icon: BookOpen },
+  { name: "Follow-ups", href: "/follow-ups", icon: ListChecks },
+  { name: "Career Framework", href: "/framework", icon: Award },
+  { label: "Output" },
+  { name: "Weekly Summary", href: "/summary", icon: FileText },
 ]
 
 interface SidebarProps {
@@ -91,8 +94,6 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         else setReviewIndicator(null)
 
         setOverdueFollowUps(followUpRes.count ?? 0)
-
-        // radar critical: reuse the signal counts from fetchSignalCounts
         setRadarCritical(counts.critical)
       } catch {
         // non-critical — sidebar indicators are best-effort
@@ -148,16 +149,51 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         </button>
       </div>
 
+      {/* Search bar */}
+      {isOpen && (
+        <div style={{ padding: "4px 10px 2px" }}>
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            background: "var(--surf-2)",
+            border: "1px solid var(--border-1)",
+            borderRadius: "5px",
+            padding: "5px 8px",
+            cursor: "pointer",
+          }}>
+            <Search style={{ width: "11px", height: "11px", color: "var(--text-3)", flexShrink: 0 }} />
+            <span style={{ fontSize: "var(--text-meta)", color: "var(--text-3)", flex: 1 }}>Search or jump...</span>
+            <span style={{ fontSize: "9px", color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>⌘K</span>
+          </div>
+        </div>
+      )}
+
       {/* Nav */}
       <nav style={{ flex: 1, padding: "4px 10px", display: "flex", flexDirection: "column" }}>
         {navigation.map((item, idx) => {
-          if ('divider' in item) {
+          if ('label' in item) {
+            if (!isOpen) {
+              return (
+                <div key={`label-${idx}`} style={{
+                  height: "1px",
+                  background: "var(--border-1)",
+                  margin: "4px 0",
+                }} />
+              )
+            }
             return (
-              <div key={`divider-${idx}`} style={{
-                height: "1px",
-                background: "var(--border-1)",
-                margin: "4px 0",
-              }} />
+              <div key={`label-${idx}`} style={{
+                fontSize: "9px",
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                color: "var(--text-3)",
+                padding: "10px 4px 4px",
+                fontWeight: 500,
+                userSelect: "none",
+              }}>
+                {item.label}
+              </div>
             )
           }
 
@@ -178,6 +214,9 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
             : isRadar && radarCritical > 0
             ? radarCritical
             : null
+
+          const badgeBg = isFollowUps ? "#1e0d00" : "#1a0a0a"
+          const badgeColor = isFollowUps ? "#ffa94d" : "#ff6b6b"
 
           return (
             <Link
@@ -206,8 +245,8 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
               )}
               {badge !== null && (
                 <span style={{
-                  background: "#ff6b6b",
-                  color: "#fff",
+                  background: badgeBg,
+                  color: badgeColor,
                   borderRadius: "10px",
                   padding: "0 5px",
                   fontSize: "var(--text-overline)",
