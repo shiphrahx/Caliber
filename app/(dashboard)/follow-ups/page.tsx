@@ -95,12 +95,12 @@ export default function FollowUpsPage() {
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
-            background: 'var(--surf-3)',
-            border: '1px solid var(--border-2)',
+            background: 'var(--accent)',
+            border: '1px solid var(--accent)',
             borderRadius: '5px',
-            color: 'var(--text-1)',
+            color: '#000',
             fontSize: 'var(--text-meta)',
-            fontWeight: 500,
+            fontWeight: 600,
             padding: '7px 14px',
             cursor: 'pointer',
             fontFamily: 'var(--font-sans)',
@@ -256,9 +256,16 @@ export default function FollowUpsPage() {
             style={{ background: 'var(--surf-2)', border: '1px solid var(--border-2)', borderRadius: '8px', padding: '20px', width: '320px', display: 'flex', flexDirection: 'column', gap: '12px' }}
             onClick={e => e.stopPropagation()}
           >
-            <span style={{ fontSize: 'var(--text-body)', fontWeight: 600, color: 'var(--text-1)' }}>Who is this follow-up for?</span>
+            <div>
+              <span style={{ fontSize: 'var(--text-body)', fontWeight: 600, color: 'var(--text-1)' }}>Who is this follow-up for?</span>
+              <p style={{ fontSize: 'var(--text-meta)', color: 'var(--text-3)', marginTop: '4px' }}>Select a person to continue</p>
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxHeight: '300px', overflowY: 'auto' }}>
-              {people.map(p => (
+              {loading ? (
+                <p style={{ fontSize: 'var(--text-meta)', color: 'var(--text-3)', padding: '8px 0' }}>Loading...</p>
+              ) : people.length === 0 ? (
+                <p style={{ fontSize: 'var(--text-meta)', color: 'var(--text-3)', padding: '8px 0' }}>No active people found.</p>
+              ) : people.map(p => (
                 <button
                   key={p.id}
                   onClick={() => { setAddingFor(p); setShowPersonPicker(false) }}

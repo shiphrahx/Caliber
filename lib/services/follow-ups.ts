@@ -40,7 +40,6 @@ type FollowUpRow = {
   times_surfaced: number
   updated_at: string
   person?: { full_name: string } | null
-  meeting?: { title: string } | null
 }
 
 function rowToFollowUp(row: FollowUpRow): FollowUp {
@@ -53,7 +52,7 @@ function rowToFollowUp(row: FollowUpRow): FollowUp {
     description: row.description,
     sourceType: row.source_type,
     sourceId: row.source_id,
-    sourceName: row.meeting?.title ?? null,
+    sourceName: null,
     status: row.status,
     dueDate: row.due_date,
     createdAt: row.created_at,
@@ -67,8 +66,7 @@ function rowToFollowUp(row: FollowUpRow): FollowUp {
 
 const FOLLOW_UP_SELECT = `
   *,
-  person:people(full_name),
-  meeting:meetings(title)
+  person:people(full_name)
 ` as const
 
 export async function getFollowUpsForPerson(personId: string): Promise<FollowUp[]> {

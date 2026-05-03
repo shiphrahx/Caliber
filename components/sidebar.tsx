@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
@@ -23,19 +24,22 @@ import { createClient } from "@/lib/supabase/client"
 import { fetchSignalCounts } from "@/lib/hooks/use-weekly-review-signals"
 import { getMondayOfWeek, getWeeklyReview } from "@/lib/services/weekly-review"
 
-const navigation = [
+type NavItem = { name: string; href: string; icon: React.ComponentType<{ style?: React.CSSProperties }> } | { divider: true }
+
+const navigation: NavItem[] = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Weekly Review", href: "/review", icon: ClipboardCheck },
   { name: "Weekly Summary", href: "/summary", icon: FileText },
-  { name: "Tasks", href: "/tasks", icon: CheckSquare },
-  { name: "Follow-ups", href: "/follow-ups", icon: ListChecks },
-  { name: "Teams", href: "/teams", icon: Users },
+  { divider: true },
   { name: "People", href: "/people", icon: UserCircle },
+  { name: "Teams", href: "/teams", icon: Users },
   { name: "People Radar", href: "/radar", icon: ScanSearch },
-  // { name: "Projects", href: "/projects", icon: FolderKanban },
-  { name: "Meetings", href: "/meetings", icon: Calendar },
   { name: "Evidence", href: "/evidence", icon: BookOpen },
   { name: "Career Framework", href: "/framework", icon: Award },
+  { divider: true },
+  { name: "Tasks", href: "/tasks", icon: CheckSquare },
+  { name: "Follow-ups", href: "/follow-ups", icon: ListChecks },
+  { name: "Meetings", href: "/meetings", icon: Calendar },
 ]
 
 interface SidebarProps {
@@ -146,7 +150,17 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
       {/* Nav */}
       <nav style={{ flex: 1, padding: "4px 10px", display: "flex", flexDirection: "column" }}>
-        {navigation.map((item) => {
+        {navigation.map((item, idx) => {
+          if ('divider' in item) {
+            return (
+              <div key={`divider-${idx}`} style={{
+                height: "1px",
+                background: "var(--border-1)",
+                margin: "4px 0",
+              }} />
+            )
+          }
+
           const isActive = pathname === item.href
           const isReview = item.href === "/review"
           const isFollowUps = item.href === "/follow-ups"

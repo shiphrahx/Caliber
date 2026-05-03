@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
+import { useSearchParams } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { ChevronRight, ChevronDown, ChevronsRight, ChevronsDown, BookOpen, ListChecks } from "lucide-react"
 import { LogEvidenceModal } from "@/components/evidence/log-evidence-modal"
@@ -52,13 +53,16 @@ function parseActionItems(html: string): string[] {
 }
 
 export default function MeetingsPage() {
+  const searchParams = useSearchParams()
   const [meetings, setMeetings] = useState<Meeting[]>([])
   const [people, setPeople] = useState<string[]>([])
   const [teams, setTeams] = useState<string[]>([])
   const [peopleWithIds, setPeopleWithIds] = useState<Array<{ id: string; name: string }>>([])
   const [teamsWithIds, setTeamsWithIds] = useState<Array<{ id: string; name: string }>>([])
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [newMeetingDefaults, setNewMeetingDefaults] = useState<{ type?: string; personId?: string }>({})
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null)
+  const searchParamsHandled = useRef(false)
   const [expandedTypes, setExpandedTypes] = useState<Set<string>>(new Set(["1:1"]))
   const [expandedPeople, setExpandedPeople] = useState<Set<string>>(new Set())
   const [expandedTeams, setExpandedTeams] = useState<Set<string>>(new Set())
@@ -105,6 +109,15 @@ export default function MeetingsPage() {
         setTeamsWithIds(activeTeams.map(t => ({ id: t.id, name: t.name })))
 
         if (uiMeetings.length > 0) setSelectedMeeting(uiMeetings[0])
+
+        // Open new meeting dialog if navigated with ?new=1
+        if (!searchParamsHandled.current && searchParams.get('new') === '1') {
+          searchParamsHandled.current = true
+          const type = searchParams.get('type') || undefined
+          const personId = searchParams.get('personId') || undefined
+          setNewMeetingDefaults({ type, personId })
+          setIsAddDialogOpen(true)
+        }
       } catch (error) {
         console.error('Failed to load data:', error)
       }
@@ -859,6 +872,8 @@ export default function MeetingsPage() {
         availableTeams={teams}
         peopleWithIds={peopleWithIds}
         teamsWithIds={teamsWithIds}
+        defaultType={newMeetingDefaults.type}
+        defaultPersonId={newMeetingDefaults.personId}
       />
 
       {selectedMeeting?.personId && (

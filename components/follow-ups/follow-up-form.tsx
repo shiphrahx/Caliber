@@ -168,10 +168,10 @@ export function FollowUpForm({
             onClick={handleSave}
             disabled={saving}
             style={{
-              background: 'var(--surf-3)',
+              background: '#00f058',
               border: '1px solid #00f058',
               borderRadius: '4px',
-              color: '#00f058',
+              color: '#000',
               fontSize: 'var(--text-meta)',
               fontWeight: 600,
               padding: '6px 14px',

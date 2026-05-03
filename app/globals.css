@@ -51,7 +51,7 @@
     --text-body:         14px;   /* default body text */
     --text-label:        14px;   /* secondary labels, captions */
     --text-meta:         12px;   /* table cells, metadata */
-    --text-caption:      10px;   /* tags, badges, tiny labels */
+    --text-caption:      12px;   /* tags, badges, tiny labels */
     --text-overline:     11px;   /* uppercase column/stat headers */
 
     --weight-title:      700;

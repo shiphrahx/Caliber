@@ -38,6 +38,8 @@ interface MeetingFormDialogProps {
   availablePeople?: string[]
   availableTeams?: string[]
   defaultPerson?: string
+  defaultType?: string
+  defaultPersonId?: string
   peopleWithIds?: Array<{ id: string; name: string }>
   teamsWithIds?: Array<{ id: string; name: string }>
 }
@@ -97,7 +99,7 @@ const recurrenceOptions = [
   { value: "custom", label: "Custom" },
 ]
 
-export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availablePeople = [], availableTeams = [], defaultPerson, peopleWithIds = [], teamsWithIds = [] }: MeetingFormDialogProps) {
+export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availablePeople = [], availableTeams = [], defaultPerson, defaultType, defaultPersonId, peopleWithIds = [], teamsWithIds = [] }: MeetingFormDialogProps) {
   const { templates } = useTemplates()
   const [formData, setFormData] = useState<Meeting>(meeting || emptyMeeting)
   const [personInput, setPersonInput] = useState("")
@@ -114,17 +116,22 @@ export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availab
     if (open) {
       const initialData = meeting || emptyMeeting
 
-      // If defaultPerson is provided and we're not editing, pre-populate the person field
-      if (defaultPerson && !meeting) {
-        const personData = peopleWithIds.find(p => p.name === defaultPerson)
+      // If defaultPerson/defaultType/defaultPersonId provided and not editing, pre-populate
+      if ((defaultPerson || defaultPersonId) && !meeting) {
+        const personData = defaultPersonId
+          ? peopleWithIds.find(p => p.id === defaultPersonId)
+          : peopleWithIds.find(p => p.name === defaultPerson)
+        const resolvedName = personData?.name ?? defaultPerson ?? ''
+        const resolvedType = defaultType || initialData.type
         setFormData({
           ...initialData,
-          attendees: [defaultPerson],
-          personName: defaultPerson,
+          type: resolvedType as Meeting['type'],
+          attendees: resolvedName ? [resolvedName] : initialData.attendees,
+          personName: resolvedName || undefined,
           personId: personData?.id,
-          title: `${initialData.type} with ${defaultPerson}`
+          title: resolvedName ? `${resolvedType} with ${resolvedName}` : initialData.title,
         })
-        setPersonInput(defaultPerson)
+        setPersonInput(resolvedName)
       } else {
         setFormData(initialData)
         setPersonInput(initialData.personName || "")
@@ -139,7 +146,7 @@ export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availab
         setFormData(prev => ({ ...prev, nextMeetingDate: nextDate }))
       }
     }
-  }, [open, meeting, defaultPerson, peopleWithIds])
+  }, [open, meeting, defaultPerson, defaultType, defaultPersonId, peopleWithIds])
 
   // Update next meeting date when date or recurrence changes
   useEffect(() => {
