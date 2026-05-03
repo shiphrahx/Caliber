@@ -599,7 +599,7 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
       </div>
 
       {/* Competencies section */}
-      <CompetencySection personId={personId!} personLevel={formData.level ?? null} />
+      <CompetencySection personId={personId!} personLevel={formData.level ?? null} personName={formData.name} />
 
       {addingFollowUp && personId && (
         <FollowUpForm

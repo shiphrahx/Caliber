@@ -23,7 +23,7 @@ import { getEvidenceForPerson, type EvidenceEntry } from "@/lib/services/evidenc
 import { AIButton } from "@/components/ui/ai-button"
 import { useAIConfig } from "@/lib/hooks/use-ai-config"
 import { callAI, handleAIError } from "@/lib/services/ai"
-import { GROWTH_PLAN_SYSTEM, buildGrowthPlanPrompt } from "@/lib/ai/prompts"
+import { GROWTH_PLAN_SYSTEM, buildGrowthPlanPrompt, PROMOTION_PACKET_SYSTEM, buildPromotionPacketPrompt, ASSESSMENT_REASONING_SYSTEM } from "@/lib/ai/prompts"
 
 const LEVEL_COLORS: Record<string, { bg: string; color: string }> = {
   Junior:    { bg: "#0d1420", color: "#818cf8" },
@@ -130,17 +130,19 @@ interface CompetencyCardProps {
   allEvidence: EvidenceEntry[]
   onAssess: (level: string, notes: string, evidenceIds: string[]) => Promise<void>
   onLoadHistory: () => void
+  aiConfigured?: boolean
 }
 
 function CompetencyCard({
   area, levels, assessment, history, historyLoaded, personLevel,
-  allEvidence, onAssess, onLoadHistory,
+  allEvidence, onAssess, onLoadHistory, aiConfigured = false,
 }: CompetencyCardProps) {
   const [expanded, setExpanded] = useState(false)
   const [notesLocal, setNotesLocal] = useState(assessment?.notes ?? "")
   const [showEvidencePicker, setShowEvidencePicker] = useState(false)
   const [saving, setSaving] = useState(false)
   const [savedFlash, setSavedFlash] = useState(false)
+  const [generatingReasoning, setGeneratingReasoning] = useState(false)
 
   useEffect(() => { setNotesLocal(assessment?.notes ?? "") }, [assessment])
 
@@ -179,6 +181,29 @@ function CompetencyCard({
       await onAssess(assessment.assessedLevel, notesLocal, assessment.evidenceIds)
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleGenerateReasoning = async () => {
+    if (!assessment) return
+    setGeneratingReasoning(true)
+    try {
+      const linkedEvItems = allEvidence.filter(e => assessment.evidenceIds?.includes(e.id))
+      const expLev = personLevel ? levels.find(l => l.level === personLevel) : null
+      const evidenceSummary = linkedEvItems.map(e => `- ${e.title} (${e.occurredAt}): ${e.content ?? ''}`).join('\n') || 'No linked evidence.'
+      const userPrompt = `Competency area: ${area.name}\nAssessed level: ${assessment.assessedLevel}\nExpected level: ${expLev?.level ?? personLevel ?? 'unknown'}\n\nEvidence:\n${evidenceSummary}`
+      const result = await callAI({
+        systemPrompt: ASSESSMENT_REASONING_SYSTEM,
+        userPrompt,
+        maxTokens: 300,
+        temperature: 0.3,
+      })
+      setNotesLocal(result.content)
+      await onAssess(assessment.assessedLevel, result.content, assessment.evidenceIds)
+    } catch (err) {
+      handleAIError(err)
+    } finally {
+      setGeneratingReasoning(false)
     }
   }
 
@@ -278,7 +303,18 @@ function CompetencyCard({
         <div style={{ padding: "12px 16px 16px 40px", borderTop: "1px solid var(--border-1)" }}>
           {/* Notes */}
           <div style={{ marginBottom: "16px" }}>
-            <Label style={{ display: "block", marginBottom: "4px" }}>Assessment notes</Label>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "4px" }}>
+              <Label>Assessment notes</Label>
+              {aiConfigured && assessment && (
+                <button
+                  onClick={handleGenerateReasoning}
+                  disabled={generatingReasoning}
+                  style={{ fontSize: "var(--text-caption)", color: generatingReasoning ? "var(--text-3)" : "#00f058", background: "none", border: "none", cursor: generatingReasoning ? "not-allowed" : "pointer", padding: 0, fontFamily: "var(--font-sans)" }}
+                >
+                  {generatingReasoning ? "Generating…" : "✦ Generate reasoning"}
+                </button>
+              )}
+            </div>
             <div onBlur={handleNotesBlur}>
               <MarkdownTextarea
                 value={notesLocal}
@@ -629,9 +665,10 @@ function AddGrowthPlanForm({ personId, areas, defaultAreaId, onSaved, onCancel }
 interface CompetencySectionProps {
   personId: string
   personLevel: string | null
+  personName?: string
 }
 
-export function CompetencySection({ personId, personLevel }: CompetencySectionProps) {
+export function CompetencySection({ personId, personLevel, personName = "this engineer" }: CompetencySectionProps) {
   const [framework, setFramework] = useState<CompetencyFramework | null>(null)
   const [areas, setAreas] = useState<CompetencyArea[]>([])
   const [areaLevels, setAreaLevels] = useState<Record<string, CompetencyLevel[]>>({})
@@ -642,6 +679,8 @@ export function CompetencySection({ personId, personLevel }: CompetencySectionPr
   const [growthPlans, setGrowthPlans] = useState<GrowthPlan[]>([])
   const [addingPlan, setAddingPlan] = useState(false)
   const [suggestingPlan, setSuggestingPlan] = useState(false)
+  const [promotionPacket, setPromotionPacket] = useState<string | null>(null)
+  const [generatingPacket, setGeneratingPacket] = useState(false)
   const [loading, setLoading] = useState(true)
   const aiConfig = useAIConfig()
 
@@ -697,6 +736,44 @@ export function CompetencySection({ personId, personLevel }: CompetencySectionPr
     if (!confirm("Delete this growth plan?")) return
     await deleteGrowthPlan(id)
     setGrowthPlans(prev => prev.filter(p => p.id !== id))
+  }
+
+  const handleGeneratePromotionPacket = async (targetLevel: string) => {
+    setGeneratingPacket(true)
+    try {
+      const result = await callAI({
+        systemPrompt: PROMOTION_PACKET_SYSTEM,
+        userPrompt: buildPromotionPacketPrompt({
+          name: personName,
+          role: null,
+          currentLevel: personLevel ?? "unknown",
+          targetLevel,
+          assessments: assessments.map(a => {
+            const area = areas.find(ar => ar.id === a.areaId)
+            const expLev = personLevel ? (areaLevels[a.areaId] ?? []).find(l => l.level === personLevel) : null
+            return {
+              areaName: area?.name ?? a.areaId,
+              assessedLevel: a.assessedLevel,
+              expectedLevel: expLev?.level ?? personLevel ?? "unknown",
+              notes: a.notes,
+            }
+          }),
+          evidence: allEvidence.map(e => ({
+            category: e.category,
+            title: e.title,
+            occurredAt: e.occurredAt,
+            content: e.content,
+          })),
+        }),
+        maxTokens: 1500,
+        temperature: 0.4,
+      })
+      setPromotionPacket(result.content)
+    } catch (err) {
+      handleAIError(err)
+    } finally {
+      setGeneratingPacket(false)
+    }
   }
 
   const handleSuggestGrowthPlan = async () => {
@@ -824,7 +901,37 @@ export function CompetencySection({ personId, personLevel }: CompetencySectionPr
 
         {/* Promotion readiness */}
         {assessments.length > 0 && personLevel && (
-          <PromotionBanner readiness={readiness} />
+          <>
+            <PromotionBanner readiness={readiness} />
+            {readiness.nextLevel && (
+              <div style={{ marginBottom: "20px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: promotionPacket ? "12px" : 0 }}>
+                  <AIButton
+                    configured={aiConfig.configured}
+                    loading={aiConfig.loading}
+                    generating={generatingPacket}
+                    onClick={() => handleGeneratePromotionPacket(readiness.nextLevel!)}
+                    label={promotionPacket ? "Regenerate promotion packet" : "Draft promotion packet"}
+                    tooltip={aiConfig.tooltip}
+                    showSetupLink={false}
+                  />
+                  {promotionPacket && (
+                    <button
+                      onClick={() => setPromotionPacket(null)}
+                      style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                    >
+                      ✕ Clear
+                    </button>
+                  )}
+                </div>
+                {promotionPacket && (
+                  <div style={{ background: "var(--surf-2)", border: "1px solid var(--border-1)", borderRadius: "6px", padding: "16px 20px", fontSize: "var(--text-label)", color: "var(--text-2)", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
+                    {promotionPacket}
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         )}
 
         {/* Radar chart */}
@@ -851,6 +958,7 @@ export function CompetencySection({ personId, personLevel }: CompetencySectionPr
                 allEvidence={allEvidence}
                 onAssess={(level, notes, evidenceIds) => handleAssess(area.id, level, notes, evidenceIds)}
                 onLoadHistory={() => handleLoadHistory(area.id)}
+                aiConfigured={aiConfig.configured}
               />
             ))}
           </div>
