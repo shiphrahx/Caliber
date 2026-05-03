@@ -6,6 +6,10 @@ import { ArrowLeft, ChevronDown, ChevronRight, Printer, Plus, Save } from "lucid
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { MarkdownTextarea } from "@/components/ui/markdown-textarea"
+import { AIButton, AIGeneratedBadge } from "@/components/ui/ai-button"
+import { useAIConfig } from "@/lib/hooks/use-ai-config"
+import { callAI, handleAIError } from "@/lib/services/ai"
+import { REVIEW_DRAFT_SYSTEM, buildReviewDraftPrompt } from "@/lib/ai/prompts"
 import { getPeople, type Person } from "@/lib/services/people"
 import { getMeetingsForPerson, type Meeting } from "@/lib/services/meetings"
 import {
@@ -78,6 +82,10 @@ export default function ReviewPrepPage({ params }: { params: Promise<{ id: strin
   const [newCycleName, setNewCycleName] = useState("")
   const [savingCycle, setSavingCycle] = useState(false)
   const [savingEvidenceId, setSavingEvidenceId] = useState<string | null>(null)
+  const [generatingDraft, setGeneratingDraft] = useState(false)
+  const [draftAbort, setDraftAbort] = useState<AbortController | null>(null)
+  const [showAIBadge, setShowAIBadge] = useState(false)
+  const aiConfig = useAIConfig()
 
   useEffect(() => {
     params.then(({ id }) => setPersonId(id))
@@ -135,6 +143,39 @@ export default function ReviewPrepPage({ params }: { params: Promise<{ id: strin
       console.error(err)
     } finally {
       setSavingCycle(false)
+    }
+  }
+
+  const handleGenerateDraft = async () => {
+    if (!person) return
+    if (summaryText.trim() && !confirm('This will replace your current summary draft. Continue?')) return
+    const abort = new AbortController()
+    setDraftAbort(abort)
+    setGeneratingDraft(true)
+    try {
+      const result = await callAI({
+        systemPrompt: REVIEW_DRAFT_SYSTEM,
+        userPrompt: buildReviewDraftPrompt({
+          name: person.name,
+          role: person.role,
+          level: person.level,
+          teams: person.teams,
+          startDate: person.startDate,
+          periodStart,
+          periodEnd,
+          evidence,
+          meetings: meetings.map(m => ({ meetingType: m.meetingType, title: m.title, meetingDate: m.meetingDate, notes: m.notes })),
+        }),
+        maxTokens: 2000,
+        temperature: 0.4,
+      }, abort.signal)
+      setSummaryText(result.content)
+      setShowAIBadge(true)
+    } catch (err) {
+      handleAIError(err)
+    } finally {
+      setGeneratingDraft(false)
+      setDraftAbort(null)
     }
   }
 
