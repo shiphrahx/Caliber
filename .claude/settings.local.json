@@ -111,7 +111,8 @@
       "Bash(git clone:*)",
       "Bash(npm run *)",
       "Read(//tmp/**)",
-      "Bash(grep -v \"^$\")"
+      "Bash(grep -v \"^$\")",
+      "PowerShell(Stop-Process -Id 11692 -Force)"
     ]
   }
 }

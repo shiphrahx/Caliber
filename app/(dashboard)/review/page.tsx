@@ -374,9 +374,19 @@ export default function WeeklyReviewPage() {
   const overdueSignals = taskSignals.filter(s => s.type === 'overdue_task')
   const upcomingSignals = taskSignals.filter(s => s.type === 'upcoming_deadline')
 
-  const totalSections = 5
-  const reviewedCount = Object.values(sectionState).filter(Boolean).length
-  const progressPct = Math.round((reviewedCount / totalSections) * 100)
+  // Sections auto-check when all their signals are cleared
+  const effectiveSectionState = {
+    people:     peopleSignals.length === 0 || sectionState.people,
+    actions:    actionSignals.length === 0  || sectionState.actions,
+    tasks:      taskSignals.length === 0    || sectionState.tasks,
+    week:       sectionState.week,
+    reflection: sectionState.reflection,
+  }
+
+  // Progress = completed sections / 5 (week excluded — no action items)
+  const PROGRESS_SECTIONS = ['people', 'actions', 'tasks', 'reflection'] as const
+  const reviewedCount = PROGRESS_SECTIONS.filter(k => effectiveSectionState[k]).length
+  const progressPct = Math.round((reviewedCount / PROGRESS_SECTIONS.length) * 100)
 
   const isReadOnly = !isCurrentWeek && review?.status === 'completed'
   const isCompleted = review?.status === 'completed'
@@ -532,7 +542,7 @@ export default function WeeklyReviewPage() {
             criticalCount={isReadOnly ? 0 : peopleSignals.filter(s => s.severity === 'critical').length}
             warningCount={isReadOnly ? 0 : peopleSignals.filter(s => s.severity === 'warning').length}
             infoCount={isReadOnly ? 0 : peopleSignals.filter(s => s.severity === 'info').length}
-            isReviewed={sectionState.people}
+            isReviewed={effectiveSectionState.people}
             onMarkReviewed={() => toggleSection('people')}
             emptyMessage="All clear — everyone has been seen recently"
           >
@@ -620,7 +630,7 @@ export default function WeeklyReviewPage() {
             criticalCount={isReadOnly ? 0 : actionSignals.filter(s => s.severity === 'critical').length}
             warningCount={isReadOnly ? 0 : actionSignals.filter(s => s.severity === 'warning').length}
             infoCount={isReadOnly ? 0 : actionSignals.filter(s => s.severity === 'info').length}
-            isReviewed={sectionState.actions}
+            isReviewed={effectiveSectionState.actions}
             onMarkReviewed={() => toggleSection('actions')}
             emptyMessage="All action items resolved"
           >
@@ -666,7 +676,7 @@ export default function WeeklyReviewPage() {
             criticalCount={isReadOnly ? 0 : overdueSignals.filter(s => s.severity === 'critical').length}
             warningCount={isReadOnly ? 0 : overdueSignals.filter(s => s.severity === 'warning').length}
             infoCount={isReadOnly ? 0 : upcomingSignals.length}
-            isReviewed={sectionState.tasks}
+            isReviewed={effectiveSectionState.tasks}
             onMarkReviewed={() => toggleSection('tasks')}
             emptyMessage="No overdue tasks and no deadlines this week"
           >
@@ -760,7 +770,7 @@ export default function WeeklyReviewPage() {
             signalCount={1}
             badgeLabel="Summary"
             badgeVariant="info"
-            isReviewed={sectionState.week}
+            isReviewed={effectiveSectionState.week}
             onMarkReviewed={() => toggleSection('week')}
             defaultExpanded={false}
           >
@@ -795,7 +805,7 @@ export default function WeeklyReviewPage() {
             title="Reflection"
             icon={ICON_REFLECTION}
             signalCount={1}
-            isReviewed={sectionState.reflection}
+            isReviewed={effectiveSectionState.reflection}
             onMarkReviewed={() => toggleSection('reflection')}
           >
             <div style={{ padding: '16px' }}>
