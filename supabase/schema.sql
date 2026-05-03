@@ -924,6 +924,69 @@ ALTER TABLE public.evidence_entries
   ADD COLUMN IF NOT EXISTS competency_area_id UUID REFERENCES public.competency_areas(id) ON DELETE SET NULL;
 
 -- ============================================================================
+-- PGCRYPTO HELPER FUNCTIONS (for AI key encryption)
+-- ============================================================================
+-- Requires pgcrypto extension. Enable via: CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- Encrypt an API key. Called from the client (via RPC with service role) when saving key.
+CREATE OR REPLACE FUNCTION encrypt_api_key(plain_key TEXT, passphrase TEXT)
+RETURNS TEXT
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+  SELECT encode(pgp_sym_encrypt(plain_key, passphrase), 'base64');
+$$;
+
+-- Decrypt an API key. Called ONLY from the Edge Function (service role).
+-- Never called from client-side code.
+CREATE OR REPLACE FUNCTION decrypt_api_key(encrypted_key TEXT, passphrase TEXT)
+RETURNS TEXT
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+  SELECT pgp_sym_decrypt(decode(encrypted_key, 'base64'), passphrase);
+$$;
+
+REVOKE ALL ON FUNCTION decrypt_api_key FROM PUBLIC;
+REVOKE ALL ON FUNCTION encrypt_api_key FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION decrypt_api_key TO service_role;
+GRANT EXECUTE ON FUNCTION encrypt_api_key TO authenticated;
+
+-- ============================================================================
+-- AI CONFIG TABLE
+-- ============================================================================
+-- API key stored encrypted using pgcrypto pgp_sym_encrypt.
+-- Encryption passphrase must be set as SUPABASE_AI_ENCRYPTION_KEY in Edge Function env.
+-- The client never sees the decrypted key — all AI calls go through the ai-proxy Edge Function.
+
+CREATE TABLE IF NOT EXISTS public.ai_config (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
+  provider TEXT NOT NULL CHECK (provider IN ('anthropic', 'openai', 'google')),
+  api_key_encrypted TEXT NOT NULL,
+  model TEXT NOT NULL,
+  total_requests INTEGER NOT NULL DEFAULT 0,
+  last_used_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_ai_config_user ON public.ai_config(user_id);
+
+CREATE TRIGGER update_ai_config_updated_at
+  BEFORE UPDATE ON public.ai_config
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE public.ai_config ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage their own AI config"
+  ON public.ai_config FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- ============================================================================
 -- SEED DATA (Optional - for development)
 -- ============================================================================
 -- Uncomment to add sample data after first user logs in
