@@ -14,8 +14,10 @@ import {
   ClipboardCheck,
   ScanSearch,
   ListChecks,
+  FileText,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Award,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { fetchSignalCounts } from "@/lib/hooks/use-weekly-review-signals"
@@ -24,6 +26,7 @@ import { getMondayOfWeek, getWeeklyReview } from "@/lib/services/weekly-review"
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Weekly Review", href: "/review", icon: ClipboardCheck },
+  { name: "Weekly Summary", href: "/summary", icon: FileText },
   { name: "Tasks", href: "/tasks", icon: CheckSquare },
   { name: "Follow-ups", href: "/follow-ups", icon: ListChecks },
   { name: "Teams", href: "/teams", icon: Users },
@@ -32,7 +35,7 @@ const navigation = [
   // { name: "Projects", href: "/projects", icon: FolderKanban },
   { name: "Meetings", href: "/meetings", icon: Calendar },
   { name: "Evidence", href: "/evidence", icon: BookOpen },
-  // { name: "Career Goals", href: "/career-goals", icon: Target },
+  { name: "Career Framework", href: "/framework", icon: Award },
 ]
 
 interface SidebarProps {

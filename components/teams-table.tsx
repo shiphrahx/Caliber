@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { DataTable, ColumnDef, FilterDef } from "@/components/ui/data-table"
 import { Pencil, Trash2, UserX, UserCheck } from "lucide-react"
 import { type Team } from "@/lib/services/teams"
@@ -27,7 +28,15 @@ export function TeamsTable({
       header: "Team Name",
       accessorKey: "name",
       cell: (team) => (
-        <span style={{ fontWeight: 500, color: "var(--text-1)", fontSize: "var(--text-meta)" }}>{team.name}</span>
+        <Link
+          href={`/teams/${team.id}`}
+          style={{ fontWeight: 500, color: "var(--text-1)", fontSize: "var(--text-meta)", textDecoration: "none" }}
+          onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "#00f058")}
+          onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-1)")}
+          onClick={e => e.stopPropagation()}
+        >
+          {team.name}
+        </Link>
       ),
     },
     {

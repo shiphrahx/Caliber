@@ -6,6 +6,10 @@ import { ArrowLeft, ChevronDown, ChevronRight, Printer, Plus, Save } from "lucid
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { MarkdownTextarea } from "@/components/ui/markdown-textarea"
+import { AIButton, AIGeneratedBadge } from "@/components/ui/ai-button"
+import { useAIConfig } from "@/lib/hooks/use-ai-config"
+import { callAI, handleAIError } from "@/lib/services/ai"
+import { REVIEW_DRAFT_SYSTEM, buildReviewDraftPrompt } from "@/lib/ai/prompts"
 import { getPeople, type Person } from "@/lib/services/people"
 import { getMeetingsForPerson, type Meeting } from "@/lib/services/meetings"
 import {
@@ -78,6 +82,10 @@ export default function ReviewPrepPage({ params }: { params: Promise<{ id: strin
   const [newCycleName, setNewCycleName] = useState("")
   const [savingCycle, setSavingCycle] = useState(false)
   const [savingEvidenceId, setSavingEvidenceId] = useState<string | null>(null)
+  const [generatingDraft, setGeneratingDraft] = useState(false)
+  const [draftAbort, setDraftAbort] = useState<AbortController | null>(null)
+  const [showAIBadge, setShowAIBadge] = useState(false)
+  const aiConfig = useAIConfig()
 
   useEffect(() => {
     params.then(({ id }) => setPersonId(id))
@@ -135,6 +143,39 @@ export default function ReviewPrepPage({ params }: { params: Promise<{ id: strin
       console.error(err)
     } finally {
       setSavingCycle(false)
+    }
+  }
+
+  const handleGenerateDraft = async () => {
+    if (!person) return
+    if (summaryText.trim() && !confirm('This will replace your current summary draft. Continue?')) return
+    const abort = new AbortController()
+    setDraftAbort(abort)
+    setGeneratingDraft(true)
+    try {
+      const result = await callAI({
+        systemPrompt: REVIEW_DRAFT_SYSTEM,
+        userPrompt: buildReviewDraftPrompt({
+          name: person.name,
+          role: person.role,
+          level: person.level,
+          teams: person.teams,
+          startDate: person.startDate,
+          periodStart,
+          periodEnd,
+          evidence,
+          meetings: meetings.map(m => ({ meetingType: m.meetingType, title: m.title, meetingDate: m.meetingDate, notes: m.notes })),
+        }),
+        maxTokens: 2000,
+        temperature: 0.4,
+      }, abort.signal)
+      setSummaryText(result.content)
+      setShowAIBadge(true)
+    } catch (err) {
+      handleAIError(err)
+    } finally {
+      setGeneratingDraft(false)
+      setDraftAbort(null)
     }
   }
 
@@ -320,7 +361,33 @@ export default function ReviewPrepPage({ params }: { params: Promise<{ id: strin
         onToggle={() => toggleSection("impact")}
         count={summaryText ? 1 : 0}
         emptyMessage="Write a synthesis of this person's performance for the review period. Capture the overall narrative before diving into specifics."
+        headerExtra={
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            {generatingDraft && draftAbort && (
+              <button
+                onClick={() => draftAbort.abort()}
+                style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", background: "none", border: "none", cursor: "pointer", padding: "2px 6px" }}
+              >
+                Cancel
+              </button>
+            )}
+            <AIButton
+              configured={aiConfig.configured}
+              loading={aiConfig.loading}
+              generating={generatingDraft}
+              onClick={handleGenerateDraft}
+              label="Generate draft"
+              tooltip={aiConfig.tooltip}
+              showSetupLink={true}
+            />
+          </div>
+        }
       >
+        {showAIBadge && (
+          <div style={{ marginBottom: "10px" }}>
+            <AIGeneratedBadge onDismiss={() => setShowAIBadge(false)} />
+          </div>
+        )}
         <MarkdownTextarea
           value={summaryText}
           onValueChange={setSummaryText}
@@ -492,7 +559,7 @@ export default function ReviewPrepPage({ params }: { params: Promise<{ id: strin
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 function ReviewSection({
-  title, collapsed, onToggle, count, emptyMessage, children,
+  title, collapsed, onToggle, count, emptyMessage, headerExtra, children,
 }: {
   title: string
   sectionKey?: SectionKey
@@ -500,22 +567,30 @@ function ReviewSection({
   onToggle: () => void
   count: number
   emptyMessage: string
+  headerExtra?: React.ReactNode
   children?: React.ReactNode
 }) {
   return (
     <div style={{ background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "8px", overflow: "hidden", marginBottom: "12px" }}>
-      <button
-        onClick={onToggle}
-        style={{ width: "100%", padding: "14px 20px", display: "flex", alignItems: "center", gap: "8px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
-        onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "var(--surf-2)")}
-        onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "none")}
-      >
-        {collapsed
-          ? <ChevronRight style={{ width: "14px", height: "14px", color: "var(--text-3)", flexShrink: 0 }} />
-          : <ChevronDown style={{ width: "14px", height: "14px", color: "var(--text-3)", flexShrink: 0 }} />}
-        <h2 style={{ flex: 1 }}>{title}</h2>
-        <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>{count} {count === 1 ? "entry" : "entries"}</span>
-      </button>
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <button
+          onClick={onToggle}
+          style={{ flex: 1, padding: "14px 20px", display: "flex", alignItems: "center", gap: "8px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+          onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "var(--surf-2)")}
+          onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "none")}
+        >
+          {collapsed
+            ? <ChevronRight style={{ width: "14px", height: "14px", color: "var(--text-3)", flexShrink: 0 }} />
+            : <ChevronDown style={{ width: "14px", height: "14px", color: "var(--text-3)", flexShrink: 0 }} />}
+          <h2 style={{ flex: 1 }}>{title}</h2>
+          <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>{count} {count === 1 ? "entry" : "entries"}</span>
+        </button>
+        {headerExtra && (
+          <div style={{ padding: "0 16px" }} onClick={e => e.stopPropagation()}>
+            {headerExtra}
+          </div>
+        )}
+      </div>
       {!collapsed && (
         <div style={{ padding: "4px 20px 20px" }}>
           {count === 0 && emptyMessage ? (

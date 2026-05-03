@@ -5,12 +5,13 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   ChevronLeft, ChevronRight, AlertCircle, AlertTriangle, Info,
-  CheckCircle, User, ExternalLink
+  CheckCircle, User, ExternalLink, ArrowRight
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import {
   getMondayOfWeek,
   formatWeekRange,
+  addDays,
   getOrCreateWeeklyReview,
   getWeeklyReview,
   getDismissedItems,
@@ -26,14 +27,13 @@ import { useWeeklyReviewSignals, type ReviewSignal, type SignalSeverity } from '
 import { ReviewSection } from '@/components/review/review-section'
 import { DismissDialog } from '@/components/review/dismiss-dialog'
 import { updateTask } from '@/lib/services/tasks'
+import { AIButton } from '@/components/ui/ai-button'
+import { useAIConfig } from '@/lib/hooks/use-ai-config'
+import { callAI, handleAIError } from '@/lib/services/ai'
+import { REFLECTION_PROMPTS_SYSTEM } from '@/lib/ai/prompts'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function addDays(dateStr: string, n: number): string {
-  const d = new Date(dateStr + 'T00:00:00')
-  d.setDate(d.getDate() + n)
-  return d.toISOString().split('T')[0]
-}
 
 function severityIcon(severity: SignalSeverity) {
   if (severity === 'critical') return <AlertCircle style={{ width: '13px', height: '13px', color: '#ff6b6b', flexShrink: 0 }} />
@@ -153,6 +153,11 @@ export default function WeeklyReviewPage() {
 
   // Completing state
   const [completing, setCompleting] = useState(false)
+
+  // AI reflection prompts
+  const [reflectionPrompts, setReflectionPrompts] = useState<string[]>([])
+  const [generatingPrompts, setGeneratingPrompts] = useState(false)
+  const aiConfig = useAIConfig()
 
   // Load review + dismissed items
   const loadReview = useCallback(async () => {
@@ -306,6 +311,32 @@ export default function WeeklyReviewPage() {
 
   const isReadOnly = !isCurrentWeek && review?.status === 'completed'
   const isCompleted = review?.status === 'completed'
+
+  const handleGenerateReflectionPrompts = async () => {
+    setGeneratingPrompts(true)
+    try {
+      const context = [
+        activitySummary ? `Meetings held: ${activitySummary.meetingsHeld.length}. Tasks completed: ${activitySummary.tasksCompleted.length}. Evidence logged: ${activitySummary.evidenceLogged}.` : '',
+        signals.length > 0 ? `Signals: ${signals.slice(0, 5).map(s => s.message).join('; ')}` : '',
+        notes ? `Notes so far: ${notes.slice(0, 300)}` : '',
+      ].filter(Boolean).join('\n')
+      const result = await callAI({
+        systemPrompt: REFLECTION_PROMPTS_SYSTEM,
+        userPrompt: context || 'Manager completed a weekly review. No additional data available.',
+        maxTokens: 300,
+        temperature: 0.7,
+      })
+      const jsonMatch = result.content.match(/\[[\s\S]*\]/)
+      if (jsonMatch) {
+        const prompts = JSON.parse(jsonMatch[0])
+        setReflectionPrompts(Array.isArray(prompts) ? prompts : [])
+      }
+    } catch (err) {
+      handleAIError(err)
+    } finally {
+      setGeneratingPrompts(false)
+    }
+  }
 
   if (loadingReview) {
     return (
@@ -685,6 +716,39 @@ export default function WeeklyReviewPage() {
             padding: '16px',
             marginTop: '-12px',
           }}>
+            {/* AI reflection prompts */}
+            <div style={{ marginBottom: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: reflectionPrompts.length > 0 ? '10px' : 0 }}>
+                <AIButton
+                  configured={aiConfig.configured}
+                  loading={aiConfig.loading}
+                  generating={generatingPrompts}
+                  onClick={handleGenerateReflectionPrompts}
+                  label="Generate reflection prompts"
+                  tooltip={aiConfig.tooltip}
+                  showSetupLink={true}
+                  disabled={isReadOnly}
+                />
+                {reflectionPrompts.length > 0 && (
+                  <button
+                    onClick={() => setReflectionPrompts([])}
+                    style={{ fontSize: 'var(--text-caption)', color: 'var(--text-3)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                  >
+                    ✕ Clear
+                  </button>
+                )}
+              </div>
+              {reflectionPrompts.length > 0 && (
+                <div style={{ display: 'grid', gap: '6px' }}>
+                  {reflectionPrompts.map((prompt, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', padding: '8px 12px', background: 'var(--surf-2)', border: '1px solid var(--border-1)', borderRadius: '5px' }}>
+                      <span style={{ fontSize: 'var(--text-caption)', color: '#00f058', flexShrink: 0, marginTop: '1px' }}>✦</span>
+                      <span style={{ fontSize: 'var(--text-label)', color: 'var(--text-2)', lineHeight: 1.5 }}>{prompt}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <textarea
               value={notes}
               onChange={e => handleNotesChange(e.target.value)}
@@ -744,11 +808,23 @@ export default function WeeklyReviewPage() {
               )}
 
               {isCompleted ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: 'var(--text-body)', color: '#00f058', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <CheckCircle style={{ width: '16px', height: '16px' }} />
                     Week reviewed ✓
                   </span>
+                  <Link
+                    href={`/summary?week=${weekStart}`}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '5px',
+                      background: 'var(--surf-3)', border: '1px solid var(--border-2)',
+                      borderRadius: '4px', color: 'var(--text-2)',
+                      fontSize: 'var(--text-meta)', padding: '5px 12px',
+                      textDecoration: 'none', fontFamily: 'var(--font-sans)',
+                    }}
+                  >
+                    Generate weekly summary <ArrowRight style={{ width: '11px', height: '11px' }} />
+                  </Link>
                   <button
                     onClick={handleReopen}
                     style={{

@@ -1,0 +1,289 @@
+// All AI system prompts and context assembly functions.
+// Centralised here so prompts can be updated without touching components.
+
+import { truncateToTokenBudget } from '@/lib/services/ai'
+
+// ─── Review Draft ─────────────────────────────────────────────────────────────
+
+export const REVIEW_DRAFT_SYSTEM = `You are an expert engineering manager writing a performance review. You write in a direct, evidence-based style. Every claim is backed by specific examples with dates. You are fair, balanced, and constructive.
+
+Write a performance review for the following period. Structure it with these markdown sections:
+## Summary
+## Impact & Delivery
+## Strengths
+## Growth Areas
+## Overall Assessment
+
+Rules:
+- Reference specific dates and examples from the evidence provided
+- Be direct and specific, not vague or generic
+- Balance positive and constructive feedback
+- If evidence is thin for any section, note that explicitly rather than fabricating
+- Use the person's first name
+- Keep total length under 800 words`
+
+export function buildReviewDraftPrompt(args: {
+  name: string
+  role: string | null
+  level: string | null
+  teams: string[]
+  startDate: string | null
+  periodStart: string
+  periodEnd: string
+  evidence: Array<{ category: string; title: string; occurredAt: string; content?: string | null }>
+  meetings: Array<{ meetingType: string; title: string; meetingDate: string; notes?: string | null }>
+}): string {
+  const evidenceText = args.evidence.length > 0
+    ? args.evidence.map(e => `[${e.category}] ${e.title} (${e.occurredAt})${e.content ? ': ' + e.content.slice(0, 300) : ''}`).join('\n')
+    : 'No evidence entries in this period.'
+
+  const meetingText = args.meetings.length > 0
+    ? args.meetings.slice(0, 20).map(m => {
+        const notes = (m.notes ?? '').slice(0, 400)
+        return `${m.meetingType}: ${m.title} (${m.meetingDate})${notes ? '\n  ' + notes : ''}`
+      }).join('\n')
+    : 'No meeting notes in this period.'
+
+  const prompt = `Person: ${args.name}, ${args.role ?? 'Engineer'}, ${args.level ?? 'unknown'} level${args.teams.length ? ', team: ' + args.teams.join(', ') : ''}${args.startDate ? ', started ' + args.startDate : ''}
+Review period: ${args.periodStart} to ${args.periodEnd}
+
+=== Evidence Entries ===
+${evidenceText}
+
+=== Meeting Notes ===
+${meetingText}`
+
+  return truncateToTokenBudget(prompt, 6000)
+}
+
+// ─── 1:1 Prep ─────────────────────────────────────────────────────────────────
+
+export const ONE_ON_ONE_PREP_SYSTEM = `You are helping an engineering manager prepare for a 1:1 meeting. Generate a concise prep brief with:
+
+- **Carry-over topics**: unresolved items from the last meeting
+- **Follow-up check-ins**: commitments from previous meetings that need updating
+- **Suggested discussion topics**: based on recent evidence, competency gaps, or patterns
+- **Questions to ask**: 2-3 thoughtful questions based on the person's current situation
+
+Rules:
+- Be concise — this is a prep note, not an essay
+- Flag anything that looks like it needs attention (repeated concerns, stalled growth plans)
+- Reference specific previous discussions where relevant
+- Keep total length under 400 words`
+
+export function buildOneonOnePrepPrompt(args: {
+  name: string
+  role: string | null
+  level: string | null
+  recentMeetings: Array<{ title: string; meetingDate: string; notes?: string | null; actionItems?: string | null }>
+  openFollowUps: Array<{ title: string; createdAt: string }>
+  recentEvidence: Array<{ category: string; title: string; occurredAt: string }>
+  competencyGaps: Array<{ areaName: string; assessedLevel: string; expectedLevel: string }>
+}): string {
+  const meetingText = args.recentMeetings.slice(0, 3).map(m => {
+    const notes = (m.notes ?? '').slice(0, 300)
+    const actions = (m.actionItems ?? '').slice(0, 200)
+    return `${m.title} (${m.meetingDate})${notes ? '\n  Notes: ' + notes : ''}${actions ? '\n  Action items: ' + actions : ''}`
+  }).join('\n\n') || 'No recent 1:1 notes.'
+
+  const followUpText = args.openFollowUps.length > 0
+    ? args.openFollowUps.slice(0, 5).map(f => `- ${f.title} (open since ${f.createdAt.slice(0, 10)})`).join('\n')
+    : 'No open follow-ups.'
+
+  const evidenceText = args.recentEvidence.length > 0
+    ? args.recentEvidence.slice(0, 8).map(e => `[${e.category}] ${e.title} (${e.occurredAt})`).join('\n')
+    : 'No recent evidence.'
+
+  const gapText = args.competencyGaps.length > 0
+    ? args.competencyGaps.map(g => `${g.areaName}: assessed ${g.assessedLevel}, expected ${g.expectedLevel}`).join('\n')
+    : 'No competency gaps.'
+
+  return truncateToTokenBudget(`Person: ${args.name}, ${args.role ?? 'Engineer'} (${args.level ?? 'unknown level'})
+
+=== Last 3 Meeting Notes ===
+${meetingText}
+
+=== Open Follow-ups ===
+${followUpText}
+
+=== Recent Evidence (last 30 days) ===
+${evidenceText}
+
+=== Competency Gaps ===
+${gapText}`, 4000)
+}
+
+// ─── Promotion Packet ─────────────────────────────────────────────────────────
+
+export const PROMOTION_PACKET_SYSTEM = `You are helping an engineering manager write a promotion case for one of their reports. Write a compelling, evidence-based promotion document.
+
+Structure (use markdown):
+## Recommendation
+## Current Level Summary
+## Case for Promotion
+## Growth Trajectory
+## Areas for Continued Development
+## Supporting Evidence Summary
+
+Rules:
+- Every claim must reference specific evidence with dates
+- Frame the case positively but honestly — do not overstate
+- If evidence is thin for a competency area, note it explicitly
+- Use the person's first name
+- Keep total length under 1000 words`
+
+export function buildPromotionPacketPrompt(args: {
+  name: string
+  role: string | null
+  currentLevel: string
+  targetLevel: string
+  assessments: Array<{ areaName: string; assessedLevel: string; expectedLevel: string; notes?: string | null }>
+  evidence: Array<{ category: string; title: string; occurredAt: string; content?: string | null }>
+}): string {
+  const assessmentText = args.assessments.map(a =>
+    `${a.areaName}: ${a.assessedLevel} (expected ${a.expectedLevel})${a.notes ? ' — ' + a.notes.slice(0, 150) : ''}`
+  ).join('\n') || 'No assessments.'
+
+  const evidenceText = args.evidence
+    .filter(e => ['promotion_evidence', 'achievement', 'delivery'].includes(e.category))
+    .slice(0, 20)
+    .map(e => `[${e.category}] ${e.title} (${e.occurredAt})${e.content ? ': ' + e.content.slice(0, 250) : ''}`)
+    .join('\n') || 'No promotion evidence logged.'
+
+  return truncateToTokenBudget(`Person: ${args.name}, ${args.role ?? 'Engineer'}
+Current level: ${args.currentLevel} → Proposed: ${args.targetLevel}
+
+=== Competency Assessments ===
+${assessmentText}
+
+=== Promotion Evidence ===
+${evidenceText}`, 6000)
+}
+
+// ─── Action Item Extraction ───────────────────────────────────────────────────
+
+export const ACTION_ITEM_EXTRACTION_SYSTEM = `Extract action items from meeting notes. An action item is something someone committed to DO — not a discussion point or observation.
+
+For each action item return:
+- title: concise description
+- assignee: person responsible (must be one of the attendees, or "unassigned")
+- due_date_hint: timeframe mentioned ("by Friday", "next sprint") or null
+
+Return ONLY a JSON object:
+{
+  "action_items": [{"title": "...", "assignee": "...", "due_date_hint": "..."}],
+  "follow_ups": [{"title": "...", "person": "...", "due_date_hint": "..."}]
+}
+
+follow_ups are commitments the MANAGER made ("I'll check on...", "Let me find out about...").
+If none found, return empty arrays. No other text.`
+
+export function buildActionItemPrompt(args: {
+  meetingTitle: string
+  meetingType: string
+  attendees: string[]
+  notes: string
+  actionItems: string
+}): string {
+  return `Meeting: ${args.meetingTitle} (${args.meetingType})
+Attendees: ${args.attendees.join(', ') || 'unknown'}
+
+Notes:
+${(args.notes + '\n\n' + args.actionItems).slice(0, 3000)}`
+}
+
+// ─── Meeting Notes Cleanup ────────────────────────────────────────────────────
+
+export const NOTES_CLEANUP_SYSTEM = `Clean up the following meeting notes. Fix grammar, spelling, and punctuation. Organise into clear sections if the notes are unstructured. Preserve all factual content — do not add, remove, or change any information. Keep the same level of detail. Use markdown formatting.`
+
+// ─── Evidence Categorisation ──────────────────────────────────────────────────
+
+export const EVIDENCE_CATEGORISATION_SYSTEM = `Given an evidence entry about an employee, suggest:
+1. category: one of [achievement, feedback_given, feedback_received, concern, growth, delivery, behaviour, promotion_evidence, general]
+2. sentiment: one of [positive, neutral, negative]
+
+Return ONLY JSON: {"category": "...", "sentiment": "..."}`
+
+// ─── Summary Rewriting ────────────────────────────────────────────────────────
+
+export const SUMMARY_REWRITE_PROMPTS: Record<string, string> = {
+  'skip-level': 'Rewrite this weekly status update for a skip-level audience (the manager\'s manager). Focus on strategic progress, key decisions, risks, and team health. Remove tactical details. Keep to 200-300 words.',
+  'slack':      'Compress this weekly status update into a concise Slack post. Use bullet points. Lead with the most important items. Keep to 5-8 bullets maximum. Casual but professional tone. Include emoji sparingly for scannability.',
+  'team':       'Rewrite this weekly status update as a team-facing update. Focus on what was delivered, what\'s coming next, and any blockers the team should know about. Positive and forward-looking tone. Keep to 300-400 words.',
+}
+
+export const SUMMARY_REWRITE_LABELS: Record<string, string> = {
+  'skip-level': 'Skip-level update',
+  'slack':      'Slack post',
+  'team':       'Team update',
+  'custom':     'Custom…',
+}
+
+// ─── Growth Plan Suggestion ───────────────────────────────────────────────────
+
+export const GROWTH_PLAN_SYSTEM = `Suggest a growth plan for an engineer who needs to develop in a competency area. The plan should be specific, actionable, and achievable within 3-6 months.
+
+Return ONLY JSON:
+{
+  "title": "...",
+  "description": "...",
+  "actions": ["...", "...", "..."],
+  "success_criteria": "...",
+  "suggested_timeline": "..."
+}
+
+Be specific to the competency area and level gap. Avoid generic advice. Focus on on-the-job practice and measurable behaviours.`
+
+export function buildGrowthPlanPrompt(args: {
+  name: string
+  role: string | null
+  currentLevel: string
+  targetLevel: string
+  areaName: string
+  areaDescription: string
+  currentExpectations: string
+  targetExpectations: string
+}): string {
+  return `Engineer: ${args.name}, ${args.role ?? 'Engineer'}, currently at ${args.currentLevel}, working toward ${args.targetLevel}
+Competency area: ${args.areaName} — ${args.areaDescription}
+
+Current level (${args.currentLevel}) expectations:
+${args.currentExpectations || 'Not defined'}
+
+Target level (${args.targetLevel}) expectations:
+${args.targetExpectations || 'Not defined'}`
+}
+
+// ─── Competency Assessment Reasoning ─────────────────────────────────────────
+
+export const ASSESSMENT_REASONING_SYSTEM = `Draft assessment reasoning for a competency area based on evidence. The reasoning should:
+- Cite specific evidence entries by title and date
+- Explain why the assessed level is appropriate
+- Be 2-4 sentences
+- Be direct and factual
+
+If evidence is thin, note that the assessment is based on limited data.`
+
+// ─── Weekly Reflection Prompts ────────────────────────────────────────────────
+
+export const REFLECTION_PROMPTS_SYSTEM = `Based on a manager's week, generate 3-4 reflection prompts to help them think about their week. Each prompt should be:
+- Specific to what actually happened (not generic)
+- Thought-provoking, not just restating facts
+- One sentence each
+
+Return ONLY a JSON array of strings: ["...", "...", "..."]
+
+Example: "You completed 12 tasks but had no 1:1s — was that a conscious trade-off or did something slip?"`
+
+// ─── Recurring Topics ─────────────────────────────────────────────────────────
+
+export const RECURRING_TOPICS_SYSTEM = `Analyse these meeting notes chronologically and identify recurring topics — themes, concerns, or subjects that appear across multiple meetings. Only flag topics that appear in 3 or more separate meetings.
+
+For each recurring topic return:
+- topic: concise description
+- frequency: how many meetings mention it
+- first_seen: date of the first meeting
+- latest: date of the most recent meeting
+- escalating: boolean — is the topic becoming more prominent or urgent over time?
+
+Return ONLY a JSON array. If no recurring topics, return [].`

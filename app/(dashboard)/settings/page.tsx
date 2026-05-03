@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { User, Check, FileText, Plus, Trash2, ChevronDown, ChevronRight, RotateCcw } from "lucide-react"
 import { useTemplates, type MeetingTemplate } from "@/lib/hooks/use-templates"
+import { AISettingsCard } from "@/components/settings/ai-settings-card"
 
 export default function SettingsPage() {
   const [preferredName, setPreferredName] = useState("User")
@@ -246,6 +247,9 @@ export default function SettingsPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* AI Assistant */}
+        <AISettingsCard />
 
         <div className="flex items-center justify-between">
           <p className="text-gray-400">Changes will be saved to your account</p>

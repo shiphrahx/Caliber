@@ -8,11 +8,16 @@ import { Label } from "@/components/ui/label"
 import { MarkdownTextarea } from "@/components/ui/markdown-textarea"
 import { ChevronRight, ChevronLeft, ArrowLeft, ChevronDown, Plus } from "lucide-react"
 import { MeetingFormDialog } from "@/components/meeting-form-dialog"
+import { AIButton, AIGeneratedBadge } from "@/components/ui/ai-button"
+import { useAIConfig } from "@/lib/hooks/use-ai-config"
+import { callAI, handleAIError } from "@/lib/services/ai"
+import { ONE_ON_ONE_PREP_SYSTEM, buildOneonOnePrepPrompt } from "@/lib/ai/prompts"
 import { getPeople, updatePerson, type Person } from "@/lib/services/people"
 import { getTeams, type Team } from "@/lib/services/teams"
 import { getMeetingsForPerson, createMeeting, type MeetingType, type RecurrenceType } from "@/lib/services/meetings"
 import { LEVEL_BADGE } from "@/lib/badge-styles"
 import { EvidenceSection } from "@/components/evidence/evidence-section"
+import { CompetencySection } from "@/components/competency/competency-section"
 import { FollowUpList } from "@/components/follow-ups/follow-up-list"
 import { FollowUpForm } from "@/components/follow-ups/follow-up-form"
 import { getFollowUpsForPerson, type FollowUp } from "@/lib/services/follow-ups"
@@ -61,6 +66,11 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
 
   const [followUps, setFollowUps] = useState<FollowUp[]>([])
   const [addingFollowUp, setAddingFollowUp] = useState(false)
+
+  const [prepBrief, setPrepBrief] = useState<string | null>(null)
+  const [generatingPrep, setGeneratingPrep] = useState(false)
+  const [showPrepBadge, setShowPrepBadge] = useState(false)
+  const aiConfig = useAIConfig()
 
   const { signals, score, loading: signalsLoading } = usePersonSignals(personId ?? '')
 
@@ -223,6 +233,42 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
     }
     setMeetings(meetings.map(m => m.id === updatedMeeting.id ? updatedMeeting : m))
     setSelectedMeeting(updatedMeeting)
+  }
+
+  const handleGeneratePrep = async () => {
+    if (!formData || !personId) return
+    setGeneratingPrep(true)
+    try {
+      const recentMeetings = [...meetings]
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 3)
+        .map(m => ({ title: m.title, meetingDate: m.date, notes: m.notes ?? null, actionItems: m.actionItems ?? null }))
+      const openFollowUps = followUps
+        .filter(f => f.status === 'open')
+        .slice(0, 5)
+        .map(f => ({ title: f.title, createdAt: f.createdAt }))
+      const competencyGaps: Array<{ areaName: string; assessedLevel: string; expectedLevel: string }> = []
+      const result = await callAI({
+        systemPrompt: ONE_ON_ONE_PREP_SYSTEM,
+        userPrompt: buildOneonOnePrepPrompt({
+          name: formData.name,
+          role: formData.role,
+          level: formData.level,
+          recentMeetings,
+          openFollowUps,
+          recentEvidence: [],
+          competencyGaps,
+        }),
+        maxTokens: 600,
+        temperature: 0.3,
+      })
+      setPrepBrief(result.content)
+      setShowPrepBadge(true)
+    } catch (err) {
+      handleAIError(err)
+    } finally {
+      setGeneratingPrep(false)
+    }
   }
 
   const dualListStyle = { border: "1px solid var(--border-2)", borderRadius: "4px", height: "192px", overflowY: "auto" as const, background: "var(--surf-2)" }
@@ -453,6 +499,31 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
           <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
             {selectedMeeting ? (
               <div style={{ display: "grid", gap: "16px" }}>
+                {/* 1:1 Prep Brief */}
+                {selectedMeeting.type === "1:1" && (
+                  <div style={{ background: "var(--surf-2)", border: "1px solid var(--border-1)", borderRadius: "6px", padding: "12px 16px" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: prepBrief ? "12px" : 0 }}>
+                      <span style={{ fontSize: "var(--text-label)", fontWeight: 600, color: "var(--text-2)" }}>1:1 Prep</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        {showPrepBadge && prepBrief && <AIGeneratedBadge onDismiss={() => setShowPrepBadge(false)} />}
+                        <AIButton
+                          configured={aiConfig.configured}
+                          loading={aiConfig.loading}
+                          generating={generatingPrep}
+                          onClick={handleGeneratePrep}
+                          label={prepBrief ? "Regenerate" : "Generate prep brief"}
+                          tooltip={aiConfig.tooltip}
+                          showSetupLink={true}
+                        />
+                      </div>
+                    </div>
+                    {prepBrief && (
+                      <div style={{ fontSize: "var(--text-label)", color: "var(--text-2)", whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
+                        {prepBrief}
+                      </div>
+                    )}
+                  </div>
+                )}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                   <div style={{ display: "grid", gap: "4px" }}>
                     <Label>Date</Label>
@@ -526,6 +597,9 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
       <div style={{ marginTop: "24px" }}>
         <EvidenceSection personId={personId!} personName={formData.name} />
       </div>
+
+      {/* Competencies section */}
+      <CompetencySection personId={personId!} personLevel={formData.level ?? null} personName={formData.name} />
 
       {addingFollowUp && personId && (
         <FollowUpForm
