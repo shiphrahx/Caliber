@@ -17,6 +17,11 @@ import {
 } from '@/lib/services/weekly-review'
 import { useWeeklySummaryData } from '@/lib/hooks/use-weekly-summary-data'
 import { generateSummaryMarkdown, stripMarkdown } from '@/lib/summary/template'
+import { AIButton } from '@/components/ui/ai-button'
+import { useAIConfig } from '@/lib/hooks/use-ai-config'
+import { callAI, handleAIError } from '@/lib/services/ai'
+import { SUMMARY_REWRITE_PROMPTS, SUMMARY_REWRITE_LABELS } from '@/lib/ai/prompts'
+import { toast } from 'sonner'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -108,7 +113,10 @@ export default function SummaryPage() {
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'copiedPlain'>('idle')
   const [regenerating, setRegenerating] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [rewriting, setRewriting] = useState(false)
+  const [showRewriteMenu, setShowRewriteMenu] = useState(false)
   const saveDebounce = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const aiConfig = useAIConfig()
 
   const { data, loading, error, refetch } = useWeeklySummaryData(weekStart)
 
@@ -165,6 +173,30 @@ export default function SummaryPage() {
       setGeneratedAt(r.summaryGeneratedAt)
     } finally {
       setRegenerating(false)
+    }
+  }
+
+  const handleRewrite = async (format: string) => {
+    if (!content.trim()) { toast.error('No summary content to rewrite.'); return }
+    setShowRewriteMenu(false)
+    setRewriting(true)
+    try {
+      const systemPrompt = format === 'custom'
+        ? (prompt('Enter your rewrite instructions:') ?? '')
+        : SUMMARY_REWRITE_PROMPTS[format]
+      if (!systemPrompt) { setRewriting(false); return }
+      const result = await callAI({
+        systemPrompt,
+        userPrompt: content,
+        maxTokens: 800,
+        temperature: 0.4,
+      })
+      handleContentChange(result.content)
+      toast.success(`Rewritten as ${SUMMARY_REWRITE_LABELS[format] ?? format}.`)
+    } catch (err) {
+      handleAIError(err)
+    } finally {
+      setRewriting(false)
     }
   }
 
@@ -283,6 +315,53 @@ export default function SummaryPage() {
               <RefreshCw style={{ width: '10px', height: '10px' }} />
               Regenerate
             </button>
+            {/* AI rewrite menu */}
+            <div style={{ position: 'relative' }}>
+              <AIButton
+                configured={aiConfig.configured}
+                loading={aiConfig.loading}
+                generating={rewriting}
+                onClick={() => setShowRewriteMenu(m => !m)}
+                label="Rewrite for…"
+                tooltip={aiConfig.tooltip}
+                showSetupLink={false}
+              />
+              {showRewriteMenu && aiConfig.configured && (
+                <div style={{
+                  position: 'absolute', top: 'calc(100% + 4px)', right: 0, zIndex: 50,
+                  background: 'var(--surf)', border: '1px solid var(--border-2)', borderRadius: '6px',
+                  minWidth: '160px', overflow: 'hidden',
+                }}>
+                  {Object.keys(SUMMARY_REWRITE_PROMPTS).map(fmt => (
+                    <button
+                      key={fmt}
+                      onClick={() => handleRewrite(fmt)}
+                      style={{
+                        display: 'block', width: '100%', padding: '8px 14px', textAlign: 'left',
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        fontSize: 'var(--text-label)', color: 'var(--text-2)', fontFamily: 'var(--font-sans)',
+                      }}
+                      onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'var(--surf-2)')}
+                      onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'none')}
+                    >
+                      {SUMMARY_REWRITE_LABELS[fmt]}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => handleRewrite('custom')}
+                    style={{
+                      display: 'block', width: '100%', padding: '8px 14px', textAlign: 'left',
+                      background: 'none', borderTop: '1px solid var(--border-1)', borderRight: 'none', borderBottom: 'none', borderLeft: 'none',
+                      cursor: 'pointer', fontSize: 'var(--text-label)', color: 'var(--text-3)', fontFamily: 'var(--font-sans)',
+                    }}
+                    onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'var(--surf-2)')}
+                    onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'none')}
+                  >
+                    {SUMMARY_REWRITE_LABELS['custom']}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Editor */}
