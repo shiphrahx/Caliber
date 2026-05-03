@@ -361,7 +361,33 @@ export default function ReviewPrepPage({ params }: { params: Promise<{ id: strin
         onToggle={() => toggleSection("impact")}
         count={summaryText ? 1 : 0}
         emptyMessage="Write a synthesis of this person's performance for the review period. Capture the overall narrative before diving into specifics."
+        headerExtra={
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            {generatingDraft && draftAbort && (
+              <button
+                onClick={() => draftAbort.abort()}
+                style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", background: "none", border: "none", cursor: "pointer", padding: "2px 6px" }}
+              >
+                Cancel
+              </button>
+            )}
+            <AIButton
+              configured={aiConfig.configured}
+              loading={aiConfig.loading}
+              generating={generatingDraft}
+              onClick={handleGenerateDraft}
+              label="Generate draft"
+              tooltip={aiConfig.tooltip}
+              showSetupLink={true}
+            />
+          </div>
+        }
       >
+        {showAIBadge && (
+          <div style={{ marginBottom: "10px" }}>
+            <AIGeneratedBadge onDismiss={() => setShowAIBadge(false)} />
+          </div>
+        )}
         <MarkdownTextarea
           value={summaryText}
           onValueChange={setSummaryText}
@@ -533,7 +559,7 @@ export default function ReviewPrepPage({ params }: { params: Promise<{ id: strin
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 function ReviewSection({
-  title, collapsed, onToggle, count, emptyMessage, children,
+  title, collapsed, onToggle, count, emptyMessage, headerExtra, children,
 }: {
   title: string
   sectionKey?: SectionKey
@@ -541,22 +567,30 @@ function ReviewSection({
   onToggle: () => void
   count: number
   emptyMessage: string
+  headerExtra?: React.ReactNode
   children?: React.ReactNode
 }) {
   return (
     <div style={{ background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "8px", overflow: "hidden", marginBottom: "12px" }}>
-      <button
-        onClick={onToggle}
-        style={{ width: "100%", padding: "14px 20px", display: "flex", alignItems: "center", gap: "8px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
-        onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "var(--surf-2)")}
-        onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "none")}
-      >
-        {collapsed
-          ? <ChevronRight style={{ width: "14px", height: "14px", color: "var(--text-3)", flexShrink: 0 }} />
-          : <ChevronDown style={{ width: "14px", height: "14px", color: "var(--text-3)", flexShrink: 0 }} />}
-        <h2 style={{ flex: 1 }}>{title}</h2>
-        <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>{count} {count === 1 ? "entry" : "entries"}</span>
-      </button>
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <button
+          onClick={onToggle}
+          style={{ flex: 1, padding: "14px 20px", display: "flex", alignItems: "center", gap: "8px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+          onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "var(--surf-2)")}
+          onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "none")}
+        >
+          {collapsed
+            ? <ChevronRight style={{ width: "14px", height: "14px", color: "var(--text-3)", flexShrink: 0 }} />
+            : <ChevronDown style={{ width: "14px", height: "14px", color: "var(--text-3)", flexShrink: 0 }} />}
+          <h2 style={{ flex: 1 }}>{title}</h2>
+          <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>{count} {count === 1 ? "entry" : "entries"}</span>
+        </button>
+        {headerExtra && (
+          <div style={{ padding: "0 16px" }} onClick={e => e.stopPropagation()}>
+            {headerExtra}
+          </div>
+        )}
+      </div>
       {!collapsed && (
         <div style={{ padding: "4px 20px 20px" }}>
           {count === 0 && emptyMessage ? (
