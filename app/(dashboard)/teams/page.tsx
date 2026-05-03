@@ -92,39 +92,9 @@ export default function TeamsPage() {
   return (
     <>
       {/* Top bar */}
-      <div style={{
-        height: "40px",
-        padding: "0 16px",
-        borderBottom: "1px solid var(--border-1)",
-        background: "var(--surf)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        flexShrink: 0,
-        position: "sticky",
-        top: 0,
-        zIndex: 10,
-      }}>
-        <span style={{ fontSize: "var(--text-label)", fontWeight: 500, color: "var(--text-1)", fontFamily: "var(--font-sans)" }}>
-          Teams
-        </span>
-        <button
-          onClick={() => setIsAddDialogOpen(true)}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "4px",
-            background: "linear-gradient(90deg, #00ffe5 0%, #00f058 100%)",
-            border: "none",
-            color: "#0a1a0a",
-            padding: "4px 10px",
-            borderRadius: "4px",
-            fontSize: "var(--text-caption)",
-            fontWeight: 600,
-            cursor: "pointer",
-            fontFamily: "var(--font-sans)",
-          }}
-        >
+      <div className="page-topbar">
+        <span className="page-topbar-title">Teams</span>
+        <button className="btn-primary" onClick={() => setIsAddDialogOpen(true)}>
           + Create team
         </button>
       </div>

@@ -175,20 +175,14 @@ export default function EvidencePage() {
   }, [people])
 
   return (
-    <div style={{ padding: "32px" }}>
-      {/* Header */}
-      <div style={{ marginBottom: "24px", display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-        <div>
-          <h1>Evidence Bank</h1>
-          <p style={{ marginTop: "4px" }}>Continuous evidence log for performance reviews</p>
-        </div>
-        <button
-          onClick={() => setShowForm(true)}
-          style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "linear-gradient(90deg, #00ffe5 0%, #00f058 100%)", border: "none", color: "#0a1a0a", padding: "6px 14px", borderRadius: "4px", fontSize: "var(--text-label)", fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-sans)" }}
-        >
-          <Plus style={{ width: "14px", height: "14px" }} /> Add Evidence
+    <>
+      <div className="page-topbar">
+        <span className="page-topbar-title">Evidence Bank</span>
+        <button className="btn-primary" onClick={() => setShowForm(true)}>
+          <Plus style={{ width: "13px", height: "13px" }} /> Add Evidence
         </button>
       </div>
+      <div className="page-content">
 
       {/* Stats bar */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "12px", marginBottom: "24px" }}>
@@ -408,6 +402,7 @@ export default function EvidencePage() {
           </>
         )}
       </div>
-    </div>
+      </div>
+    </>
   )
 }

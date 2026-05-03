@@ -82,33 +82,14 @@ export default function FollowUpsPage() {
 
 
   return (
-    <div style={{ padding: '24px 32px', maxWidth: '900px', margin: '0 auto' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-        <div>
-          <h1>Follow-ups</h1>
-          <p style={{ marginTop: '4px' }}>Commitments you've made to your team</p>
-        </div>
-        <button
-          onClick={() => setShowPersonPicker(true)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            background: 'var(--accent)',
-            border: '1px solid var(--accent)',
-            borderRadius: '5px',
-            color: '#000',
-            fontSize: 'var(--text-meta)',
-            fontWeight: 600,
-            padding: '7px 14px',
-            cursor: 'pointer',
-            fontFamily: 'var(--font-sans)',
-          }}
-        >
+    <>
+      <div className="page-topbar">
+        <span className="page-topbar-title">Follow-ups</span>
+        <button className="btn-primary" onClick={() => setShowPersonPicker(true)}>
           <Plus style={{ width: '13px', height: '13px' }} /> Add follow-up
         </button>
       </div>
+      <div className="page-content">
 
       {/* Stats bar */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '20px' }}>
@@ -289,5 +270,6 @@ export default function FollowUpsPage() {
         />
       )}
     </div>
+    </>
   )
 }

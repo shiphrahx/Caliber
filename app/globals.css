@@ -242,3 +242,69 @@ label { font-size: var(--text-label); color: var(--text-2); }
 .nav-item-collapsed {
   justify-content: center;
 }
+
+/* ── Page topbar (sticky header bar used across all pages) ── */
+.page-topbar {
+  height: 40px;
+  padding: 0 16px;
+  background: var(--surf);
+  border-bottom: 1px solid var(--border-1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.page-topbar-title {
+  font-size: var(--text-label);
+  font-weight: 500;
+  color: var(--text-1);
+  font-family: var(--font-sans);
+}
+
+/* ── Page content wrapper ── */
+.page-content {
+  padding: 16px;
+}
+
+/* ── Primary gradient button ── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(90deg, #00ffe5 0%, #00f058 100%);
+  border: none;
+  color: #0a1a0a;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  white-space: nowrap;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+/* ── Secondary ghost button ── */
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border-2);
+  border-radius: 4px;
+  color: var(--text-2);
+  font-size: var(--text-caption);
+  padding: 4px 10px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  white-space: nowrap;
+}
+
+.btn-ghost:hover {
+  border-color: var(--border-3);
+  color: var(--text-1);
+}

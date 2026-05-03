@@ -337,11 +337,14 @@ export default function RadarPage() {
   }
 
   return (
-    <div style={{ padding: '24px 32px', maxWidth: '860px', margin: '0 auto' }}>
-      {/* Header */}
+    <>
+      <div className="page-topbar">
+        <span className="page-topbar-title">People Radar</span>
+      </div>
+      <div className="page-content">
+      {/* Header subtitle */}
       <div style={{ marginBottom: '20px' }}>
-        <h1>People Radar</h1>
-        <p style={{ marginTop: '4px' }}>
+        <p>
           {needsAttention.length > 0
             ? `${needsAttention.length} person${needsAttention.length !== 1 ? 's' : ''} need${needsAttention.length === 1 ? 's' : ''} attention`
             : 'All clear — everyone is on track'}
@@ -501,6 +504,7 @@ export default function RadarPage() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   )
 }

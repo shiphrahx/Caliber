@@ -65,32 +65,10 @@ export function DismissDialog({ onConfirm, onCancel }: DismissDialogProps) {
         />
 
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-          <button
-            onClick={onCancel}
-            style={{
-              background: 'var(--surf-3)',
-              border: '1px solid var(--border-2)',
-              borderRadius: '4px',
-              color: 'var(--text-2)',
-              fontSize: 'var(--text-meta)',
-              padding: '6px 12px',
-              cursor: 'pointer',
-            }}
-          >
+          <button onClick={onCancel} className="btn-ghost" style={{ padding: '6px 12px' }}>
             Cancel
           </button>
-          <button
-            onClick={() => onConfirm(note)}
-            style={{
-              background: 'var(--surf-3)',
-              border: '1px solid var(--border-2)',
-              borderRadius: '4px',
-              color: 'var(--text-1)',
-              fontSize: 'var(--text-meta)',
-              padding: '6px 12px',
-              cursor: 'pointer',
-            }}
-          >
+          <button onClick={() => onConfirm(note)} className="btn-primary" style={{ padding: '6px 12px' }}>
             Dismiss
           </button>
         </div>

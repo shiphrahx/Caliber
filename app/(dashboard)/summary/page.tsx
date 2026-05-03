@@ -236,15 +236,9 @@ export default function SummaryPage() {
   return (
     <>
       {/* Top bar */}
-      <div style={{
-        height: '40px', padding: '0 16px', borderBottom: '1px solid var(--border-1)',
-        background: 'var(--surf)', display: 'flex', alignItems: 'center',
-        justifyContent: 'space-between', flexShrink: 0, position: 'sticky', top: 0, zIndex: 10,
-      }}>
+      <div className="page-topbar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: 'var(--text-label)', fontWeight: 500, color: 'var(--text-1)', fontFamily: 'var(--font-sans)' }}>
-            Weekly Summary
-          </span>
+          <span className="page-topbar-title">Weekly Summary</span>
           {saving && (
             <span style={{ fontSize: 'var(--text-caption)', color: 'var(--text-3)' }}>saving…</span>
           )}
