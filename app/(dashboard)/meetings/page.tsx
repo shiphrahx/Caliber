@@ -6,6 +6,11 @@ import { ChevronRight, ChevronDown, ChevronsRight, ChevronsDown, BookOpen, ListC
 import { LogEvidenceModal } from "@/components/evidence/log-evidence-modal"
 import { FollowUpForm } from "@/components/follow-ups/follow-up-form"
 import { MeetingFormDialog } from "@/components/meeting-form-dialog"
+import { AIButton } from "@/components/ui/ai-button"
+import { useAIConfig } from "@/lib/hooks/use-ai-config"
+import { callAI, handleAIError } from "@/lib/services/ai"
+import { ACTION_ITEM_EXTRACTION_SYSTEM, buildActionItemPrompt } from "@/lib/ai/prompts"
+import { toast } from "sonner"
 import {
   getMeetings,
   createMeeting,
@@ -61,6 +66,8 @@ export default function MeetingsPage() {
   const [isResizing, setIsResizing] = useState(false)
   const [logEvidenceOpen, setLogEvidenceOpen] = useState(false)
   const [trackFollowUpOpen, setTrackFollowUpOpen] = useState(false)
+  const [extractingActions, setExtractingActions] = useState(false)
+  const aiConfig = useAIConfig()
 
   useEffect(() => {
     const loadData = async () => {
@@ -272,6 +279,60 @@ export default function MeetingsPage() {
     } catch (error) {
       console.error('Failed to update meeting:', error)
       alert('Failed to update meeting. Please try again.')
+    }
+  }
+
+  const handleExtractActions = async () => {
+    if (!selectedMeeting) return
+    setExtractingActions(true)
+    try {
+      const notes = (selectedMeeting.notes ?? '').replace(/<[^>]+>/g, ' ')
+      const actionItems = (selectedMeeting.actionItems ?? '').replace(/<[^>]+>/g, ' ')
+      const result = await callAI({
+        systemPrompt: ACTION_ITEM_EXTRACTION_SYSTEM,
+        userPrompt: buildActionItemPrompt({
+          meetingTitle: selectedMeeting.title,
+          meetingType: selectedMeeting.type,
+          attendees: selectedMeeting.attendees,
+          notes,
+          actionItems,
+        }),
+        maxTokens: 800,
+        temperature: 0.2,
+      })
+      let parsed: { action_items: Array<{ title: string; assignee: string; due_date_hint: string | null }>; follow_ups: Array<{ title: string; person: string; due_date_hint: string | null }> }
+      try {
+        const jsonMatch = result.content.match(/\{[\s\S]*\}/)
+        parsed = JSON.parse(jsonMatch?.[0] ?? result.content)
+      } catch {
+        toast.error('Could not parse AI response. Try again.')
+        return
+      }
+      const tasks = parsed.action_items ?? []
+      const followUps = parsed.follow_ups ?? []
+      let created = 0
+      for (const item of tasks) {
+        await createTask({
+          title: item.title,
+          description: `Extracted from: ${selectedMeeting.title} · Assignee: ${item.assignee}${item.due_date_hint ? ' · Due: ' + item.due_date_hint : ''}`,
+          priority: 'Medium',
+          category: 'Task',
+          status: 'Not started',
+          list: 'week',
+          dueDate: null,
+        })
+        created++
+      }
+      const total = tasks.length + followUps.length
+      if (total === 0) {
+        toast.info('No action items found in notes.')
+      } else {
+        toast.success(`Created ${created} task${created !== 1 ? 's' : ''}${followUps.length > 0 ? ` + ${followUps.length} follow-up${followUps.length !== 1 ? 's' : ''} identified` : ''}.`)
+      }
+    } catch (err) {
+      handleAIError(err)
+    } finally {
+      setExtractingActions(false)
     }
   }
 
@@ -697,7 +758,18 @@ export default function MeetingsPage() {
 
               {/* Action items */}
               <div style={{ marginBottom: "16px" }}>
-                <div className="form-section-header">Action items</div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
+                  <div className="form-section-header" style={{ marginBottom: 0 }}>Action items</div>
+                  <AIButton
+                    configured={aiConfig.configured}
+                    loading={aiConfig.loading}
+                    generating={extractingActions}
+                    onClick={handleExtractActions}
+                    label="Extract from notes"
+                    tooltip={aiConfig.tooltip}
+                    showSetupLink={false}
+                  />
+                </div>
                 <div style={{
                   background: "var(--surf-2)",
                   border: "1px solid var(--border-1)",
