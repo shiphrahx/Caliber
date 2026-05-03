@@ -13,6 +13,9 @@ import { Input } from "@/components/ui/input"
 import { MarkdownTextarea } from "@/components/ui/markdown-textarea"
 import { Link2 } from "lucide-react"
 import { createEvidence, type EvidenceCategory, type EvidenceSentiment } from "@/lib/services/evidence"
+import { useAIConfig } from "@/lib/hooks/use-ai-config"
+import { callAI } from "@/lib/services/ai"
+import { EVIDENCE_CATEGORISATION_SYSTEM } from "@/lib/ai/prompts"
 
 const CATEGORY_LABELS: Record<EvidenceCategory, string> = {
   achievement:        "Achievement",
@@ -64,6 +67,8 @@ export function LogEvidenceModal({
   const [sentiment, setSentiment] = useState<EvidenceSentiment>("neutral")
   const [resolvedPersonId, setResolvedPersonId] = useState(personId)
   const [saving, setSaving] = useState(false)
+  const [suggesting, setSuggesting] = useState(false)
+  const aiConfig = useAIConfig()
 
   useEffect(() => {
     if (open) {
@@ -75,6 +80,33 @@ export function LogEvidenceModal({
       setResolvedPersonId(personId)
     }
   }, [open, meetingDate, personId])
+
+  const handleSuggestCategory = async () => {
+    if (!title.trim()) return
+    setSuggesting(true)
+    try {
+      const result = await callAI({
+        systemPrompt: EVIDENCE_CATEGORISATION_SYSTEM,
+        userPrompt: `Title: ${title}\nNotes: ${content}`,
+        maxTokens: 80,
+        temperature: 0,
+      })
+      const jsonMatch = result.content.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0])
+        if (parsed.category && CATEGORIES.includes(parsed.category as EvidenceCategory)) {
+          setCategory(parsed.category as EvidenceCategory)
+        }
+        if (parsed.sentiment && SENTIMENTS.includes(parsed.sentiment as EvidenceSentiment)) {
+          setSentiment(parsed.sentiment as EvidenceSentiment)
+        }
+      }
+    } catch {
+      // silent — AI suggestion is non-critical
+    } finally {
+      setSuggesting(false)
+    }
+  }
 
   const handleSave = async () => {
     if (!title.trim() || !resolvedPersonId) return
@@ -138,7 +170,19 @@ export function LogEvidenceModal({
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 160px", gap: "12px" }}>
             <div style={{ display: "grid", gap: "4px" }}>
-              <label className="form-label">Category</label>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <label className="form-label" style={{ margin: 0 }}>Category</label>
+                {aiConfig.configured && title.trim().length >= 10 && (
+                  <button
+                    type="button"
+                    onClick={handleSuggestCategory}
+                    disabled={suggesting}
+                    style={{ fontSize: "var(--text-caption)", color: suggesting ? "var(--text-3)" : "#00f058", background: "none", border: "none", cursor: suggesting ? "not-allowed" : "pointer", padding: 0, fontFamily: "var(--font-sans)" }}
+                  >
+                    {suggesting ? "Suggesting…" : "✦ Suggest"}
+                  </button>
+                )}
+              </div>
               <select value={category} onChange={e => setCategory(e.target.value as EvidenceCategory)}
                 style={{ background: "var(--surf-2)", border: "1px solid var(--border-2)", borderRadius: "6px", color: "var(--text-1)", padding: "6px 10px", fontSize: "var(--text-label)", cursor: "pointer" }}>
                 {CATEGORIES.map(c => <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>)}
