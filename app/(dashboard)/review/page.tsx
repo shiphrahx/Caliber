@@ -5,12 +5,13 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   ChevronLeft, ChevronRight, AlertCircle, AlertTriangle, Info,
-  CheckCircle, User, ExternalLink
+  CheckCircle, User, ExternalLink, ArrowRight
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import {
   getMondayOfWeek,
   formatWeekRange,
+  addDays,
   getOrCreateWeeklyReview,
   getWeeklyReview,
   getDismissedItems,
@@ -29,11 +30,6 @@ import { updateTask } from '@/lib/services/tasks'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function addDays(dateStr: string, n: number): string {
-  const d = new Date(dateStr + 'T00:00:00')
-  d.setDate(d.getDate() + n)
-  return d.toISOString().split('T')[0]
-}
 
 function severityIcon(severity: SignalSeverity) {
   if (severity === 'critical') return <AlertCircle style={{ width: '13px', height: '13px', color: '#ff6b6b', flexShrink: 0 }} />
@@ -744,11 +740,23 @@ export default function WeeklyReviewPage() {
               )}
 
               {isCompleted ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: 'var(--text-body)', color: '#00f058', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <CheckCircle style={{ width: '16px', height: '16px' }} />
                     Week reviewed ✓
                   </span>
+                  <Link
+                    href={`/summary?week=${weekStart}`}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '5px',
+                      background: 'var(--surf-3)', border: '1px solid var(--border-2)',
+                      borderRadius: '4px', color: 'var(--text-2)',
+                      fontSize: 'var(--text-meta)', padding: '5px 12px',
+                      textDecoration: 'none', fontFamily: 'var(--font-sans)',
+                    }}
+                  >
+                    Generate weekly summary <ArrowRight style={{ width: '11px', height: '11px' }} />
+                  </Link>
                   <button
                     onClick={handleReopen}
                     style={{

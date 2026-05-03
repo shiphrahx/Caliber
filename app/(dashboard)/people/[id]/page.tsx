@@ -13,6 +13,7 @@ import { getTeams, type Team } from "@/lib/services/teams"
 import { getMeetingsForPerson, createMeeting, type MeetingType, type RecurrenceType } from "@/lib/services/meetings"
 import { LEVEL_BADGE } from "@/lib/badge-styles"
 import { EvidenceSection } from "@/components/evidence/evidence-section"
+import { CompetencySection } from "@/components/competency/competency-section"
 import { FollowUpList } from "@/components/follow-ups/follow-up-list"
 import { FollowUpForm } from "@/components/follow-ups/follow-up-form"
 import { getFollowUpsForPerson, type FollowUp } from "@/lib/services/follow-ups"
@@ -526,6 +527,9 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
       <div style={{ marginTop: "24px" }}>
         <EvidenceSection personId={personId!} personName={formData.name} />
       </div>
+
+      {/* Competencies section */}
+      <CompetencySection personId={personId!} personLevel={formData.level ?? null} />
 
       {addingFollowUp && personId && (
         <FollowUpForm

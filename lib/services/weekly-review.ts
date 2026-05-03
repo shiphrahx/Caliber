@@ -23,6 +23,9 @@ export interface WeeklyReview {
   completedAt: string | null
   notes: string | null
   snapshot: ReviewSnapshot | null
+  summaryMarkdown: string | null
+  editedSummary: string | null
+  summaryGeneratedAt: string | null
   createdAt: string
   updatedAt: string
 }
@@ -58,6 +61,9 @@ type WeeklyReviewRow = {
   completed_at: string | null
   notes: string | null
   snapshot: ReviewSnapshot | null
+  summary_markdown: string | null
+  edited_summary: string | null
+  summary_generated_at: string | null
   created_at: string
   updated_at: string
 }
@@ -82,6 +88,9 @@ function rowToReview(row: WeeklyReviewRow): WeeklyReview {
     completedAt: row.completed_at,
     notes: row.notes,
     snapshot: row.snapshot,
+    summaryMarkdown: row.summary_markdown,
+    editedSummary: row.edited_summary,
+    summaryGeneratedAt: row.summary_generated_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }
@@ -98,6 +107,13 @@ function rowToDismissed(row: DismissedItemRow): DismissedItem {
     dismissedAt: row.dismissed_at,
     note: row.note,
   }
+}
+
+/** Adds n days to an ISO date string, returns ISO date string */
+export function addDays(dateStr: string, n: number): string {
+  const d = new Date(dateStr + 'T00:00:00')
+  d.setDate(d.getDate() + n)
+  return d.toISOString().split('T')[0]
 }
 
 /** Returns the Monday (ISO date string) of the week containing the given date */
@@ -259,6 +275,44 @@ export async function undismissItem(dismissedItemId: string): Promise<void> {
     .from('review_dismissed_items')
     .delete()
     .eq('id', dismissedItemId)
+  if (error) throw new Error(error.message)
+}
+
+/** Save a freshly-generated summary (overwrites previous generated content) */
+export async function saveSummaryMarkdown(weekStart: string, markdown: string): Promise<WeeklyReview> {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const { data, error } = await supabase
+    .from('weekly_reviews')
+    .upsert({
+      user_id: user.id,
+      week_start: weekStart,
+      summary_markdown: markdown,
+      summary_generated_at: new Date().toISOString(),
+      // clear edited version when regenerating
+      edited_summary: null,
+    }, { onConflict: 'user_id,week_start' })
+    .select('*')
+    .single()
+  if (error) throw new Error(error.message)
+  return rowToReview(data as WeeklyReviewRow)
+}
+
+/** Save user edits to the summary (separate from generated content) */
+export async function saveEditedSummary(weekStart: string, editedContent: string): Promise<void> {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const { error } = await supabase
+    .from('weekly_reviews')
+    .upsert({
+      user_id: user.id,
+      week_start: weekStart,
+      edited_summary: editedContent,
+    }, { onConflict: 'user_id,week_start' })
   if (error) throw new Error(error.message)
 }
 

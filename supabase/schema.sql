@@ -721,6 +721,9 @@ CREATE TABLE IF NOT EXISTS public.weekly_reviews (
   completed_at TIMESTAMPTZ,
   notes TEXT,
   snapshot JSONB,
+  summary_markdown TEXT,
+  edited_summary TEXT,
+  summary_generated_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE(user_id, week_start)
@@ -754,7 +757,11 @@ CREATE TABLE IF NOT EXISTS public.review_dismissed_items (
     'no_evidence',
     'upcoming_deadline',
     'stale_goal',
-    'missing_notes'
+    'missing_notes',
+    'overdue_follow_up',
+    'ageing_follow_up',
+    'surfaced_follow_up',
+    'action_overload'
   )),
   reference_id UUID,
   reference_type TEXT,
@@ -772,6 +779,149 @@ CREATE POLICY "Users can manage their own dismissed items"
   FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
+
+-- ============================================================================
+-- CAREER FRAMEWORK TABLES
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS public.competency_frameworks (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  owning_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  description TEXT,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'archived')),
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+CREATE INDEX idx_competency_frameworks_user ON public.competency_frameworks(owning_user_id);
+
+CREATE TRIGGER update_competency_frameworks_updated_at
+  BEFORE UPDATE ON public.competency_frameworks
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE public.competency_frameworks ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage their own frameworks"
+  ON public.competency_frameworks FOR ALL
+  USING (auth.uid() = owning_user_id)
+  WITH CHECK (auth.uid() = owning_user_id);
+
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS public.competency_areas (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  owning_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  framework_id UUID NOT NULL REFERENCES public.competency_frameworks(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  description TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+CREATE INDEX idx_competency_areas_framework ON public.competency_areas(framework_id, sort_order);
+
+CREATE TRIGGER update_competency_areas_updated_at
+  BEFORE UPDATE ON public.competency_areas
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE public.competency_areas ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage their own competency areas"
+  ON public.competency_areas FOR ALL
+  USING (auth.uid() = owning_user_id)
+  WITH CHECK (auth.uid() = owning_user_id);
+
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS public.competency_levels (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  owning_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  area_id UUID NOT NULL REFERENCES public.competency_areas(id) ON DELETE CASCADE,
+  level TEXT NOT NULL,
+  expectations TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  UNIQUE(area_id, level)
+);
+
+CREATE TRIGGER update_competency_levels_updated_at
+  BEFORE UPDATE ON public.competency_levels
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE public.competency_levels ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage their own competency levels"
+  ON public.competency_levels FOR ALL
+  USING (auth.uid() = owning_user_id)
+  WITH CHECK (auth.uid() = owning_user_id);
+
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS public.competency_assessments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  owning_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  person_id UUID NOT NULL REFERENCES public.people(id) ON DELETE CASCADE,
+  area_id UUID NOT NULL REFERENCES public.competency_areas(id) ON DELETE CASCADE,
+  assessed_level TEXT NOT NULL,
+  score INTEGER NOT NULL CHECK (score BETWEEN 1 AND 5),
+  notes TEXT,
+  assessed_at DATE NOT NULL DEFAULT CURRENT_DATE,
+  evidence_ids UUID[] DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+CREATE INDEX idx_assessments_person ON public.competency_assessments(person_id, assessed_at DESC);
+CREATE INDEX idx_assessments_area ON public.competency_assessments(area_id);
+
+CREATE TRIGGER update_competency_assessments_updated_at
+  BEFORE UPDATE ON public.competency_assessments
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE public.competency_assessments ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage their own assessments"
+  ON public.competency_assessments FOR ALL
+  USING (auth.uid() = owning_user_id)
+  WITH CHECK (auth.uid() = owning_user_id);
+
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS public.growth_plans (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  owning_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  person_id UUID NOT NULL REFERENCES public.people(id) ON DELETE CASCADE,
+  area_id UUID REFERENCES public.competency_areas(id) ON DELETE SET NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  target_level TEXT,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'completed', 'paused', 'cancelled')),
+  target_date DATE,
+  progress_notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+CREATE INDEX idx_growth_plans_person ON public.growth_plans(person_id, status);
+
+CREATE TRIGGER update_growth_plans_updated_at
+  BEFORE UPDATE ON public.growth_plans
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE public.growth_plans ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage their own growth plans"
+  ON public.growth_plans FOR ALL
+  USING (auth.uid() = owning_user_id)
+  WITH CHECK (auth.uid() = owning_user_id);
+
+-- ============================================================================
+-- EVIDENCE → COMPETENCY AREA LINK
+-- ============================================================================
+ALTER TABLE public.evidence_entries
+  ADD COLUMN IF NOT EXISTS competency_area_id UUID REFERENCES public.competency_areas(id) ON DELETE SET NULL;
 
 -- ============================================================================
 -- SEED DATA (Optional - for development)
