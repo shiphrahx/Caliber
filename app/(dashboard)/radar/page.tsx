@@ -10,10 +10,15 @@ import {
 import { useRadar, type PersonAttention } from '@/lib/hooks/use-person-signals'
 import { completeFollowUp, getFollowUpsForPerson, markFollowUpsSurfaced, type FollowUp } from '@/lib/services/follow-ups'
 import { updateTask } from '@/lib/services/tasks'
+import { getMeetings } from '@/lib/services/meetings'
 import { FollowUpForm } from '@/components/follow-ups/follow-up-form'
 import { FollowUpList } from '@/components/follow-ups/follow-up-list'
 import { scoreToColor, scoreToBg } from '@/lib/signals/types'
 import type { Signal } from '@/lib/signals/types'
+import { AIButton } from '@/components/ui/ai-button'
+import { useAIConfig } from '@/lib/hooks/use-ai-config'
+import { callAI, handleAIError } from '@/lib/services/ai'
+import { RECURRING_TOPICS_SYSTEM } from '@/lib/ai/prompts'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -253,10 +258,59 @@ function PersonCard({
 
 // ── Radar page ────────────────────────────────────────────────────────────────
 
+interface RecurringTopic {
+  topic: string
+  frequency: number
+  first_seen: string
+  latest: string
+  escalating: boolean
+}
+
 export default function RadarPage() {
   const { people, loading, error, refetch } = useRadar()
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all')
   const [showAllClear, setShowAllClear] = useState(false)
+  const [recurringTopics, setRecurringTopics] = useState<RecurringTopic[]>([])
+  const [detectingTopics, setDetectingTopics] = useState(false)
+  const [topicsDetected, setTopicsDetected] = useState(false)
+  const aiConfig = useAIConfig()
+
+  const handleDetectRecurringTopics = async () => {
+    setDetectingTopics(true)
+    try {
+      const meetings = await getMeetings()
+      const withNotes = meetings
+        .filter(m => m.notes)
+        .sort((a, b) => a.meetingDate.localeCompare(b.meetingDate))
+        .slice(0, 30)
+      if (withNotes.length === 0) {
+        setRecurringTopics([])
+        setTopicsDetected(true)
+        return
+      }
+      const notesText = withNotes.map(m => {
+        const plain = (m.notes ?? '').replace(/<[^>]+>/g, ' ').trim()
+        return `[${m.meetingDate}] ${m.title}: ${plain.slice(0, 400)}`
+      }).join('\n\n')
+      const result = await callAI({
+        systemPrompt: RECURRING_TOPICS_SYSTEM,
+        userPrompt: notesText,
+        maxTokens: 600,
+        temperature: 0.2,
+      })
+      const jsonMatch = result.content.match(/\[[\s\S]*\]/)
+      if (jsonMatch) {
+        setRecurringTopics(JSON.parse(jsonMatch[0]))
+      } else {
+        setRecurringTopics([])
+      }
+      setTopicsDetected(true)
+    } catch (err) {
+      handleAIError(err)
+    } finally {
+      setDetectingTopics(false)
+    }
+  }
 
   const needsAttention = people.filter(p => p.score > 0)
   const allClear = people.filter(p => p.score === 0)
@@ -398,6 +452,55 @@ export default function RadarPage() {
           )}
         </div>
       )}
+
+      {/* Recurring Topics */}
+      <div style={{ marginTop: '28px', borderTop: '1px solid var(--border-1)', paddingTop: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+          <div>
+            <h2 style={{ margin: 0 }}>Recurring Topics</h2>
+            <p style={{ fontSize: 'var(--text-caption)', color: 'var(--text-3)', marginTop: '2px' }}>
+              Topics that surface across 3+ meeting notes
+            </p>
+          </div>
+          <AIButton
+            configured={aiConfig.configured}
+            loading={aiConfig.loading}
+            generating={detectingTopics}
+            onClick={handleDetectRecurringTopics}
+            label={topicsDetected ? "Re-analyse" : "Detect recurring topics"}
+            tooltip={aiConfig.tooltip}
+            showSetupLink={true}
+          />
+        </div>
+
+        {topicsDetected && recurringTopics.length === 0 && (
+          <p style={{ fontSize: 'var(--text-meta)', color: 'var(--text-3)' }}>No recurring topics found in recent meeting notes.</p>
+        )}
+
+        {recurringTopics.length > 0 && (
+          <div style={{ display: 'grid', gap: '8px' }}>
+            {recurringTopics.map((t, i) => (
+              <div key={i} style={{
+                display: 'flex', alignItems: 'flex-start', gap: '12px',
+                padding: '12px 16px', background: 'var(--surf)', border: `1px solid ${t.escalating ? '#f87171' : 'var(--border-1)'}`,
+                borderRadius: '6px',
+              }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <span style={{ fontWeight: 600, color: 'var(--text-1)', fontSize: 'var(--text-body)' }}>{t.topic}</span>
+                    {t.escalating && (
+                      <span style={{ fontSize: 'var(--text-caption)', color: '#f87171', background: '#2a0a0a', border: '1px solid #f8717140', borderRadius: '3px', padding: '1px 6px' }}>Escalating</span>
+                    )}
+                  </div>
+                  <span style={{ fontSize: 'var(--text-caption)', color: 'var(--text-3)' }}>
+                    {t.frequency} meeting{t.frequency !== 1 ? 's' : ''} · first {t.first_seen} · latest {t.latest}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
