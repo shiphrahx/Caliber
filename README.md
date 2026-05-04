@@ -7,82 +7,85 @@
 ![TypeScript](https://img.shields.io/github/package-json/dependency-version/shiphrahx/Cadence/dev/typescript?logo=typescript)
 ![Tailwind CSS](https://img.shields.io/github/package-json/dependency-version/shiphrahx/Cadence/dev/tailwindcss?logo=tailwindcss)
 
-
-**A lightweight web platform for engineering managers to run their day-to-day work effectively.**
-
-Cadence is your control centre for management work—bringing together tasks, meetings, delivery data, and personal growth in one clear, organised place.
-
-
-## What is Cadence?
-
-Cadence helps engineering managers:
-
-- 📋 **Stay organised** - Track tasks, follow-ups, and commitments in one place
-- 👥 **Manage teams** - Keep context on people, 1:1s, and team dynamics
-- 📊 **Understand delivery** - Track capacity and delivery patterns over time
-- 🎯 **Invest in growth** - Set and track your own career progression goals
-
-### What Cadence is NOT
-
-- ❌ Not a Jira replacement
-- ❌ Not an HR system
-- ❌ Not a performance management tool
-- ❌ Not an AI-driven decision platform
-
-Cadence supports good management habits—it doesn't automate judgement.
+A lightweight web platform for engineering managers to run their day-to-day work. Brings together people management, tasks, meetings, follow-ups, and career development in one place.
 
 ## Features
 
-### 📋 Task Management
-- Time-based task views (today, this week, this month)
-- Track overdue and upcoming work
-- Link tasks to people, teams, meetings, or projects
-- Automatic task creation from meeting action items
+**People & Teams**
+- Manage team members with seniority levels, roles, and start dates
+- Organise people into teams; track active/inactive status
+- Per-person meeting history and team membership management
 
-### 👥 Team & People Management
-- Manage multiple teams and team members
-- Track team composition and context
-- Configure recurring 1:1s
-- Maintain people-related notes and history
+**People Radar**
+- Attention signals per person (overdue tasks, no recent 1:1, ageing follow-ups, missing notes)
+- Critical/warning severity scoring
+- Schedule 1:1s and log evidence directly from the radar view
 
-### 🤝 Meeting Management
-- Capture meeting notes and decisions
-- Create action items directly from meetings
-- Link meetings to people, teams, and projects
-- View meeting history and outcomes
+**Meetings**
+- Full CRUD with recurrence support (weekly, fortnightly, monthly)
+- Meeting types: 1:1, Team Sync, Retro, Planning, Review, Standup, Other
+- Extract action items from meeting notes; auto-create tasks
+- Tree-organised view by type and person/team
 
-### 📊 Project & Delivery Tracking
-- Track delivery periods (sprints/iterations)
-- Log planned vs actual capacity
-- Visualize delivery trends over time
-- Get warnings about over-planning or capacity drops
+**Follow-ups**
+- Track commitments made to team members
+- Link follow-ups to meetings or log manually
+- Overdue tracking with sidebar badge
 
-### 🌱 Personal Career Progression
-- Define short, mid, and long-term goals
-- Track actions toward each goal
-- Build historical context of your growth
-- Link goals to projects and learning activities
+**Tasks**
+- Kanban board and backlog table views
+- Drag-and-drop between columns
+- Priority levels, due dates, week/backlog organisation
 
+**Weekly Review & Summary**
+- Structured weekly review with signal-based checklist
+- AI-assisted summary generation (optional, requires API key)
+- Editable summary with markdown output
 
-## License
+**Evidence Bank**
+- Log evidence per person for performance conversations
 
-This project is currently under development. License information will be added soon.
+**Career Framework & Goals**
+- Track career goals, gap analysis, and focus distributions
+- Manage achievements and profile notes per person
 
+**Settings**
+- Profile management
+- Meeting template CRUD with soft delete/restore
 
-## Target Audience
+## Tech Stack
 
-Cadence is built for:
+- **Framework:** Next.js 16 (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS v4
+- **UI:** shadcn/ui + Radix UI
+- **Database:** Supabase Postgres with Row Level Security
+- **Auth:** Supabase Auth (Google OAuth)
+- **Testing:** Vitest + React Testing Library
 
-- Engineering Managers
-- Tech Leads with people-management responsibilities
-- Senior Engineers transitioning into management
-- Managers leading multiple teams
+## Setup
 
+1. Clone the repo
+2. Create `.env.local` with your Supabase credentials:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+   ```
+3. Run the schema from `supabase/schema.sql` against your Supabase project
+4. Run any migrations in `supabase/migrations/` in order
+5. Configure Google OAuth in your Supabase dashboard
+6. `npm install && npm run dev`
 
+## Testing
 
-## Contact & Support
-- **Project Board:** [GitHub Projects](https://github.com/users/shiphrahx/projects/2)
+```bash
+npm run test:run      # run all tests once
+npm test              # watch mode
+npm run test:coverage # coverage report
+```
 
----
+91+ tests across service layer, components, and integration tests.
 
-Built with ❤️ for engineering managers who want to stay organized and invest in their teams.
+## Project Board
+
+[github.com/users/shiphrahx/projects/2](https://github.com/users/shiphrahx/projects/2)
