@@ -25,11 +25,17 @@ export async function GET(request: Request) {
     }
 
     if (data.user) {
-      const { data: profile } = await supabase
+      const { data: profile, error: selectErr } = await supabase
         .from('user_profiles')
         .select('id')
         .eq('id', data.user.id)
         .single()
+
+      // PGRST116 = "no rows" — expected on first login
+      if (selectErr && selectErr.code !== 'PGRST116') {
+        console.error('Profile lookup failed:', selectErr)
+        return NextResponse.redirect(`${origin}/login?error=profile_lookup_failed`)
+      }
 
       if (!profile) {
         const metadata = data.user.user_metadata ?? {}
@@ -47,6 +53,7 @@ export async function GET(request: Request) {
 
         if (profileError) {
           console.error('Error creating user profile:', profileError)
+          return NextResponse.redirect(`${origin}/login?error=profile_creation_failed`)
         }
       }
     }
