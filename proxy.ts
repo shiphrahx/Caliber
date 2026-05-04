@@ -44,7 +44,7 @@ export async function proxy(request: NextRequest) {
 
   // Protected routes - redirect to login if not authenticated
   const protectedPaths = [
-    '/', '/dashboard', '/tasks', '/teams', '/people', '/projects',
+    '/dashboard', '/tasks', '/teams', '/people', '/projects',
     '/meetings', '/career-goals', '/settings',
     '/radar', '/follow-ups', '/evidence', '/framework', '/review', '/summary',
   ]
@@ -64,10 +64,10 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // If user is logged in and tries to access login, redirect to dashboard
-  if (request.nextUrl.pathname === '/login' && user) {
+  // Logged-in users: redirect landing → dashboard, login → dashboard
+  if (user && (request.nextUrl.pathname === '/' || request.nextUrl.pathname === '/login')) {
     const url = request.nextUrl.clone()
-    url.pathname = '/'
+    url.pathname = '/dashboard'
     return NextResponse.redirect(url)
   }
 

@@ -4,7 +4,7 @@ import React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import {
   LayoutDashboard,
   CheckSquare,
@@ -19,6 +19,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Award,
+  Settings,
+  LogOut,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { fetchSignalCounts } from "@/lib/hooks/use-weekly-review-signals"
@@ -29,7 +31,7 @@ type NavItem =
   | { label: string }
 
 const navigation: NavItem[] = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Weekly Review", href: "/review", icon: ClipboardCheck },
   { name: "People Radar", href: "/radar", icon: ScanSearch },
   { label: "Manage" },
@@ -56,7 +58,25 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const [userName, setUserName] = useState("User")
   const [userAvatar, setUserAvatar] = useState<string | null>(null)
   const [userInitials, setUserInitials] = useState("U")
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
   const [reviewIndicator, setReviewIndicator] = useState<ReviewIndicator>(null)
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    if (menuOpen) document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [menuOpen])
+
+  async function handleLogout() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    window.location.href = "/"
+  }
   const [overdueFollowUps, setOverdueFollowUps] = useState(0)
   const [radarCritical, setRadarCritical] = useState(0)
 
@@ -113,7 +133,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       {/* Logo + collapse toggle */}
       <div style={{ display: "flex", alignItems: "center", height: "48px", padding: "0 10px", gap: "6px" }}>
         {isOpen && (
-          <Link href="/" style={{ flex: 1, display: "flex", alignItems: "center" }}>
+          <Link href="/dashboard" style={{ flex: 1, display: "flex", alignItems: "center" }}>
             <Image
               src="/logo_transparent.png"
               alt="Cadence"
@@ -245,12 +265,69 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       </nav>
 
       {/* User / Settings */}
-      <div style={{ padding: "8px 10px" }}>
-        <Link
-          href="/settings"
-          title={!isOpen ? "Settings" : undefined}
-          className={`nav-item${pathname === "/settings" ? " active" : ""}${!isOpen ? " nav-item-collapsed" : ""}`}
-          style={{ marginBottom: 0 }}
+      <div style={{ padding: "8px 10px", position: "relative" }} ref={menuRef}>
+        {menuOpen && (
+          <div style={{
+            position: "absolute",
+            bottom: "calc(100% + 4px)",
+            left: "8px",
+            right: "8px",
+            background: "var(--surf-2, #1e1e1e)",
+            border: "1px solid var(--border-1)",
+            borderRadius: "8px",
+            overflow: "hidden",
+            zIndex: 200,
+            boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+          }}>
+            <Link
+              href="/settings"
+              onClick={() => setMenuOpen(false)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "9px 12px",
+                fontSize: "var(--text-meta, 12px)",
+                color: "var(--text-2)",
+                textDecoration: "none",
+                transition: "background 0.1s",
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-3, #2a2a2a)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+            >
+              <Settings style={{ width: "13px", height: "13px", flexShrink: 0 }} />
+              {isOpen && <span>Settings</span>}
+            </Link>
+            <div style={{ height: "1px", background: "var(--border-1)" }} />
+            <button
+              onClick={handleLogout}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "9px 12px",
+                width: "100%",
+                fontSize: "var(--text-meta, 12px)",
+                color: "#e05555",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                fontFamily: "inherit",
+                transition: "background 0.1s",
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-3, #2a2a2a)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+            >
+              <LogOut style={{ width: "13px", height: "13px", flexShrink: 0 }} />
+              {isOpen && <span>Log out</span>}
+            </button>
+          </div>
+        )}
+        <button
+          onClick={() => setMenuOpen(o => !o)}
+          title={!isOpen ? userName : undefined}
+          className={`nav-item${!isOpen ? " nav-item-collapsed" : ""}`}
+          style={{ marginBottom: 0, width: "100%", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}
         >
           {userAvatar ? (
             <img
@@ -279,10 +356,10 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
           {isOpen && (
             <div style={{ overflow: "hidden", flex: 1 }}>
               <div style={{ fontSize: "var(--text-meta)", color: "var(--text-1)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userName}</div>
-              <div style={{ fontSize: "var(--text-overline)", color: "var(--text-3)" }}>Settings</div>
+              <div style={{ fontSize: "var(--text-overline)", color: "var(--text-3)" }}>Account</div>
             </div>
           )}
-        </Link>
+        </button>
       </div>
     </div>
   )

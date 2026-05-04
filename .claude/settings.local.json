@@ -112,7 +112,8 @@
       "Bash(npm run *)",
       "Read(//tmp/**)",
       "Bash(grep -v \"^$\")",
-      "PowerShell(Stop-Process -Id 11692 -Force)"
+      "PowerShell(Stop-Process -Id 11692 -Force)",
+      "PowerShell(ls \"c:\\\\Users\\\\Shiph\\\\Documents\\\\Code\\\\Cadence\\\\app\\\\\" -Recurse -Depth 1 | Where-Object { $_.PSIsContainer } | Select-Object FullName)"
     ]
   }
 }
