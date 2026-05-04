@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { marked } from "marked"
+import DOMPurify from "isomorphic-dompurify"
 import { getTodayDate } from "@/lib/utils"
 import { type Meeting as BaseMeeting } from "@/lib/mock-data"
 import { useTemplates } from "@/lib/hooks/use-templates"
@@ -609,7 +610,7 @@ export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availab
                         type="button"
                         onClick={() => {
                           setSelectedTemplate(template.id)
-                          const html = marked.parse(template.notes) as string
+                          const html = DOMPurify.sanitize(marked.parse(template.notes) as string)
                           setFormData(prev => ({ ...prev, notes: html }))
                         }}
                         style={{

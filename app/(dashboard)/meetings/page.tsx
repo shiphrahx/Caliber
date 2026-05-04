@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useSearchParams } from "next/navigation"
+import DOMPurify from "isomorphic-dompurify"
 import { Input } from "@/components/ui/input"
 import { ChevronRight, ChevronDown, ChevronsRight, ChevronsDown, BookOpen, ListChecks } from "lucide-react"
 import { LogEvidenceModal } from "@/components/evidence/log-evidence-modal"
@@ -821,7 +822,7 @@ export default function MeetingsPage() {
                   {/* Body */}
                   <div style={{ padding: "12px 14px", fontSize: "var(--text-label)", color: "var(--text-2)", lineHeight: 1.75 }}>
                     {selectedMeeting.notes ? (
-                      <div dangerouslySetInnerHTML={{ __html: selectedMeeting.notes }} />
+                      <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(selectedMeeting.notes) }} />
                     ) : (
                       <span style={{ color: "var(--text-3)" }}>Meeting notes, discussion points, decisions...</span>
                     )}

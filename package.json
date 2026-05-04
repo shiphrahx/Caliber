@@ -47,6 +47,7 @@
     "@types/react": "^19.2.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "isomorphic-dompurify": "^3.12.0",
     "lucide-react": "^0.561.0",
     "marked": "^17.0.3",
     "next": "^16.0.10",
