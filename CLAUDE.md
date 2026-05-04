@@ -205,6 +205,7 @@ Cadence/
 4. **IMPORTANT:** Never mention Claude or AI tools in GitHub comments, PRs, or commit messages
 5. Create PRs to master for review
 6. Delete feature branches after merging
+7. Commit after every change, and NOT only at the end of the command
 
 ### Code Style
 - Use TypeScript for all components
@@ -381,23 +382,3 @@ interface Task {
 
 Last Updated: 2026-03-14
 
-## Changelog
-
-### 2026-03-14 - Documentation Refresh
-- Updated logo reference from icon_02.png to logo_transparent.png
-- Added Meetings, Career Goals, Settings, and People detail pages to structure
-- Added dashboard components, form dialogs, and new UI components to structure
-- Added meetings, career-goals, and templates services + use-templates hook
-- Updated implementation status to reflect completed features
-
-### 2026-01-04 - V1 Backend Complete
-- Implemented Supabase database integration with RLS policies
-- Added Google OAuth authentication
-- Migrated Teams, People, and Tasks to use Supabase backend
-- Created comprehensive testing infrastructure (91+ tests)
-- Updated documentation to reflect current architecture
-
-### 2025-12-18 - Initial Setup
-- Project initialization with Next.js 16 and Tailwind CSS v4
-- Basic UI components and navigation
-- Mock data implementation for People management
