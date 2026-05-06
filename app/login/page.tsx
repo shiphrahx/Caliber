@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
+import Link from "next/link"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -78,7 +79,7 @@ export default function LoginPage() {
           </Button>
 
           <div className="text-gray-400 text-sm">
-            <p>By signing in, you agree to our Terms of Service and Privacy Policy</p>
+            <p>By signing in, you agree to our <Link href="/terms" className="underline hover:text-gray-200">Terms of Service</Link> and <Link href="/privacy" className="underline hover:text-gray-200">Privacy Policy</Link></p>
           </div>
         </CardContent>
       </Card>
