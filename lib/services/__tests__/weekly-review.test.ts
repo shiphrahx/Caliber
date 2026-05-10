@@ -114,39 +114,32 @@ describe('Weekly Review Service', () => {
 
   describe('getOrCreateWeeklyReview', () => {
     it('returns existing review if found', async () => {
-      mockSupabaseClient.from = vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
+      const selectChain = {
+        eq: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              maybeSingle: vi.fn().mockResolvedValue({ data: mockReviewRow, error: null }),
-            }),
+            single: vi.fn().mockResolvedValue({ data: mockReviewRow, error: null }),
           }),
         }),
-      })
+      }
+      mockSupabaseClient.from = vi.fn()
+        .mockReturnValueOnce({ upsert: vi.fn().mockResolvedValue({ error: null }) })
+        .mockReturnValueOnce({ select: vi.fn().mockReturnValue(selectChain) })
 
       const result = await getOrCreateWeeklyReview('2026-04-27')
       expect(result.id).toBe('review-1')
     })
 
     it('creates new review when none exists', async () => {
-      const insertChain = {
-        select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({ data: mockReviewRow, error: null }),
+      const selectChain = {
+        eq: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ data: mockReviewRow, error: null }),
+          }),
         }),
       }
       mockSupabaseClient.from = vi.fn()
-        .mockReturnValueOnce({
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-              }),
-            }),
-          }),
-        })
-        .mockReturnValueOnce({
-          insert: vi.fn().mockReturnValue(insertChain),
-        })
+        .mockReturnValueOnce({ upsert: vi.fn().mockResolvedValue({ error: null }) })
+        .mockReturnValueOnce({ select: vi.fn().mockReturnValue(selectChain) })
 
       const result = await getOrCreateWeeklyReview('2026-04-27')
       expect(result.id).toBe('review-1')
