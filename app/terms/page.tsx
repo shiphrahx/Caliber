@@ -34,7 +34,7 @@ export default function TermsPage() {
         <p>These terms may change as the project evolves. Continued use of the service after changes constitutes acceptance.</p>
 
         <h2 style={{ color: "#f4f4f5", fontSize: 20, fontWeight: 600, marginTop: 40, marginBottom: 12 }}>7. Open source</h2>
-        <p>The source code is available on GitHub under the MIT License. You are free to self-host, fork, and modify Cadence. Self-hosted instances are governed by the MIT License, not these terms.</p>
+        <p>The source code is available on GitHub under the <strong style={{ color: "#f4f4f5" }}>GNU Affero General Public License v3.0 (AGPL-3.0)</strong>. You are free to self-host, fork, and modify Cadence. However, if you deploy a modified version — including as a hosted service — you must release your modifications under the same AGPL-3.0 license and make the source code available to your users. Self-hosted instances are governed by the AGPL-3.0, not these terms.</p>
 
       </div>
 
