@@ -161,19 +161,20 @@ export async function getOrCreateWeeklyReview(weekStart: string): Promise<Weekly
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
-  const { data: existing } = await supabase
+  const { error: upsertError } = await supabase
+    .from('weekly_reviews')
+    .upsert(
+      { user_id: user.id, week_start: weekStart, status: 'in_progress' },
+      { onConflict: 'user_id,week_start', ignoreDuplicates: true }
+    )
+
+  if (upsertError) throw new Error(upsertError.message)
+
+  const { data, error } = await supabase
     .from('weekly_reviews')
     .select('*')
     .eq('user_id', user.id)
     .eq('week_start', weekStart)
-    .maybeSingle()
-
-  if (existing) return rowToReview(existing as WeeklyReviewRow)
-
-  const { data, error } = await supabase
-    .from('weekly_reviews')
-    .insert({ user_id: user.id, week_start: weekStart, status: 'in_progress' })
-    .select('*')
     .single()
 
   if (error) throw new Error(error.message)
