@@ -128,16 +128,23 @@ export function addDays(dateStr: string, n: number): string {
 export function getMondayOfWeek(date: Date = new Date()): string {
   const d = new Date(date)
   const day = d.getDay()
-  const diff = day === 0 ? -6 : 1 - day
-  d.setDate(d.getDate() + diff)
+  // getDay() returns 0=Sunday, 1=Monday, ..., 6=Saturday
+  // Calculate days to subtract to get to Monday (1)
+  // If Monday (1), diff = 0; if Sunday (0), diff = -6; if Tuesday (2), diff = -1
+  const diff = day === 0 ? 6 : day - 1
+  d.setDate(d.getDate() - diff)
   return localDateStr(d)
 }
 
 /** Returns the Sunday (ISO date string) of the week containing the given date */
 export function getSundayOfWeek(date: Date = new Date()): string {
-  const monday = new Date(getMondayOfWeek(date) + 'T00:00:00')
-  monday.setDate(monday.getDate() + 6)
-  return localDateStr(monday)
+  const d = new Date(date)
+  const day = d.getDay()
+  // Calculate days to add to get to Sunday (0)
+  // If Sunday (0), diff = 0; if Monday (1), diff = 6; if Saturday (6), diff = 1
+  const diff = day === 0 ? 0 : 7 - day
+  d.setDate(d.getDate() + diff)
+  return localDateStr(d)
 }
 
 /** Formats a week range as "28 Apr – 2 May 2026" */
