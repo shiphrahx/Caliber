@@ -1,6 +1,6 @@
 ﻿"use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -94,8 +94,8 @@ export default function CareerGoalsPage() {
   })
 
   // Derive categories from gap analysis
-  const categories = gapAnalysis.map(row => row.category)
-  const categoryMap = new Map(gapAnalysis.map(row => [row.category, row.id]))
+  const categories = useMemo(() => gapAnalysis.map(row => row.category), [gapAnalysis])
+  const categoryMap = useMemo(() => new Map(gapAnalysis.map(row => [row.category, row.id])), [gapAnalysis])
 
   // Short-term (0-4 months)
   const [shortTermFocus, setShortTermFocus] = useState<FocusDistribution[]>([])
@@ -258,7 +258,7 @@ export default function CareerGoalsPage() {
     updateFocusDistributions(shortTermFocus, setShortTermFocus)
     updateFocusDistributions(midTermFocus, setMidTermFocus)
     updateFocusDistributions(longTermFocus, setLongTermFocus)
-  }, [gapAnalysis, isLoading])
+  }, [gapAnalysis, categories, categoryMap, shortTermFocus, midTermFocus, longTermFocus, isLoading])
 
   // Gap Analysis Functions
   const openAddGapDialog = () => {

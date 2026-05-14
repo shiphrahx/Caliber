@@ -125,7 +125,7 @@ export default function MeetingsPage() {
       }
     }
     loadData()
-  }, [])
+  }, [searchParams])
 
   const organizeTree = (): { [type: string]: TreeNode } => {
     const tree: { [type: string]: TreeNode } = {}

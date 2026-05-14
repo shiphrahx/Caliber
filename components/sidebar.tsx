@@ -114,8 +114,9 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
         setOverdueFollowUps(followUpRes.count ?? 0)
         setRadarCritical(counts.critical)
-      } catch {
+      } catch (error) {
         // non-critical — sidebar indicators are best-effort
+        console.warn('Failed to load sidebar indicators:', error)
       }
     }
     loadIndicators()
