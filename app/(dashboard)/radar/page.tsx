@@ -299,9 +299,9 @@ export default function RadarPage() {
         temperature: 0.2,
       })
       const jsonMatch = result.content.match(/\[[\s\S]*\]/)
-      if (jsonMatch) {
-        setRecurringTopics(JSON.parse(jsonMatch[0]))
-      } else {
+      try {
+        setRecurringTopics(jsonMatch ? JSON.parse(jsonMatch[0]) : [])
+      } catch {
         setRecurringTopics([])
       }
       setTopicsDetected(true)
