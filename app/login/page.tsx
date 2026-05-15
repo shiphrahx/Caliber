@@ -19,7 +19,8 @@ export default function LoginPage() {
         router.push("/")
       }
     })
-  }, [router, supabase.auth])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleGoogleSignIn = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
