@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Task, TaskStatus, TASK_STATUSES } from "@/lib/types/task"
 import { getTasks, createTask, updateTask, deleteTask as deleteTaskService } from "@/lib/services/tasks"
 import {
@@ -40,10 +40,13 @@ export default function TasksPage() {
   const [isMounted, setIsMounted] = useState(false)
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [, setIsLoading] = useState(true)
+  const mountedRef = useRef(true)
 
   // Load tasks from Supabase on mount
   useEffect(() => {
+    mountedRef.current = true
     loadTasks()
+    return () => { mountedRef.current = false }
   }, [])
 
   const loadTasks = async () => {
@@ -206,13 +209,14 @@ export default function TasksPage() {
 
       if (listChanged || statusChanged) {
         const updates = { list: currentTask.list, status: currentTask.status }
-        // Schedule DB write outside of the state updater
-        setTimeout(() => {
+        // DB write must happen outside state updater; guard against unmount
+        Promise.resolve().then(() => {
+          if (!mountedRef.current) return
           updateTask(activeId, updates).catch((error) => {
             console.error('Failed to update task:', error)
-            loadTasks()
+            if (mountedRef.current) loadTasks()
           })
-        }, 0)
+        })
       }
 
       return currentTasks
