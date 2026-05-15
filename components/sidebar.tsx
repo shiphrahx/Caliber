@@ -3,7 +3,7 @@
 import React from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useState, useEffect, useRef } from "react"
 import {
   LayoutDashboard,
@@ -55,6 +55,7 @@ type ReviewIndicator = 'critical' | 'warning' | 'complete' | null
 
 export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const [userName, setUserName] = useState("User")
   const [userAvatar, setUserAvatar] = useState<string | null>(null)
   const [userInitials, setUserInitials] = useState("U")
@@ -75,7 +76,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   async function handleLogout() {
     const supabase = createClient()
     await supabase.auth.signOut()
-    window.location.href = "/"
+    router.push("/")
   }
   const [overdueFollowUps, setOverdueFollowUps] = useState(0)
   const [radarCritical, setRadarCritical] = useState(0)
@@ -93,6 +94,8 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   }, [])
 
   useEffect(() => {
+    let cancelled = false
+
     async function loadIndicators() {
       try {
         const supabase = createClient()
@@ -107,6 +110,8 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
             .lt('due_date', new Date().toISOString().slice(0, 10)),
         ])
 
+        if (cancelled) return
+
         if (review?.status === "completed") setReviewIndicator("complete")
         else if (counts.critical > 0) setReviewIndicator("critical")
         else if (counts.warning > 0) setReviewIndicator("warning")
@@ -116,10 +121,11 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         setRadarCritical(counts.critical)
       } catch (error) {
         // non-critical — sidebar indicators are best-effort
-        console.warn('Failed to load sidebar indicators:', error)
+        if (!cancelled) console.warn('Failed to load sidebar indicators:', error)
       }
     }
     loadIndicators()
+    return () => { cancelled = true }
   }, [])
 
   return (
