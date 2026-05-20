@@ -22,7 +22,8 @@ async function getCalendarTasks(): Promise<CalendarTask[]> {
     blocked: "Blocked", completed: "Done",
   }
 
-  return (data ?? []).map((t: any) => ({
+  type TaskRow = { id: string; title: string; due_date: string; priority: string; status: string }
+  return (data ?? []).map((t: TaskRow) => ({
     id: t.id,
     title: t.title,
     dueDate: t.due_date,

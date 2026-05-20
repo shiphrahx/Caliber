@@ -103,8 +103,8 @@ export function DataTable<T extends { id?: number | string }>({
     }
 
     filtered.sort((a, b) => {
-      const aInactive = (a as any).status === "inactive" ? 1 : 0
-      const bInactive = (b as any).status === "inactive" ? 1 : 0
+      const aInactive = (a as { status?: string }).status === "inactive" ? 1 : 0
+      const bInactive = (b as { status?: string }).status === "inactive" ? 1 : 0
       return aInactive - bInactive
     })
 
