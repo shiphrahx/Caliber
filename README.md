@@ -2,6 +2,7 @@
 
 ![Cadence Banner](public/banner.png)
 
+![In Development](https://img.shields.io/badge/status-in%20development-orange)
 ![Next.js](https://img.shields.io/github/package-json/dependency-version/shiphrahx/Cadence/next?logo=nextdotjs)
 ![React](https://img.shields.io/github/package-json/dependency-version/shiphrahx/Cadence/react?logo=react)
 ![Tailwind CSS](https://img.shields.io/github/package-json/dependency-version/shiphrahx/Cadence/dev/tailwindcss?logo=tailwindcss)
