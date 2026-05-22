@@ -2,9 +2,10 @@
 
 ![Caliber Banner](public/banner.png)
 
-![Next.js](https://img.shields.io/github/package-json/dependency-version/shiphrahx/Caliber/next?logo=nextdotjs)
-![React](https://img.shields.io/github/package-json/dependency-version/shiphrahx/Caliber/react?logo=react)
-![Tailwind CSS](https://img.shields.io/github/package-json/dependency-version/shiphrahx/Caliber/dev/tailwindcss?logo=tailwindcss)
+![In Development](https://img.shields.io/badge/status-in%20development-orange)
+![Next.js](https://img.shields.io/github/package-json/dependency-version/shiphrahx/Cadence/next?logo=nextdotjs)
+![React](https://img.shields.io/github/package-json/dependency-version/shiphrahx/Cadence/react?logo=react)
+![Tailwind CSS](https://img.shields.io/github/package-json/dependency-version/shiphrahx/Cadence/dev/tailwindcss?logo=tailwindcss)
 
 ![Last Commit](https://img.shields.io/github/last-commit/shiphrahx/Caliber)
 ![Repo Size](https://img.shields.io/github/repo-size/shiphrahx/Caliber)
