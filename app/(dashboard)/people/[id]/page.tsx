@@ -17,6 +17,7 @@ import { getTeams, type Team } from "@/lib/services/teams"
 import { getMeetingsForPerson, createMeeting, type MeetingType, type RecurrenceType } from "@/lib/services/meetings"
 import { LEVEL_BADGE } from "@/lib/badge-styles"
 import { EvidenceSection } from "@/components/evidence/evidence-section"
+import { SentimentTrendChart } from "@/components/evidence/sentiment-trend-chart"
 import { CompetencySection } from "@/components/competency/competency-section"
 import { FollowUpList } from "@/components/follow-ups/follow-up-list"
 import { FollowUpForm } from "@/components/follow-ups/follow-up-form"
@@ -594,6 +595,11 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
           followUps={followUps}
           onChanged={() => getFollowUpsForPerson(personId!).then(setFollowUps).catch(console.error)}
         />
+      </div>
+
+      {/* Sentiment Trend */}
+      <div style={{ marginTop: "24px" }}>
+        <SentimentTrendChart personId={personId!} days={60} />
       </div>
 
       {/* Evidence section */}

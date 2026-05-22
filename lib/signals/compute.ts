@@ -88,7 +88,7 @@ export async function loadSignalData() {
 
     supabase
       .from('evidence_entries')
-      .select('person_id, occurred_at')
+      .select('person_id, occurred_at, sentiment')
       .gte('occurred_at', nDaysAgoStr(90)),
 
     supabase
@@ -401,6 +401,107 @@ export async function computeActionItemSignals(
         meta: { taskId: task.id, taskTitle: task.title, meetingTitle: meeting.title, daysAgo },
       })
     }
+  }
+
+  return signals
+}
+
+/**
+ * Compute sentiment drift signals for all active people.
+ *
+ * Drift is detected when:
+ *   - recent 30 days: negative rate > 60%
+ *   - prior 30 days:  negative rate < 40%
+ *
+ * Severity escalates to critical if both the recent AND the prior period
+ * show the negative rate exceeding the threshold (i.e., persists across
+ * two consecutive periods).
+ *
+ * Requires evidence entries for each person passed in. Call
+ * `getEvidenceSentimentTimeline` per person externally, or pass raw entries.
+ */
+export interface SentimentPeriodStats {
+  positive: number
+  neutral: number
+  negative: number
+  total: number
+}
+
+export function computeSentimentDriftForPeriods(
+  recent: SentimentPeriodStats,
+  prior: SentimentPeriodStats
+): { drifting: boolean; severe: boolean; recentNegRate: number; priorNegRate: number } {
+  const recentNegRate = recent.total > 0 ? recent.negative / recent.total : 0
+  const priorNegRate  = prior.total  > 0 ? prior.negative  / prior.total  : 0
+
+  const drifting = recentNegRate > 0.6 && priorNegRate < 0.4
+  // Severe: trend persists — both periods show elevated negativity (prior > 40% too)
+  const severe = recentNegRate > 0.6 && priorNegRate >= 0.4
+
+  return { drifting: drifting || severe, severe, recentNegRate, priorNegRate }
+}
+
+/**
+ * Compute sentiment drift signals from raw evidence entries grouped by person.
+ * `evidenceByPerson` maps personId → array of {occurred_at, sentiment} rows.
+ */
+export function computeSentimentDriftSignals(
+  activePeople: Array<{ id: string; full_name: string }>,
+  evidenceByPerson: Map<string, Array<{ occurred_at: string; sentiment: string | null }>>,
+  dismissedSet: Set<string>,
+  today: Date
+): Signal[] {
+  const signals: Signal[] = []
+
+  const todayMs = today.getTime()
+  const DAY = 24 * 60 * 60 * 1000
+  const thirtyDaysMs = 30 * DAY
+  const sixtyDaysMs  = 60 * DAY
+
+  for (const person of activePeople) {
+    if (isDismissed(dismissedSet, 'sentiment_drift', person.id)) continue
+
+    const entries = evidenceByPerson.get(person.id) ?? []
+    if (entries.length === 0) continue
+
+    const recent: SentimentPeriodStats = { positive: 0, neutral: 0, negative: 0, total: 0 }
+    const prior:  SentimentPeriodStats = { positive: 0, neutral: 0, negative: 0, total: 0 }
+
+    for (const e of entries) {
+      const ageMs = todayMs - new Date(e.occurred_at + 'T00:00:00').getTime()
+      if (ageMs < 0 || ageMs > sixtyDaysMs) continue
+
+      const bucket = ageMs <= thirtyDaysMs ? recent : prior
+      bucket.total++
+      if (e.sentiment === 'positive') bucket.positive++
+      else if (e.sentiment === 'negative') bucket.negative++
+      else bucket.neutral++
+    }
+
+    // Need evidence in both windows to detect drift
+    if (recent.total === 0 || prior.total === 0) continue
+
+    const { drifting, severe, recentNegRate, priorNegRate } = computeSentimentDriftForPeriods(recent, prior)
+    if (!drifting) continue
+
+    const pct = Math.round(recentNegRate * 100)
+    signals.push({
+      type: 'sentiment_drift',
+      severity: severe ? 'critical' : 'warning',
+      message: `${person.full_name}'s evidence has been ${pct}% negative in the last 30 days`,
+      personId: person.id,
+      personName: person.full_name,
+      entityId: person.id,
+      entityType: 'person',
+      meta: {
+        recentNegRate,
+        priorNegRate,
+        recentTotal: recent.total,
+        priorTotal: prior.total,
+        recentNegative: recent.negative,
+        priorNegative: prior.negative,
+      },
+    })
   }
 
   return signals

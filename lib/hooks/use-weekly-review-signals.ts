@@ -7,6 +7,7 @@ import {
   computePeopleSignals,
   computeFollowUpSignals,
   computeActionItemSignals,
+  computeSentimentDriftSignals,
   sortSignals,
   buildDismissedSet,
 } from '@/lib/signals/compute'
@@ -31,6 +32,13 @@ async function computeAllSignals(dismissedItems: DismissedItem[]): Promise<Signa
 
   const data = await loadSignalData()
 
+  // Build evidenceByPerson map for sentiment drift computation (uses 60-day window)
+  const evidenceByPerson = new Map<string, Array<{ occurred_at: string; sentiment: string | null }>>()
+  for (const e of data.evidenceRecent as Array<{ person_id: string; occurred_at: string; sentiment: string | null }>) {
+    if (!evidenceByPerson.has(e.person_id)) evidenceByPerson.set(e.person_id, [])
+    evidenceByPerson.get(e.person_id)!.push({ occurred_at: e.occurred_at, sentiment: e.sentiment })
+  }
+
   const [taskSignals, peopleSignals, actionSignals] = await Promise.all([
     Promise.resolve(computeTaskSignals(data, dismissedSet, today)),
     Promise.resolve(computePeopleSignals(data, dismissedSet, today)),
@@ -38,8 +46,14 @@ async function computeAllSignals(dismissedItems: DismissedItem[]): Promise<Signa
   ])
 
   const followUpSignals = computeFollowUpSignals(data.openFollowUps, dismissedSet, today)
+  const sentimentDriftSignals = computeSentimentDriftSignals(
+    data.activePeople,
+    evidenceByPerson,
+    dismissedSet,
+    today
+  )
 
-  return sortSignals([...taskSignals, ...peopleSignals, ...actionSignals, ...followUpSignals])
+  return sortSignals([...taskSignals, ...peopleSignals, ...actionSignals, ...followUpSignals, ...sentimentDriftSignals])
 }
 
 export function useWeeklyReviewSignals(dismissedItems: DismissedItem[]): SignalsData {
