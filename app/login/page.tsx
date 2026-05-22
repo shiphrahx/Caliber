@@ -42,12 +42,12 @@ export default function LoginPage() {
           <div className="flex justify-center mb-8">
             <Image
               src="/logo_transparent.png"
-              alt="Cadence"
+              alt="Caliber"
               width={270}
               height={60}
             />
           </div>
-          <CardTitle className="text-2xl">Welcome to Cadence</CardTitle>
+          <CardTitle className="text-2xl">Welcome to Caliber</CardTitle>
           <CardDescription className="text-base">
             Your engineering management control centre
           </CardDescription>

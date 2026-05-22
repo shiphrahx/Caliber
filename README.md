@@ -1,18 +1,18 @@
 <div align="center">
 
-![Cadence Banner](public/banner.png)
+![Caliber Banner](public/banner.png)
 
 ![In Development](https://img.shields.io/badge/status-in%20development-orange)
 ![Next.js](https://img.shields.io/github/package-json/dependency-version/shiphrahx/Cadence/next?logo=nextdotjs)
 ![React](https://img.shields.io/github/package-json/dependency-version/shiphrahx/Cadence/react?logo=react)
 ![Tailwind CSS](https://img.shields.io/github/package-json/dependency-version/shiphrahx/Cadence/dev/tailwindcss?logo=tailwindcss)
 
-![Last Commit](https://img.shields.io/github/last-commit/shiphrahx/Cadence)
-![Repo Size](https://img.shields.io/github/repo-size/shiphrahx/Cadence)
-![Issues](https://img.shields.io/github/issues/shiphrahx/Cadence)
-![Build](https://img.shields.io/github/actions/workflow/status/shiphrahx/Cadence/ci.yml)
+![Last Commit](https://img.shields.io/github/last-commit/shiphrahx/Caliber)
+![Repo Size](https://img.shields.io/github/repo-size/shiphrahx/Caliber)
+![Issues](https://img.shields.io/github/issues/shiphrahx/Caliber)
+![Build](https://img.shields.io/github/actions/workflow/status/shiphrahx/Caliber/ci.yml)
 
-Cadence is a lightweight tool for engineering managers to keep track of people, conversations, and follow-ups in one place.
+Caliber is a lightweight tool for engineering managers to keep track of people, conversations, and follow-ups in one place.
 
 It replaces your notes with a simple system built around how management work actually happens: unexpected ad-hoc meetings, regular 1:1s, ongoing feedback, and small actions that need to be followed through.
 

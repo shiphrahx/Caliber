@@ -122,7 +122,7 @@ export function AISettingsCard() {
         <CardDescription>
           {config
             ? 'AI features are enabled. Your key is encrypted and stored securely.'
-            : 'Connect your AI provider to unlock smart features across Cadence. Your API key is encrypted at rest and only used to call your chosen provider — Cadence never stores or accesses it otherwise.'}
+            : 'Connect your AI provider to unlock smart features across Caliber. Your API key is encrypted at rest and only used to call your chosen provider — Caliber never stores or accesses it otherwise.'}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -245,7 +245,7 @@ export function AISettingsCard() {
                 </button>
               </div>
               <p style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", marginTop: "4px" }}>
-                When you use AI features, your data (meeting notes, evidence entries, etc.) is sent to {PROVIDER_LABELS[selectedProvider]} for processing. Cadence does not store or access your data beyond what's in your account.
+                When you use AI features, your data (meeting notes, evidence entries, etc.) is sent to {PROVIDER_LABELS[selectedProvider]} for processing. Caliber does not store or access your data beyond what's in your account.
               </p>
             </div>
 

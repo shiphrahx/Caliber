@@ -143,7 +143,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
           <Link href="/dashboard" style={{ flex: 1, display: "flex", alignItems: "center" }}>
             <Image
               src="/logo_transparent.png"
-              alt="Cadence"
+              alt="Caliber"
               width={110}
               height={28}
               className="object-contain"

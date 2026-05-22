@@ -1,5 +1,5 @@
 {
-  "name": "cadence",
+  "name": "caliber",
   "version": "1.0.0",
   "description": "A lightweight web platform for engineering managers to run their day-to-day work effectively",
   "private": true,
@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shiphrahx/Cadence.git"
+    "url": "git+https://github.com/shiphrahx/Caliber.git"
   },
   "keywords": [
     "engineering-management",
@@ -29,9 +29,9 @@
   "author": "",
   "license": "AGPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/shiphrahx/Cadence/issues"
+    "url": "https://github.com/shiphrahx/Caliber/issues"
   },
-  "homepage": "https://github.com/shiphrahx/Cadence#readme",
+  "homepage": "https://github.com/shiphrahx/Caliber#readme",
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",

@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — Cadence",
+  title: "Privacy Policy — Caliber",
 }
 
 export default function PrivacyPage() {
@@ -16,10 +16,10 @@ export default function PrivacyPage() {
       <div style={{ lineHeight: 1.75, fontSize: 15, color: "#a1a1aa" }}>
 
         <h2 style={{ color: "#f4f4f5", fontSize: 20, fontWeight: 600, marginTop: 40, marginBottom: 12 }}>1. What we collect</h2>
-        <p>When you sign in with Google, we receive your email address and display name from Google. We store the data you enter into Cadence: people, teams, tasks, meetings, notes, career goals, and evidence entries. We do not collect analytics, tracking pixels, or behavioural data.</p>
+        <p>When you sign in with Google, we receive your email address and display name from Google. We store the data you enter into Caliber: people, teams, tasks, meetings, notes, career goals, and evidence entries. We do not collect analytics, tracking pixels, or behavioural data.</p>
 
         <h2 style={{ color: "#f4f4f5", fontSize: 20, fontWeight: 600, marginTop: 40, marginBottom: 12 }}>2. How we use it</h2>
-        <p>Your data is used solely to provide the Cadence service to you. We do not sell, share, rent, or otherwise disclose your data to third parties.</p>
+        <p>Your data is used solely to provide the Caliber service to you. We do not sell, share, rent, or otherwise disclose your data to third parties.</p>
 
         <h2 style={{ color: "#f4f4f5", fontSize: 20, fontWeight: 600, marginTop: 40, marginBottom: 12 }}>3. Data storage</h2>
         <p>Data is stored in Supabase (PostgreSQL), hosted on AWS infrastructure. Authentication is handled by Supabase Auth with Google OAuth. Data is stored in the region configured for the Supabase project. Supabase&apos;s privacy policy applies to their role as a data processor.</p>
@@ -34,7 +34,7 @@ export default function PrivacyPage() {
         <p>We use cookies strictly for session management — to keep you signed in. No advertising or tracking cookies are used.</p>
 
         <h2 style={{ color: "#f4f4f5", fontSize: 20, fontWeight: 600, marginTop: 40, marginBottom: 12 }}>7. Open source</h2>
-        <p>Cadence is open source. If you self-host the project, you control all data storage and processing. This policy applies only to the hosted instance.</p>
+        <p>Caliber is open source. If you self-host the project, you control all data storage and processing. This policy applies only to the hosted instance.</p>
 
         <h2 style={{ color: "#f4f4f5", fontSize: 20, fontWeight: 600, marginTop: 40, marginBottom: 12 }}>8. Changes</h2>
         <p>This policy may be updated as the project evolves. Material changes will be noted in the GitHub repository changelog.</p>
