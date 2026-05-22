@@ -13,6 +13,7 @@ import {
   buildPromotionPacketPrompt,
   buildActionItemPrompt,
   buildGrowthPlanPrompt,
+  buildTaskPrioritisationPrompt,
   REVIEW_DRAFT_SYSTEM,
   ONE_ON_ONE_PREP_SYSTEM,
   PROMOTION_PACKET_SYSTEM,
@@ -22,6 +23,8 @@ import {
   REFLECTION_PROMPTS_SYSTEM,
   RECURRING_TOPICS_SYSTEM,
   SUMMARY_REWRITE_PROMPTS,
+  TASK_PRIORITISATION_SYSTEM,
+  type TaskPrioritisationInput,
 } from '../prompts'
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
@@ -402,5 +405,99 @@ describe('system prompt structure', () => {
     expect(ONE_ON_ONE_PREP_SYSTEM).toContain('Follow-up check-ins')
     expect(ONE_ON_ONE_PREP_SYSTEM).toContain('Suggested discussion topics')
     expect(ONE_ON_ONE_PREP_SYSTEM).toContain('Questions to ask')
+  })
+
+  it('task prioritisation system prompt demands JSON-only output', () => {
+    expect(TASK_PRIORITISATION_SYSTEM).toContain('"rankings"')
+    expect(TASK_PRIORITISATION_SYSTEM).toContain('"taskId"')
+    expect(TASK_PRIORITISATION_SYSTEM).toContain('"rank"')
+    expect(TASK_PRIORITISATION_SYSTEM).toContain('"reason"')
+    expect(TASK_PRIORITISATION_SYSTEM).toContain('No other text')
+  })
+
+  it('task prioritisation system prompt describes all ranking signals', () => {
+    expect(TASK_PRIORITISATION_SYSTEM).toContain('Urgency')
+    expect(TASK_PRIORITISATION_SYSTEM).toContain('Priority field')
+    expect(TASK_PRIORITISATION_SYSTEM).toContain('Person workload')
+    expect(TASK_PRIORITISATION_SYSTEM).toContain('Category')
+  })
+})
+
+// ─── Task Prioritisation Prompt ───────────────────────────────────────────────
+
+const TASKS: TaskPrioritisationInput[] = [
+  { id: 'task-1', title: 'Write Q2 performance reviews', priority: 'Very High', dueDate: '2026-05-20', category: 'People', status: 'Not started' },
+  { id: 'task-2', title: 'Update team roadmap doc', priority: 'Medium', dueDate: '2026-06-01', category: 'Task', status: 'Not started' },
+  { id: 'task-3', title: 'Fix CI pipeline', priority: 'High', dueDate: null, category: 'Task', status: 'In progress', linkedPersonName: 'Alice', personOpenTaskCount: 8 },
+]
+
+describe('buildTaskPrioritisationPrompt', () => {
+  it('includes all task IDs in prompt', () => {
+    const prompt = buildTaskPrioritisationPrompt({ tasks: TASKS, today: '2026-05-23' })
+    expect(prompt).toContain('task-1')
+    expect(prompt).toContain('task-2')
+    expect(prompt).toContain('task-3')
+  })
+
+  it('marks overdue tasks explicitly', () => {
+    const prompt = buildTaskPrioritisationPrompt({ tasks: TASKS, today: '2026-05-23' })
+    // task-1 due 2026-05-20, today is 2026-05-23 → overdue
+    expect(prompt).toContain('OVERDUE')
+    expect(prompt).toContain('2026-05-20')
+  })
+
+  it('includes linked person name and open task count', () => {
+    const prompt = buildTaskPrioritisationPrompt({ tasks: TASKS, today: '2026-05-23' })
+    expect(prompt).toContain('Alice')
+    expect(prompt).toContain('8 open tasks')
+  })
+
+  it('includes today date in prompt', () => {
+    const prompt = buildTaskPrioritisationPrompt({ tasks: TASKS, today: '2026-05-23' })
+    expect(prompt).toContain('Today: 2026-05-23')
+  })
+
+  it('includes priority and category for each task', () => {
+    const prompt = buildTaskPrioritisationPrompt({ tasks: TASKS, today: '2026-05-23' })
+    expect(prompt).toContain('Very High')
+    expect(prompt).toContain('People')
+    expect(prompt).toContain('Medium')
+  })
+
+  it('returns early message for empty task list', () => {
+    const prompt = buildTaskPrioritisationPrompt({ tasks: [], today: '2026-05-23' })
+    expect(prompt).toContain('No tasks to prioritise')
+  })
+
+  it('stays within 4000 token budget (~16000 chars)', () => {
+    const largeTasks: TaskPrioritisationInput[] = Array.from({ length: 200 }, (_, i) => ({
+      id: `task-${i}`,
+      title: `Task ${i} with a reasonably long title that could bloat the prompt`,
+      priority: 'High',
+      dueDate: '2026-06-01',
+      category: 'Task',
+      status: 'Not started',
+      linkedPersonName: 'Alice Smith',
+      personOpenTaskCount: 12,
+    }))
+    const prompt = buildTaskPrioritisationPrompt({ tasks: largeTasks, today: '2026-05-23' })
+    expect(prompt.length).toBeLessThanOrEqual(16500)
+  })
+
+  it('handles tasks with no due date gracefully', () => {
+    const tasks: TaskPrioritisationInput[] = [
+      { id: 'task-x', title: 'No deadline task', priority: 'Low', dueDate: null, category: 'Task', status: 'Not started' },
+    ]
+    const prompt = buildTaskPrioritisationPrompt({ tasks, today: '2026-05-23' })
+    expect(prompt).toContain('no due date')
+  })
+
+  it('handles tasks without linked person', () => {
+    const tasks: TaskPrioritisationInput[] = [
+      { id: 'task-y', title: 'Standalone task', priority: 'Medium', dueDate: '2026-06-15', category: 'Task', status: 'Not started' },
+    ]
+    const prompt = buildTaskPrioritisationPrompt({ tasks, today: '2026-05-23' })
+    // No person info — should not contain "linked to"
+    expect(prompt).not.toContain('linked to')
   })
 })
