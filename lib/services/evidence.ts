@@ -263,6 +263,68 @@ export async function deleteEvidence(id: string): Promise<void> {
   if (error) throw new Error(error.message)
 }
 
+// ── Sentiment Timeline ────────────────────────────────────────────────────────
+
+export interface WeeklySentimentBucket {
+  weekStart: string  // ISO date string, Monday of the week
+  positive: number
+  neutral: number
+  negative: number
+  total: number
+}
+
+/**
+ * Returns weekly aggregations of evidence sentiment for a person
+ * over the last `days` days (default 60), ordered oldest → newest.
+ */
+export async function getEvidenceSentimentTimeline(
+  personId: string,
+  days: number = 60
+): Promise<WeeklySentimentBucket[]> {
+  const supabase = createClient()
+
+  const startDate = new Date()
+  startDate.setDate(startDate.getDate() - days)
+  const startISO = startDate.toISOString().split('T')[0]
+
+  const { data, error } = await supabase
+    .from('evidence_entries')
+    .select('occurred_at, sentiment')
+    .eq('person_id', personId)
+    .gte('occurred_at', startISO)
+    .order('occurred_at', { ascending: true })
+
+  if (error) throw new Error(error.message)
+
+  const rows = (data ?? []) as { occurred_at: string; sentiment: EvidenceSentiment | null }[]
+
+  // Group into ISO week buckets (Mon–Sun)
+  const buckets = new Map<string, WeeklySentimentBucket>()
+
+  for (const row of rows) {
+    // Parse date components directly to avoid timezone shift issues
+    const [year, month, day] = row.occurred_at.split('-').map(Number)
+    // Use UTC date to determine day-of-week consistently
+    const d = new Date(Date.UTC(year, month - 1, day))
+    const dayOfWeek = d.getUTCDay() // 0 = Sun, 1 = Mon … 6 = Sat
+    const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+    const mondayMs = d.getTime() + diffToMonday * 24 * 60 * 60 * 1000
+    const monday = new Date(mondayMs)
+    const weekStart = monday.toISOString().split('T')[0]
+
+    if (!buckets.has(weekStart)) {
+      buckets.set(weekStart, { weekStart, positive: 0, neutral: 0, negative: 0, total: 0 })
+    }
+    const bucket = buckets.get(weekStart)!
+    bucket.total++
+    if (row.sentiment === 'positive') bucket.positive++
+    else if (row.sentiment === 'negative') bucket.negative++
+    else bucket.neutral++
+  }
+
+  return Array.from(buckets.values()).sort((a, b) => a.weekStart.localeCompare(b.weekStart))
+}
+
 // ── Review Cycles ─────────────────────────────────────────────────────────────
 
 export async function getReviewCycles(): Promise<ReviewCycle[]> {
