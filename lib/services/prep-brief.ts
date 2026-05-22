@@ -78,7 +78,7 @@ export async function getPrepBriefContext(personId: string): Promise<PrepBriefCo
         .order('occurred_at', { ascending: false })
         .limit(8),
 
-      // Competency gaps (assessed < expected)
+      // Competency gaps (assessed < expected) — limit to 20 most recent assessments
       supabase
         .from('competency_assessments')
         .select(`
@@ -86,7 +86,8 @@ export async function getPrepBriefContext(personId: string): Promise<PrepBriefCo
           competency_areas!inner(name)
         `)
         .eq('person_id', personId)
-        .order('assessed_at', { ascending: false }),
+        .order('assessed_at', { ascending: false })
+        .limit(20),
     ])
 
   if (personResult.error) throw personResult.error

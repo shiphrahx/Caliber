@@ -212,9 +212,10 @@ export async function getUpcoming1on1s(
 ): Promise<Meeting[]> {
   const supabase = createClient()
 
-  const tomorrow = new Date(today + 'T00:00:00')
-  tomorrow.setDate(tomorrow.getDate() + 1)
-  const tomorrowStr = tomorrow.toISOString().split('T')[0]
+  // Compute tomorrow using UTC to avoid timezone shifts
+  const todayUtc = new Date(today + 'T00:00:00Z')
+  todayUtc.setUTCDate(todayUtc.getUTCDate() + 1)
+  const tomorrowStr = todayUtc.toISOString().split('T')[0]
 
   const { data: meetings, error } = await supabase
     .from('meetings')
