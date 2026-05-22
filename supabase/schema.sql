@@ -987,6 +987,28 @@ CREATE POLICY "Users can manage their own AI config"
   WITH CHECK (auth.uid() = user_id);
 
 -- ============================================================================
+-- AI CONFIG SAVE LOG TABLE (rate limiting for key saves)
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS public.ai_config_save_log (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_ai_config_save_log_user_time ON public.ai_config_save_log(user_id, created_at DESC);
+
+ALTER TABLE public.ai_config_save_log ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can insert their own save log"
+  ON public.ai_config_save_log FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can view their own save log"
+  ON public.ai_config_save_log FOR SELECT
+  USING (auth.uid() = user_id);
+
+-- ============================================================================
 -- AI REQUEST LOG TABLE (rate limiting)
 -- ============================================================================
 -- Tracks per-user AI requests for sliding window rate limiting in the Edge Function.
