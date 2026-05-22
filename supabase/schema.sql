@@ -1,4 +1,4 @@
--- Cadence V1 Database Schema
+-- Caliber V1 Database Schema
 -- Execute this in Supabase SQL Editor
 
 -- Enable UUID extension
