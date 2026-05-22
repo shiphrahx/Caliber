@@ -115,6 +115,7 @@ describe('SIGNAL_WEIGHTS completeness', () => {
     'overdue_task', 'no_recent_1on1', 'unresolved_action', 'no_evidence',
     'upcoming_deadline', 'missing_notes', 'overdue_follow_up',
     'ageing_follow_up', 'surfaced_follow_up', 'action_overload',
+    'sentiment_drift',
   ]
 
   it('has a weight entry for every signal type', () => {
