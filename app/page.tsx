@@ -303,7 +303,7 @@ export default function LandingPage() {
       <nav>
         <div className="nav-inner">
           <a href="#" className="nav-logo">
-            <img src="/logo_transparent.png" alt="Cadence" style={{height:"32px",width:"auto"}} />
+            <img src="/logo_transparent.png" alt="Caliber" style={{height:"32px",width:"auto"}} />
           </a>
           <div className="nav-links">
             <a href="#features">Features</a>
@@ -330,7 +330,7 @@ export default function LandingPage() {
         </div>
         <div className="container-wide">
           <div className="hero-screenshot">
-            <img src="/landing/dashboard.png" alt="Cadence dashboard showing meetings, tasks due, and calendar view" />
+            <img src="/landing/dashboard.png" alt="Caliber dashboard showing meetings, tasks due, and calendar view" />
           </div>
         </div>
       </section>
@@ -339,7 +339,7 @@ export default function LandingPage() {
       <section className="trust">
         <div className="container">
           <div className="trust-label">Built for ICs turned managers</div>
-          <p className="trust-text">Cadence replaces the Notion templates, Jira workarounds, and spreadsheets you&apos;re already using. Everything in one place, private to you.</p>
+          <p className="trust-text">Caliber replaces the Notion templates, Jira workarounds, and spreadsheets you&apos;re already using. Everything in one place, private to you.</p>
         </div>
       </section>
 
@@ -360,7 +360,7 @@ export default function LandingPage() {
           <div className="feature-content" style={{maxWidth:"600px"}}>
             <div className="feature-tag ft-green"><span className="dot"></span> Weekly Review</div>
             <h3>Start every week with clarity</h3>
-            <p>Cadence scans your people, tasks, and meetings and surfaces what needs attention. Overdue follow-ups, missed 1:1s, ageing action items — all in one guided checklist. Mark the week as reviewed when you&apos;re done.</p>
+            <p>Caliber scans your people, tasks, and meetings and surfaces what needs attention. Overdue follow-ups, missed 1:1s, ageing action items — all in one guided checklist. Mark the week as reviewed when you&apos;re done.</p>
           </div>
           <div className="feature-visual">
             <img src="/landing/weekly-review.png" alt="Weekly Review page showing people check, action items, and tasks sections" />
@@ -431,7 +431,7 @@ export default function LandingPage() {
         <div className="container">
           <div className="section-label"><span className="grad">Built different</span></div>
           <h2>Designed for how<br />EMs actually work</h2>
-          <p className="section-desc">Not another HR tool that needs team-wide adoption. Cadence is your private control centre.</p>
+          <p className="section-desc">Not another HR tool that needs team-wide adoption. Caliber is your private control centre.</p>
 
           <div className="bento reveal">
             <div className="bento-card">
@@ -460,21 +460,21 @@ export default function LandingPage() {
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="3" width="14" height="12" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M6 1v3M12 1v3M2 7h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
               </div>
               <h4>Calendar View</h4>
-              <p>See your tasks, deadlines, and meetings on a monthly calendar. Know what&apos;s coming without leaving Cadence.</p>
+              <p>See your tasks, deadlines, and meetings on a monthly calendar. Know what&apos;s coming without leaving Caliber.</p>
             </div>
             <div className="bento-card">
               <div className="bento-icon bi-orange">
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 15V7l6-4 6 4v8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M7 15v-4h4v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </div>
               <h4>Follow-up Engine</h4>
-              <p>Track every commitment you make. Cadence surfaces unresolved promises that keep ageing — before your team notices you forgot.</p>
+              <p>Track every commitment you make. Caliber surfaces unresolved promises that keep ageing — before your team notices you forgot.</p>
             </div>
             <div className="bento-card">
               <div className="bento-icon bi-red">
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M15 3L3 15M3 3l12 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
               </div>
               <h4>No team adoption needed</h4>
-              <p>Your team doesn&apos;t log in. They don&apos;t even know it exists. Cadence is your private manager toolkit.</p>
+              <p>Your team doesn&apos;t log in. They don&apos;t even know it exists. Caliber is your private manager toolkit.</p>
             </div>
           </div>
         </div>
@@ -499,8 +499,8 @@ export default function LandingPage() {
         <div className="container">
           <div className="footer-inner">
             <div className="footer-left">
-              <img src="/logo_transparent.png" alt="Cadence" style={{height:"24px",width:"auto",opacity:0.6}} />
-              <span>© 2026 Cadence</span>
+              <img src="/logo_transparent.png" alt="Caliber" style={{height:"24px",width:"auto",opacity:0.6}} />
+              <span>© 2026 Caliber</span>
             </div>
             <div className="footer-links">
               <Link href="/login">Log in</Link>
