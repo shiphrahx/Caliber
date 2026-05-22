@@ -987,6 +987,33 @@ CREATE POLICY "Users can manage their own AI config"
   WITH CHECK (auth.uid() = user_id);
 
 -- ============================================================================
+-- AI REQUEST LOG TABLE (rate limiting)
+-- ============================================================================
+-- Tracks per-user AI requests for sliding window rate limiting in the Edge Function.
+-- Old rows auto-cleaned by a scheduled job or can be pruned manually.
+
+CREATE TABLE IF NOT EXISTS public.ai_request_log (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  provider TEXT,
+  tokens_used INTEGER,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_ai_request_log_user_time ON public.ai_request_log(user_id, created_at DESC);
+
+ALTER TABLE public.ai_request_log ENABLE ROW LEVEL SECURITY;
+
+-- Users can read their own log (for future usage dashboard); Edge Function uses service role to insert
+CREATE POLICY "Users can view their own AI request log"
+  ON public.ai_request_log FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Service role can insert AI request log"
+  ON public.ai_request_log FOR INSERT
+  WITH CHECK (true);
+
+-- ============================================================================
 -- SEED DATA (Optional - for development)
 -- ============================================================================
 -- Uncomment to add sample data after first user logs in
