@@ -202,3 +202,31 @@ export async function getMeetingsForTeam(teamId: string): Promise<Meeting[]> {
 
   return (meetings ?? []).map((m) => rowToMeeting(m as unknown as MeetingRow))
 }
+
+/**
+ * Get upcoming 1:1 meetings for the current user (today + tomorrow).
+ * Returns meetings sorted by date ascending.
+ */
+export async function getUpcoming1on1s(
+  today: string = new Date().toISOString().split('T')[0]
+): Promise<Meeting[]> {
+  const supabase = createClient()
+
+  // Compute tomorrow using UTC to avoid timezone shifts
+  const todayUtc = new Date(today + 'T00:00:00Z')
+  todayUtc.setUTCDate(todayUtc.getUTCDate() + 1)
+  const tomorrowStr = todayUtc.toISOString().split('T')[0]
+
+  const { data: meetings, error } = await supabase
+    .from('meetings')
+    .select(MEETING_SELECT)
+    .eq('meeting_type', '1:1')
+    .gte('meeting_date', today)
+    .lte('meeting_date', tomorrowStr)
+    .not('person_id', 'is', null)
+    .order('meeting_date', { ascending: true })
+
+  if (error) throw error
+
+  return (meetings ?? []).map((m) => rowToMeeting(m as unknown as MeetingRow))
+}

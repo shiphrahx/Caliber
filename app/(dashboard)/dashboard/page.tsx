@@ -4,6 +4,7 @@ import { TasksWidget } from "@/components/dashboard/tasks-widget"
 import { TaskPriorityChart } from "@/components/dashboard/task-priority-chart"
 import { DashboardCalendar, CalendarTask } from "@/components/dashboard/dashboard-calendar"
 import { WeeklyReviewBanner } from "@/components/dashboard/weekly-review-banner"
+import { UpcomingOneOnOnes } from "@/components/dashboard/upcoming-one-on-ones"
 
 async function getCalendarTasks(): Promise<CalendarTask[]> {
   const supabase = await createClient()
@@ -53,6 +54,9 @@ export default async function DashboardPage() {
 
       {/* Weekly Review prompt */}
       <WeeklyReviewBanner />
+
+      {/* Upcoming 1:1s with AI prep briefs */}
+      <UpcomingOneOnOnes />
 
       {/* ── Widgets row ── */}
       <div className="grid grid-cols-3 gap-4">
