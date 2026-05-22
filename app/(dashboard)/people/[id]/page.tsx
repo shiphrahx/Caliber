@@ -80,14 +80,17 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
 
   useEffect(() => {
     if (!personId) return
-    getPeople().then(people => {
+    Promise.all([
+      getPeople(),
+      getTeams(),
+      getMeetingsForPerson(personId),
+      getFollowUpsForPerson(personId),
+    ]).then(([people, teams, backendMeetings, followUps]) => {
       const person = people.find(p => p.id === personId)
       if (person) setFormData(person)
       setAllPeopleNames(people.map(p => p.name))
       setAllPeopleWithIds(people.map(p => ({ id: p.id, name: p.name })))
-    }).catch(console.error)
-    getTeams().then(setAllTeams).catch(console.error)
-    getMeetingsForPerson(personId).then(backendMeetings => {
+      setAllTeams(teams)
       setMeetings(backendMeetings.map(m => ({
         id: m.id, title: m.title, type: m.meetingType, date: m.meetingDate,
         attendees: m.attendees,
@@ -96,8 +99,8 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
         actionItems: m.actionItems || undefined, notes: m.notes || undefined,
         personId: m.personId || undefined, teamId: m.teamId || undefined,
       })))
+      setFollowUps(followUps)
     }).catch(console.error)
-    getFollowUpsForPerson(personId).then(setFollowUps).catch(console.error)
   }, [personId])
 
   const tree = useMemo(() => {

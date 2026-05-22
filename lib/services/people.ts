@@ -43,12 +43,13 @@ function rowToPerson(person: PersonRow, teams: string[]): Person {
 export async function getPeople(): Promise<Person[]> {
   const supabase = createClient()
 
-  const [{ data: people, error }, { data: memberships }] = await Promise.all([
+  const [{ data: people, error }, { data: memberships, error: membershipsError }] = await Promise.all([
     supabase.from('people').select('*').order('created_at', { ascending: false }),
     supabase.from('team_memberships').select('person_id, teams(name)'),
   ])
 
   if (error) throw error
+  if (membershipsError) throw membershipsError
 
   const teamsByPerson: Record<string, string[]> = {}
   for (const m of memberships ?? []) {

@@ -50,6 +50,9 @@ e2e/.auth/
 *.tsbuildinfo
 next-env.d.ts
 
+# Claude Code
+CLAUDE.md
+
 # IDE
 .vscode/*
 !.vscode/settings.json

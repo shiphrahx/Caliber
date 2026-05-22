@@ -320,7 +320,11 @@ export default function MeetingsPage() {
       let parsed: { action_items: Array<{ title: string; assignee: string; due_date_hint: string | null }>; follow_ups: Array<{ title: string; person: string; due_date_hint: string | null }> }
       try {
         const jsonMatch = result.content.match(/\{[\s\S]*\}/)
-        parsed = JSON.parse(jsonMatch?.[0] ?? result.content)
+        if (!jsonMatch) {
+          toast.error('Could not parse AI response. Try again.')
+          return
+        }
+        parsed = JSON.parse(jsonMatch[0])
       } catch {
         toast.error('Could not parse AI response. Try again.')
         return
