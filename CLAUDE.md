@@ -1,10 +1,10 @@
-# Cadence - Project Documentation
+# Caliber - Project Documentation
 
 ## Project Overview
 
-Cadence is a lightweight web platform for engineering managers to run their day-to-day work effectively. It serves as a control centre for management work, bringing together tasks, meetings, delivery data, and personal growth in one clear, organized place.
+Caliber is a lightweight web platform for engineering managers to run their day-to-day work effectively. It serves as a control centre for management work, bringing together tasks, meetings, delivery data, and personal growth in one clear, organized place.
 
-**Repository:** https://github.com/shiphrahx/Cadence
+**Repository:** https://github.com/shiphrahx/Caliber
 **Project Board:** https://github.com/users/shiphrahx/projects/2
 
 ## Tech Stack
@@ -44,7 +44,7 @@ Cadence is a lightweight web platform for engineering managers to run their day-
 ## Project Structure
 
 ```
-Cadence/
+Caliber/
 ├── app/
 │   ├── (dashboard)/
 │   │   ├── layout.tsx          # Dashboard layout with sidebar
