@@ -46,7 +46,25 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders })
     }
 
-    // ── Rate limiting — simple count check via DB ─────────────────────────────
+    // ── Rate limiting — sliding window via ai_request_log table ──────────────
+    const windowStart = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+    const { count: recentCount, error: rateError } = await supabase
+      .from("ai_request_log")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .gte("created_at", windowStart)
+
+    if (rateError) {
+      console.error("Rate limit check failed:", rateError)
+      // Fail open — don't block on rate limit DB errors
+    } else if ((recentCount ?? 0) >= RATE_LIMIT_PER_HOUR) {
+      return new Response(
+        JSON.stringify({ error: `Rate limit reached. You can make up to ${RATE_LIMIT_PER_HOUR} AI requests per hour.` }),
+        { status: 429, headers: corsHeaders }
+      )
+    }
+
+    // ── Load AI config ────────────────────────────────────────────────────────
     const { data: config, error: configError } = await supabase
       .from("ai_config")
       .select("id, provider, api_key_encrypted, model, total_requests, last_used_at")
@@ -191,11 +209,16 @@ Deno.serve(async (req) => {
       clearTimeout(timeout)
     }
 
-    // ── Update usage stats ────────────────────────────────────────────────────
-    await serviceSupabase
-      .from("ai_config")
-      .update({ total_requests: (config.total_requests ?? 0) + 1, last_used_at: new Date().toISOString() })
-      .eq("user_id", user.id)
+    // ── Update usage stats + log request for rate limiting ───────────────────
+    await Promise.all([
+      serviceSupabase
+        .from("ai_config")
+        .update({ total_requests: (config.total_requests ?? 0) + 1, last_used_at: new Date().toISOString() })
+        .eq("user_id", user.id),
+      serviceSupabase
+        .from("ai_request_log")
+        .insert({ user_id: user.id, provider: config.provider, tokens_used: aiResponse.tokensUsed.input + aiResponse.tokensUsed.output }),
+    ])
 
     return new Response(JSON.stringify(aiResponse), {
       headers: { ...corsHeaders, "content-type": "application/json" },

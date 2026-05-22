@@ -6,7 +6,46 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// ---------------------------------------------------------------------------
+// Simple in-process rate limiter for API routes
+// Sliding window: max 120 requests per minute per user (IP fallback for anon)
+// Note: resets on cold start / new Edge instance — this is intentional.
+// For persistent limits use Upstash Redis. This protects against burst abuse.
+// ---------------------------------------------------------------------------
+const API_RATE_LIMIT = 120
+const API_RATE_WINDOW_MS = 60_000
+
+const rateLimitStore = new Map<string, { count: number; windowStart: number }>()
+
+function isRateLimited(key: string): boolean {
+  const now = Date.now()
+  const entry = rateLimitStore.get(key)
+
+  if (!entry || now - entry.windowStart > API_RATE_WINDOW_MS) {
+    rateLimitStore.set(key, { count: 1, windowStart: now })
+    return false
+  }
+
+  entry.count++
+  if (entry.count > API_RATE_LIMIT) return true
+  return false
+}
+
 export async function proxy(request: NextRequest) {
+  // Rate limit API routes before doing any DB work
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+      ?? request.headers.get('x-real-ip')
+      ?? 'unknown'
+    const rateLimitKey = `api:${ip}`
+    if (isRateLimited(rateLimitKey)) {
+      return new NextResponse(JSON.stringify({ error: 'Too many requests. Please slow down.' }), {
+        status: 429,
+        headers: { 'Content-Type': 'application/json', 'Retry-After': '60' },
+      })
+    }
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!supabaseUrl) throw new Error('NEXT_PUBLIC_SUPABASE_URL is not set')
