@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test"
 test.describe("Landing page", () => {
   test("renders hero and key sections", async ({ page }) => {
     await page.goto("/")
-    await expect(page).toHaveTitle(/Cadence/)
+    await expect(page).toHaveTitle(/Caliber/)
     await expect(page.locator("h1")).toContainText("engineering managers")
     await expect(page.locator("nav")).toBeVisible()
     await expect(page.locator("#features")).toBeVisible()
@@ -52,12 +52,12 @@ test.describe("Login page", () => {
   test("renders Google sign-in button", async ({ page }) => {
     await page.goto("/login")
     await expect(page.locator("text=Continue with Google")).toBeVisible()
-    await expect(page.locator("text=Welcome to Cadence")).toBeVisible()
+    await expect(page.locator("text=Welcome to Caliber")).toBeVisible()
   })
 
   test("logo visible", async ({ page }) => {
     await page.goto("/login")
-    await expect(page.locator('img[alt="Cadence"]')).toBeVisible()
+    await expect(page.locator('img[alt="Caliber"]')).toBeVisible()
   })
 })
 
