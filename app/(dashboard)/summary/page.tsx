@@ -369,7 +369,7 @@ export default function SummaryPage() {
           ) : isEmpty && !content ? (
             <div style={{ flex: 1, padding: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
               <div style={{ fontSize: 'var(--text-meta)', color: 'var(--text-3)', textAlign: 'center', maxWidth: '320px' }}>
-                Your weekly summary will appear here once you start tracking tasks and meetings in Cadence.
+                Your weekly summary will appear here once you start tracking tasks and meetings in Caliber.
               </div>
               <div style={{
                 background: 'var(--surf-2)', border: '1px solid var(--border-1)', borderRadius: '6px',
