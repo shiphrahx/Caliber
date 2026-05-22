@@ -354,3 +354,63 @@ export function buildTaskPrioritisationPrompt(args: {
 Tasks to rank:
 ${taskLines}`, 4000)
 }
+
+// ─── Natural Language Task Creation ──────────────────────────────────────────
+
+export const NATURAL_LANGUAGE_TASK_SYSTEM = `You are helping an engineering manager create structured tasks from natural language descriptions.
+
+Parse the input and return a structured task. Use the following rules:
+- **title**: A concise, action-oriented task title (max 80 characters). Remove filler words like "I need to" or "Remember to".
+- **priority**: One of "Low", "Medium", "High", "Very High". Default to "Medium" if no urgency signals.
+- **category**: One of "Task", "Meeting", "Career Growth", "People". Use "People" for tasks about team members, "Meeting" for meeting-related tasks, "Career Growth" for development tasks, "Task" for everything else.
+- **dueDate**: ISO 8601 date string (YYYY-MM-DD) resolved from the input relative to today, or null if no date mentioned. Examples: "next Friday", "end of week", "tomorrow", "in 2 weeks".
+- **assigneeId**: ID of the person this task relates to, matched from the people list, or null if no person mentioned or matched.
+- **list**: "week" if due this week or overdue, "backlog" otherwise. Default to "backlog" if no date.
+
+Return ONLY a JSON object with no other text:
+{
+  "title": "...",
+  "priority": "Low" | "Medium" | "High" | "Very High",
+  "category": "Task" | "Meeting" | "Career Growth" | "People",
+  "dueDate": "YYYY-MM-DD" | null,
+  "assigneeId": "person-uuid" | null,
+  "list": "week" | "backlog",
+  "confidence": "high" | "medium" | "low"
+}
+
+confidence reflects how certain you are about the parse:
+- high: all fields clearly stated
+- medium: some inference required (e.g. relative date resolved, name partially matched)
+- low: significant ambiguity, user should review carefully`
+
+export interface NaturalLanguageTaskPerson {
+  id: string
+  name: string
+}
+
+export interface NaturalLanguageTaskResult {
+  title: string
+  priority: string
+  category: string
+  dueDate: string | null
+  assigneeId: string | null
+  list: 'week' | 'backlog'
+  confidence: 'high' | 'medium' | 'low'
+}
+
+export function buildNaturalLanguageTaskPrompt(args: {
+  input: string
+  today: string
+  people: NaturalLanguageTaskPerson[]
+}): string {
+  const peopleList = args.people.length > 0
+    ? args.people.map(p => `- ${p.name} (id: ${p.id})`).join('\n')
+    : 'No people in directory.'
+
+  return `Today: ${args.today}
+
+User input: "${args.input}"
+
+Active people directory (for name matching):
+${peopleList}`
+}
