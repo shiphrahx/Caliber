@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Task, TaskStatus, TASK_STATUSES } from "@/lib/types/task"
-import { getTasks, createTask, updateTask, deleteTask as deleteTaskService } from "@/lib/services/tasks"
+import { getTasks, createTask, updateTask, deleteTask as deleteTaskService, type NaturalLanguageTaskPerson } from "@/lib/services/tasks"
+import { getPeople } from "@/lib/services/people"
+import { NaturalLanguageTaskInput } from "@/components/tasks/natural-language-task-input"
 import {
   DndContext,
   DragEndEvent,
@@ -33,6 +35,7 @@ import {
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([])
+  const [people, setPeople] = useState<NaturalLanguageTaskPerson[]>([])
   const [activeTask, setActiveTask] = useState<Task | null>(null)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -42,12 +45,24 @@ export default function TasksPage() {
   const [, setIsLoading] = useState(true)
   const mountedRef = useRef(true)
 
-  // Load tasks from Supabase on mount
+  // Load tasks and people from Supabase on mount
   useEffect(() => {
     mountedRef.current = true
     loadTasks()
+    loadPeople()
     return () => { mountedRef.current = false }
   }, [])
+
+  const loadPeople = async () => {
+    try {
+      const data = await getPeople()
+      if (mountedRef.current) {
+        setPeople(data.filter(p => p.status === 'active').map(p => ({ id: p.id, name: p.name })))
+      }
+    } catch (error) {
+      console.error('Failed to load people:', error)
+    }
+  }
 
   const loadTasks = async () => {
     try {
@@ -296,6 +311,15 @@ export default function TasksPage() {
     setIsModalOpen(true)
   }
 
+  const handleNaturalLanguageTask = async (task: Omit<Task, "id">) => {
+    try {
+      const newTask = await createTask(task)
+      setTasks((tasks) => [...tasks, newTask])
+    } catch (error) {
+      console.error('Failed to create task from natural language:', error)
+    }
+  }
+
   const weekTasks = tasks.filter((t) => t.list === "week")
   const backlogTasks = tasks.filter((t) => t.list === "backlog")
 
@@ -335,9 +359,15 @@ export default function TasksPage() {
       {/* Top bar */}
       <div className="page-topbar">
         <span className="page-topbar-title">Tasks</span>
-        <button className="btn-primary" onClick={handleNewTaskHeader}>
-          + New task
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <NaturalLanguageTaskInput
+            people={people}
+            onConfirm={handleNaturalLanguageTask}
+          />
+          <button className="btn-primary" onClick={handleNewTaskHeader}>
+            + New task
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-8 p-4">
