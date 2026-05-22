@@ -9,12 +9,16 @@ import { callAI } from '@/lib/services/ai'
 import {
   TASK_PRIORITISATION_SYSTEM,
   buildTaskPrioritisationPrompt,
+  NATURAL_LANGUAGE_TASK_SYSTEM,
+  buildNaturalLanguageTaskPrompt,
   type TaskPrioritisationInput,
   type TaskRanking,
   type TaskPrioritisationResult,
+  type NaturalLanguageTaskPerson,
+  type NaturalLanguageTaskResult,
 } from '@/lib/ai/prompts'
 
-export type { TaskPrioritisationInput, TaskRanking, TaskPrioritisationResult }
+export type { TaskPrioritisationInput, TaskRanking, TaskPrioritisationResult, NaturalLanguageTaskPerson, NaturalLanguageTaskResult }
 
 type DbPriority = 'low' | 'medium' | 'high' | 'very_high'
 type DbStatus = 'not_started' | 'in_progress' | 'blocked' | 'completed'
@@ -264,4 +268,74 @@ export async function prioritiseTasks(
     .sort((a, b) => a.rank - b.rank)
 
   return rankings
+}
+
+const VALID_PRIORITIES = new Set(['Low', 'Medium', 'High', 'Very High'])
+const VALID_CATEGORIES = new Set(['Task', 'Meeting', 'Career Growth', 'People'])
+const VALID_LISTS = new Set(['week', 'backlog'])
+const VALID_CONFIDENCE = new Set(['high', 'medium', 'low'])
+
+/**
+ * Parse a natural language task description into a structured task using AI.
+ * Returns a NaturalLanguageTaskResult for the caller to show in a preview.
+ * Throws if AI returns an invalid/unparseable response.
+ */
+export async function parseNaturalLanguageTask(
+  input: string,
+  people: NaturalLanguageTaskPerson[],
+  today: string = new Date().toISOString().split('T')[0],
+  signal?: AbortSignal
+): Promise<NaturalLanguageTaskResult> {
+  if (!input.trim()) throw new Error('Input cannot be empty')
+
+  const userPrompt = buildNaturalLanguageTaskPrompt({ input: input.trim(), today, people })
+
+  const response = await callAI(
+    {
+      systemPrompt: NATURAL_LANGUAGE_TASK_SYSTEM,
+      userPrompt,
+      maxTokens: 300,
+      temperature: 0,
+    },
+    signal
+  )
+
+  let parsed: NaturalLanguageTaskResult
+  try {
+    const cleaned = response.content
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```$/i, '')
+      .trim()
+    parsed = JSON.parse(cleaned) as NaturalLanguageTaskResult
+  } catch {
+    throw new Error('AI returned invalid JSON for task parsing')
+  }
+
+  // Validate required fields with safe fallbacks
+  const title = typeof parsed.title === 'string' && parsed.title.trim()
+    ? parsed.title.trim().slice(0, 80)
+    : input.trim().slice(0, 80)
+
+  const priority = VALID_PRIORITIES.has(parsed.priority) ? parsed.priority : 'Medium'
+  const category = VALID_CATEGORIES.has(parsed.category) ? parsed.category : 'Task'
+  const list = VALID_LISTS.has(parsed.list) ? parsed.list as 'week' | 'backlog' : 'backlog'
+  const confidence = VALID_CONFIDENCE.has(parsed.confidence) ? parsed.confidence as 'high' | 'medium' | 'low' : 'low'
+
+  // Validate due date — must be a valid ISO date string or null
+  let dueDate: string | null = null
+  if (typeof parsed.dueDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(parsed.dueDate)) {
+    const d = new Date(parsed.dueDate)
+    if (!isNaN(d.getTime())) {
+      dueDate = parsed.dueDate
+    }
+  }
+
+  // Validate assigneeId — must match a person ID in the provided list or be null
+  let assigneeId: string | null = null
+  if (typeof parsed.assigneeId === 'string' && parsed.assigneeId) {
+    const matched = people.find(p => p.id === parsed.assigneeId)
+    assigneeId = matched ? matched.id : null
+  }
+
+  return { title, priority, category, dueDate, assigneeId, list, confidence }
 }
