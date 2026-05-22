@@ -173,7 +173,7 @@ describe('Tasks Service — edge cases', () => {
         data: { user: { id: 'user-1' } }, error: null,
       })
 
-      await createTask({ title: 'Critical', priority: 'Very High', status: 'Not started', list: 'week', dueDate: null })
+      await createTask({ title: 'Critical', priority: 'Very High', status: 'Not started', list: 'week', dueDate: null, category: 'Task' })
       expect(capturedInsertData).toMatchObject({ priority: 'very_high' })
     })
 
@@ -197,7 +197,7 @@ describe('Tasks Service — edge cases', () => {
         data: { user: { id: 'user-1' } }, error: null,
       })
 
-      await createTask({ title: 'Already done', priority: 'Low', status: 'Done', list: 'backlog', dueDate: null })
+      await createTask({ title: 'Already done', priority: 'Low', status: 'Done', list: 'backlog', dueDate: null, category: 'Task' })
       expect(capturedInsertData).toMatchObject({ status: 'completed' })
     })
   })
