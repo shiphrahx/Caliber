@@ -5,6 +5,16 @@
 
 import { createClient } from '@/lib/supabase/client'
 import type { Task, TaskStatus, TaskPriority, TaskCategory } from '@/lib/types/task'
+import { callAI } from '@/lib/services/ai'
+import {
+  TASK_PRIORITISATION_SYSTEM,
+  buildTaskPrioritisationPrompt,
+  type TaskPrioritisationInput,
+  type TaskRanking,
+  type TaskPrioritisationResult,
+} from '@/lib/ai/prompts'
+
+export type { TaskPrioritisationInput, TaskRanking, TaskPrioritisationResult }
 
 type DbPriority = 'low' | 'medium' | 'high' | 'very_high'
 type DbStatus = 'not_started' | 'in_progress' | 'blocked' | 'completed'
@@ -205,4 +215,53 @@ export async function deleteTask(id: string): Promise<void> {
 
 export async function moveTask(id: string, toList: 'week' | 'backlog'): Promise<Task> {
   return updateTask(id, { list: toList })
+}
+
+/**
+ * Prioritise a list of tasks using AI.
+ * Returns rankings ordered by rank (1 = highest priority).
+ * Throws if the AI response cannot be parsed.
+ */
+export async function prioritiseTasks(
+  tasks: TaskPrioritisationInput[],
+  today: string = new Date().toISOString().split('T')[0],
+  signal?: AbortSignal
+): Promise<TaskRanking[]> {
+  if (tasks.length === 0) return []
+
+  const userPrompt = buildTaskPrioritisationPrompt({ tasks, today })
+
+  const response = await callAI(
+    {
+      systemPrompt: TASK_PRIORITISATION_SYSTEM,
+      userPrompt,
+      maxTokens: 1000,
+      temperature: 0,
+    },
+    signal
+  )
+
+  let parsed: TaskPrioritisationResult
+  try {
+    // Strip markdown code fences if present
+    const cleaned = response.content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
+    parsed = JSON.parse(cleaned) as TaskPrioritisationResult
+  } catch {
+    throw new Error('AI returned invalid JSON for task prioritisation')
+  }
+
+  if (!Array.isArray(parsed.rankings)) {
+    throw new Error('AI response missing rankings array')
+  }
+
+  // Validate and sort by rank
+  const rankings = parsed.rankings
+    .filter((r): r is TaskRanking =>
+      typeof r.taskId === 'string' &&
+      typeof r.rank === 'number' &&
+      typeof r.reason === 'string'
+    )
+    .sort((a, b) => a.rank - b.rank)
+
+  return rankings
 }

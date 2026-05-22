@@ -287,3 +287,70 @@ For each recurring topic return:
 - escalating: boolean — is the topic becoming more prominent or urgent over time?
 
 Return ONLY a JSON array. If no recurring topics, return [].`
+
+// ─── Task Prioritisation ──────────────────────────────────────────────────────
+
+export const TASK_PRIORITISATION_SYSTEM = `You are helping an engineering manager prioritise their task backlog. Rank tasks by importance using the following signals:
+
+1. **Urgency** — How soon is it due? Overdue tasks rank highest.
+2. **Priority field** — Very High > High > Medium > Low. Weight this heavily.
+3. **Person workload** — Tasks linked to people with high open-task counts are more important to resolve.
+4. **Category** — People-related tasks (1:1s, performance, career) rank above general tasks when urgency is equal.
+
+Return ONLY a JSON object:
+{
+  "rankings": [
+    { "taskId": "...", "rank": 1, "reason": "..." },
+    ...
+  ]
+}
+
+Rules:
+- Every task in the input must appear in rankings exactly once
+- rank 1 = highest priority
+- reason must be one concise sentence (max 15 words) explaining why this rank
+- Do not fabricate tasks that were not in the input
+- No other text outside the JSON`
+
+export interface TaskPrioritisationInput {
+  id: string
+  title: string
+  priority: string
+  dueDate: string | null
+  category: string
+  status: string
+  linkedPersonName?: string
+  personOpenTaskCount?: number
+}
+
+export interface TaskRanking {
+  taskId: string
+  rank: number
+  reason: string
+}
+
+export interface TaskPrioritisationResult {
+  rankings: TaskRanking[]
+}
+
+export function buildTaskPrioritisationPrompt(args: {
+  tasks: TaskPrioritisationInput[]
+  today: string
+}): string {
+  if (args.tasks.length === 0) return 'No tasks to prioritise.'
+
+  const taskLines = args.tasks.map(t => {
+    const due = t.dueDate
+      ? (t.dueDate < args.today ? `OVERDUE (was ${t.dueDate})` : `due ${t.dueDate}`)
+      : 'no due date'
+    const person = t.linkedPersonName
+      ? `, linked to ${t.linkedPersonName}${t.personOpenTaskCount != null ? ` (${t.personOpenTaskCount} open tasks)` : ''}`
+      : ''
+    return `- id:${t.id} | "${t.title}" | priority:${t.priority} | ${due} | category:${t.category} | status:${t.status}${person}`
+  }).join('\n')
+
+  return truncateToTokenBudget(`Today: ${args.today}
+
+Tasks to rank:
+${taskLines}`, 4000)
+}
