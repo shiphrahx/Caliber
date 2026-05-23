@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, ChevronDown, ChevronRight, Link2, Trash2, Check } from "lucide-react"
+import { Plus, ChevronDown, ChevronRight, Link2, Trash2, Check, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { MarkdownTextarea } from "@/components/ui/markdown-textarea"
@@ -14,6 +14,7 @@ import {
   type EvidenceCategory,
   type EvidenceSentiment,
 } from "@/lib/services/evidence"
+import { BatchEvidenceImportModal } from "./batch-evidence-import-modal"
 
 const CATEGORY_LABELS: Record<EvidenceCategory, string> = {
   achievement: "Achievement",
@@ -72,6 +73,8 @@ interface EvidenceSectionProps {
   prefillMeetingTitle?: string
   prefillMeetingDate?: string
   onPrefillConsumed?: () => void
+  /** People list for batch import person resolution */
+  allPeople?: Array<{ id: string; name: string }>
 }
 
 export function EvidenceSection({
@@ -81,6 +84,7 @@ export function EvidenceSection({
   prefillMeetingTitle,
   prefillMeetingDate,
   onPrefillConsumed,
+  allPeople = [],
 }: EvidenceSectionProps) {
   const [entries, setEntries] = useState<EvidenceEntry[]>([])
   const [showForm, setShowForm] = useState(false)
@@ -91,6 +95,12 @@ export function EvidenceSection({
   const [saving, setSaving] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [linkedMeetingId, setLinkedMeetingId] = useState<string | undefined>(undefined)
+  const [batchImportOpen, setBatchImportOpen] = useState(false)
+
+  // People list: merge allPeople with the current person to ensure they're always included
+  const batchPeople = allPeople.length > 0
+    ? allPeople
+    : [{ id: personId, name: personName }]
 
   useEffect(() => {
     getEvidenceForPerson(personId).then(setEntries).catch(console.error)
@@ -202,6 +212,13 @@ export function EvidenceSection({
           >
             Review Prep
           </a>
+          <button
+            onClick={() => setBatchImportOpen(true)}
+            style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "4px 10px", borderRadius: "4px", fontSize: "var(--text-caption)", fontWeight: 600, color: "var(--text-2)", border: "1px solid var(--border-2)", background: "var(--surf-2)", cursor: "pointer", fontFamily: "var(--font-sans)" }}
+            title="Import multiple evidence entries from pasted text"
+          >
+            <FileText style={{ width: "11px", height: "11px" }} /> Import from text
+          </button>
           <button
             onClick={() => { setShowForm(true); setLinkedMeetingId(undefined) }}
             style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "linear-gradient(90deg, #00ffe5 0%, #00f058 100%)", border: "none", color: "#0a1a0a", padding: "4px 10px", borderRadius: "4px", fontSize: "var(--text-caption)", fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-sans)" }}
@@ -440,6 +457,19 @@ export function EvidenceSection({
           })
         )}
       </div>
+
+      {/* Batch Import Modal */}
+      <BatchEvidenceImportModal
+        open={batchImportOpen}
+        onOpenChange={setBatchImportOpen}
+        people={batchPeople}
+        contextPersonId={personId}
+        contextPersonName={personName}
+        onSaved={(count) => {
+          // Refresh entries after batch save
+          getEvidenceForPerson(personId).then(setEntries).catch(console.error)
+        }}
+      />
     </div>
   )
 }

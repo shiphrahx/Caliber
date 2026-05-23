@@ -626,7 +626,7 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
 
       {/* Evidence section */}
       <div style={{ marginTop: "24px" }}>
-        <EvidenceSection personId={personId!} personName={formData.name} />
+        <EvidenceSection personId={personId!} personName={formData.name} allPeople={allPeopleWithIds} />
       </div>
 
       {/* Competencies section */}
