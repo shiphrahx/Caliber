@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,9 +15,11 @@ import {
 } from "@/components/ui/select"
 import { marked } from "marked"
 import DOMPurify from "isomorphic-dompurify"
+import { RefreshCw } from "lucide-react"
 import { getTodayDate } from "@/lib/utils"
 import { type Meeting as BaseMeeting } from "@/lib/mock-data"
 import { useTemplates } from "@/lib/hooks/use-templates"
+import { regenerateMeetingTldr, type Meeting as ServiceMeeting } from "@/lib/services/meetings"
 
 // Extended Meeting interface for forms that includes additional fields
 interface Meeting extends Omit<BaseMeeting, 'id' | 'time' | 'status'> {
@@ -43,6 +45,8 @@ interface MeetingFormDialogProps {
   defaultPersonId?: string
   peopleWithIds?: Array<{ id: string; name: string }>
   teamsWithIds?: Array<{ id: string; name: string }>
+  /** Service-layer meeting object for TL;DR operations (needed for regeneration) */
+  serviceMeeting?: ServiceMeeting | null
 }
 
 const calculateNextMeetingDate = (lastMeetingDate: string, recurrence: string): string => {
@@ -100,7 +104,7 @@ const recurrenceOptions = [
   { value: "custom", label: "Custom" },
 ]
 
-export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availablePeople = [], availableTeams = [], defaultPerson, defaultType, defaultPersonId, peopleWithIds = [], teamsWithIds = [] }: MeetingFormDialogProps) {
+export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availablePeople = [], availableTeams = [], defaultPerson, defaultType, defaultPersonId, peopleWithIds = [], teamsWithIds = [], serviceMeeting }: MeetingFormDialogProps) {
   const { templates } = useTemplates()
   const [formData, setFormData] = useState<Meeting>(meeting || emptyMeeting)
   const [personInput, setPersonInput] = useState("")
@@ -111,6 +115,34 @@ export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availab
   const [showTeamSuggestions, setShowTeamSuggestions] = useState(false)
   const [validationError, setValidationError] = useState("")
   const [selectedTemplate, setSelectedTemplate] = useState<string>("")
+  const [tldrText, setTldrText] = useState<string | null>(serviceMeeting?.tldr ?? null)
+  const [tldrLoading, setTldrLoading] = useState(false)
+
+  // Sync TL;DR when serviceMeeting changes
+  useEffect(() => {
+    setTldrText(serviceMeeting?.tldr ?? null)
+  }, [serviceMeeting?.tldr])
+
+  const handleRegenerateTldr = useCallback(async () => {
+    if (!serviceMeeting) return
+    setTldrLoading(true)
+    setTldrText(null)
+    try {
+      await regenerateMeetingTldr(serviceMeeting)
+      // Poll for the result (fire-and-forget async update takes a moment)
+      const supabase = (await import('@/lib/supabase/client')).createClient()
+      const { data } = await supabase
+        .from('meetings')
+        .select('tldr')
+        .eq('id', serviceMeeting.id)
+        .single()
+      setTldrText((data as { tldr: string | null } | null)?.tldr ?? null)
+    } catch {
+      // ignore
+    } finally {
+      setTldrLoading(false)
+    }
+  }, [serviceMeeting])
 
   // Reset form data when dialog opens/closes or meeting changes
   useEffect(() => {
@@ -637,6 +669,52 @@ export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availab
                   className="h-full text-sm"
                 />
               </div>
+
+              {/* TL;DR — shown when editing an existing meeting */}
+              {isEditing && serviceMeeting && (
+                <div
+                  style={{
+                    borderRadius: 8,
+                    padding: "10px 12px",
+                    background: "var(--surf-2)",
+                    border: "1px solid var(--border-2)",
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span style={{ fontSize: "var(--text-label)", color: "var(--text-2)", fontWeight: 600 }}>
+                      AI Summary
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleRegenerateTldr}
+                      disabled={tldrLoading}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 4,
+                        fontSize: "var(--text-label)", color: "var(--text-3)",
+                        background: "none", border: "none", cursor: tldrLoading ? "not-allowed" : "pointer",
+                        padding: "2px 6px", borderRadius: 4,
+                      }}
+                      title="Regenerate summary"
+                    >
+                      <RefreshCw size={11} style={{ animation: tldrLoading ? "spin 1s linear infinite" : "none" }} />
+                      Regenerate
+                    </button>
+                  </div>
+                  {tldrLoading ? (
+                    <p style={{ fontSize: "var(--text-body)", color: "var(--text-3)", fontStyle: "italic" }}>
+                      Generating summary…
+                    </p>
+                  ) : tldrText ? (
+                    <p style={{ fontSize: "var(--text-body)", color: "var(--text-2)", lineHeight: 1.5 }}>
+                      {tldrText}
+                    </p>
+                  ) : (
+                    <p style={{ fontSize: "var(--text-body)", color: "var(--text-3)", fontStyle: "italic" }}>
+                      No summary yet. Save meeting notes (&gt;100 chars) to generate one.
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
           {validationError && (

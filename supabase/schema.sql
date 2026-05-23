@@ -482,6 +482,7 @@ CREATE TABLE IF NOT EXISTS public.meetings (
   recurrence TEXT CHECK (recurrence IN ('none', 'weekly', 'fortnightly', 'monthly', 'custom')),
   action_items TEXT,
   notes TEXT,
+  tldr TEXT,
   person_id UUID REFERENCES public.people(id) ON DELETE SET NULL,
   team_id UUID REFERENCES public.teams(id) ON DELETE SET NULL,
   owning_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -997,6 +998,8 @@ CREATE TABLE IF NOT EXISTS public.ai_request_log (
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   provider TEXT,
   tokens_used INTEGER,
+  cache_read_tokens INTEGER NOT NULL DEFAULT 0,
+  cache_write_tokens INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

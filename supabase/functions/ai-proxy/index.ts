@@ -23,6 +23,13 @@ interface AIProxyRequest {
   preferFast?: boolean
 }
 
+interface AITokenUsage {
+  input: number
+  output: number
+  cacheRead?: number
+  cacheWrite?: number
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders })
@@ -110,7 +117,7 @@ Deno.serve(async (req) => {
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 30_000)
 
-    let aiResponse: { content: string; tokensUsed: { input: number; output: number }; model: string }
+    let aiResponse: { content: string; tokensUsed: AITokenUsage; model: string }
 
     try {
       if (config.provider === "anthropic") {
@@ -120,12 +127,20 @@ Deno.serve(async (req) => {
           headers: {
             "x-api-key": apiKey,
             "anthropic-version": "2023-06-01",
+            "anthropic-beta": "prompt-caching-2024-07-31",
             "content-type": "application/json",
           },
           body: JSON.stringify({
             model,
             max_tokens: maxTokens,
-            system: systemPrompt,
+            // Use content-array format for system prompt to enable cache_control
+            system: [
+              {
+                type: "text",
+                text: systemPrompt,
+                cache_control: { type: "ephemeral" },
+              },
+            ],
             messages: [{ role: "user", content: userPrompt }],
           }),
           signal: controller.signal,
@@ -135,9 +150,17 @@ Deno.serve(async (req) => {
           return new Response(JSON.stringify({ error: mapProviderError(res.status, "anthropic", errBody) }), { status: 200, headers: corsHeaders })
         }
         const data = await res.json()
+        const cacheRead = data.usage?.cache_read_input_tokens ?? 0
+        const cacheWrite = data.usage?.cache_creation_input_tokens ?? 0
+        console.log(`[ai-proxy] Anthropic cache — read: ${cacheRead}, write: ${cacheWrite}, model: ${model}`)
         aiResponse = {
           content: data.content?.[0]?.text ?? "",
-          tokensUsed: { input: data.usage?.input_tokens ?? 0, output: data.usage?.output_tokens ?? 0 },
+          tokensUsed: {
+            input: data.usage?.input_tokens ?? 0,
+            output: data.usage?.output_tokens ?? 0,
+            cacheRead,
+            cacheWrite,
+          },
           model,
         }
       } else if (config.provider === "openai") {
@@ -217,7 +240,13 @@ Deno.serve(async (req) => {
         .eq("user_id", user.id),
       serviceSupabase
         .from("ai_request_log")
-        .insert({ user_id: user.id, provider: config.provider, tokens_used: aiResponse.tokensUsed.input + aiResponse.tokensUsed.output }),
+        .insert({
+          user_id: user.id,
+          provider: config.provider,
+          tokens_used: aiResponse.tokensUsed.input + aiResponse.tokensUsed.output,
+          cache_read_tokens: aiResponse.tokensUsed.cacheRead ?? 0,
+          cache_write_tokens: aiResponse.tokensUsed.cacheWrite ?? 0,
+        }),
     ])
 
     return new Response(JSON.stringify(aiResponse), {
