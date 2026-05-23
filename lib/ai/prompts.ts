@@ -542,3 +542,120 @@ export function buildTeamCompetencySummaryPromptFromSnapshot(args: {
     areas: args.snapshot.areas,
   })
 }
+
+// ─── Meeting TL;DR ────────────────────────────────────────────────────────────
+
+export const MEETING_TLDR_SYSTEM = `You are summarising a meeting for an engineering manager. Write a TL;DR of exactly 2 sentences.
+
+Rules:
+- Lead with the main decision or outcome (not "We discussed…")
+- Mention 1-2 key topics discussed
+- Do NOT list every action item — that is captured elsewhere
+- Plain text only — no markdown, no bullet points, no headers
+- Maximum 60 words total`
+
+export function buildMeetingTldrPrompt(args: {
+  title: string
+  meetingType: string
+  notes: string
+  actionItems?: string | null
+}): string {
+  const actionText = args.actionItems?.trim()
+    ? `\nAction items: ${args.actionItems.slice(0, 400)}`
+    : ''
+  return truncateToTokenBudget(
+    `Meeting: ${args.title} (${args.meetingType})\n\nNotes:\n${args.notes}${actionText}`,
+    3000
+  )
+}
+
+// ─── Batch Evidence Extraction ────────────────────────────────────────────────
+
+export const BATCH_EVIDENCE_EXTRACTION_SYSTEM = `You are helping an engineering manager extract evidence entries from raw text (Slack threads, emails, doc excerpts, or meeting notes).
+
+Extract concrete, specific observations about individual contributors. For each distinct observation return:
+- title: concise 1-line summary (max 80 chars)
+- content: the relevant verbatim or paraphrased detail (max 300 chars), or null
+- category: one of [achievement, feedback_given, feedback_received, concern, growth, delivery, behaviour, promotion_evidence, general]
+- sentiment: one of [positive, neutral, negative]
+- occurredAt: ISO date (YYYY-MM-DD). Infer from context clues or default to today.
+- personName: the person this observation is about. Must match one of the provided names, or null if unclear.
+
+Rules:
+- Only extract CONCRETE, SPECIFIC observations — not generic praise or vague statements
+- One entry per distinct observation
+- If a passage mentions the same person doing multiple distinct things, create separate entries
+- If no extractable evidence, return an empty array
+- Return ONLY a JSON array with no other text:
+
+[{"title":"...","content":"...","category":"...","sentiment":"...","occurredAt":"YYYY-MM-DD","personName":"..."}]`
+
+export interface BatchExtractedEvidence {
+  title: string
+  content: string | null
+  category: string
+  sentiment: string
+  occurredAt: string
+  personName: string | null
+}
+
+export function buildBatchEvidencePrompt(args: {
+  text: string
+  people: Array<{ id: string; name: string }>
+  today: string
+  contextPersonName?: string
+}): string {
+  const peopleList = args.people.length > 0
+    ? `Active people (use these names exactly):\n${args.people.map(p => `- ${p.name}`).join('\n')}`
+    : 'No people directory provided.'
+
+  const contextNote = args.contextPersonName
+    ? `\nContext: this text is primarily about ${args.contextPersonName} unless another name is clearly identified.`
+    : ''
+
+  return truncateToTokenBudget(
+    `Today: ${args.today}${contextNote}\n\n${peopleList}\n\n=== Text to extract from ===\n${args.text}`,
+    4000
+  )
+}
+
+// ─── Team Health Narrative ────────────────────────────────────────────────────
+
+export const TEAM_HEALTH_NARRATIVE_SYSTEM = `You are a strategic advisor summarising team health for an engineering manager.
+
+Write 2-3 sentences of plain English describing overall team health and the top concern.
+
+Rules:
+- Use aggregate language only — no individual names
+- Reference role/level if needed (e.g. "a mid-level engineer")
+- Lead with the overall state
+- Identify the single most urgent concern in the second sentence
+- If healthy, say so and mention what is going well
+- Plain text only, no markdown`
+
+export interface TeamHealthInput {
+  score: number
+  label: string
+  breakdown: { tasks: number; people: number; followUps: number; goals: number }
+  topSignals: Array<{ type: string; severity: string; message: string }>
+}
+
+export function buildTeamHealthNarrativePrompt(args: TeamHealthInput): string {
+  const topSignalText = args.topSignals.length > 0
+    ? args.topSignals
+        .slice(0, 5)
+        .map(s => `- [${s.severity}] ${s.type}: ${s.message}`)
+        .join('\n')
+    : 'No active signals.'
+
+  return `Team health score: ${args.score}/100 (${args.label})
+
+Signal breakdown:
+- Tasks: ${args.breakdown.tasks} signals
+- People: ${args.breakdown.people} signals
+- Follow-ups: ${args.breakdown.followUps} signals
+- Goals: ${args.breakdown.goals} signals
+
+Top signals:
+${topSignalText}`
+}

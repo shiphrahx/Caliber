@@ -482,6 +482,7 @@ CREATE TABLE IF NOT EXISTS public.meetings (
   recurrence TEXT CHECK (recurrence IN ('none', 'weekly', 'fortnightly', 'monthly', 'custom')),
   action_items TEXT,
   notes TEXT,
+  tldr TEXT,
   person_id UUID REFERENCES public.people(id) ON DELETE SET NULL,
   team_id UUID REFERENCES public.teams(id) ON DELETE SET NULL,
   owning_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,

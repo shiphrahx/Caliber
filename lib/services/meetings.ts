@@ -4,6 +4,8 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import { callAI } from '@/lib/services/ai'
+import { MEETING_TLDR_SYSTEM, buildMeetingTldrPrompt } from '@/lib/ai/prompts'
 
 export type MeetingType = '1:1' | 'Team Sync' | 'Retro' | 'Planning' | 'Review' | 'Standup' | 'Other'
 export type RecurrenceType = 'none' | 'weekly' | 'fortnightly' | 'monthly' | 'custom'
@@ -17,6 +19,7 @@ export interface Meeting {
   recurrence?: RecurrenceType | null
   actionItems?: string | null
   notes?: string | null
+  tldr?: string | null
   personId?: string | null
   personName?: string | null
   teamId?: string | null
@@ -35,6 +38,7 @@ type MeetingRow = {
   recurrence: string | null
   action_items: string | null
   notes: string | null
+  tldr: string | null
   person_id: string | null
   team_id: string | null
   owning_user_id: string
@@ -61,6 +65,7 @@ function rowToMeeting(meeting: MeetingRow): Meeting {
     recurrence: meeting.recurrence as RecurrenceType | null,
     actionItems: meeting.action_items,
     notes: meeting.notes,
+    tldr: meeting.tldr,
     personId: meeting.person_id,
     personName: meeting.person?.full_name ?? null,
     teamId: meeting.team_id,
@@ -68,6 +73,42 @@ function rowToMeeting(meeting: MeetingRow): Meeting {
     attendees,
     createdAt: meeting.created_at,
     updatedAt: meeting.updated_at,
+  }
+}
+
+/**
+ * Generate a TL;DR for a meeting and persist it.
+ * Fire-and-forget: does not throw, logs errors only.
+ * Only runs if notes are > 100 chars.
+ */
+export async function generateAndSaveMeetingTldr(meeting: Meeting): Promise<void> {
+  if (!meeting.notes || meeting.notes.trim().length <= 100) return
+
+  try {
+    const response = await callAI({
+      systemPrompt: MEETING_TLDR_SYSTEM,
+      userPrompt: buildMeetingTldrPrompt({
+        title: meeting.title,
+        meetingType: meeting.meetingType,
+        notes: meeting.notes,
+        actionItems: meeting.actionItems,
+      }),
+      maxTokens: 150,
+      temperature: 0.3,
+      preferFast: true,
+    })
+
+    const tldr = response.content.trim()
+    if (!tldr) return
+
+    const supabase = createClient()
+    await supabase
+      .from('meetings')
+      .update({ tldr })
+      .eq('id', meeting.id)
+  } catch (err) {
+    // Non-blocking — TL;DR is a nice-to-have
+    console.error('[meetings] TL;DR generation failed:', err)
   }
 }
 
@@ -123,7 +164,10 @@ export async function createMeeting(
 
   if (error) throw error
 
-  return rowToMeeting(data as unknown as MeetingRow)
+  const created = rowToMeeting(data as unknown as MeetingRow)
+  // Fire-and-forget TL;DR generation (non-blocking)
+  generateAndSaveMeetingTldr(created).catch(() => undefined)
+  return created
 }
 
 /**
@@ -142,6 +186,8 @@ export async function updateMeeting(id: string, updates: Partial<Meeting>): Prom
   if (updates.notes !== undefined) dbUpdates.notes = updates.notes || null
   if (updates.personId !== undefined) dbUpdates.person_id = updates.personId || null
   if (updates.teamId !== undefined) dbUpdates.team_id = updates.teamId || null
+  // tldr can be explicitly set (e.g. regenerate)
+  if (updates.tldr !== undefined) dbUpdates.tldr = updates.tldr
 
   const { data, error } = await supabase
     .from('meetings')
@@ -152,7 +198,23 @@ export async function updateMeeting(id: string, updates: Partial<Meeting>): Prom
 
   if (error) throw error
 
-  return rowToMeeting(data as unknown as MeetingRow)
+  const updated = rowToMeeting(data as unknown as MeetingRow)
+  // Regenerate TL;DR if notes changed (fire-and-forget)
+  if (updates.notes !== undefined) {
+    generateAndSaveMeetingTldr(updated).catch(() => undefined)
+  }
+  return updated
+}
+
+/**
+ * Regenerate the TL;DR for a meeting (explicit user action).
+ * Clears existing tldr first to show loading state, then generates.
+ */
+export async function regenerateMeetingTldr(meeting: Meeting): Promise<void> {
+  const supabase = createClient()
+  // Clear existing so UI can show loading state immediately
+  await supabase.from('meetings').update({ tldr: null }).eq('id', meeting.id)
+  await generateAndSaveMeetingTldr(meeting)
 }
 
 /**

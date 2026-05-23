@@ -33,6 +33,7 @@ interface Meeting {
   attendees: string[]
   actionItems?: string
   notes?: string
+  tldr?: string | null
   personName?: string
   teamName?: string
   recurrence?: string
@@ -95,6 +96,7 @@ export default function MeetingsPage() {
           attendees: m.attendees,
           actionItems: m.actionItems || undefined,
           notes: m.notes || undefined,
+          tldr: m.tldr,
           personName: m.personName || undefined,
           teamName: m.teamName || undefined,
           recurrence: m.recurrence || undefined,
@@ -230,6 +232,7 @@ export default function MeetingsPage() {
         attendees: backendMeeting.attendees,
         actionItems: backendMeeting.actionItems || undefined,
         notes: backendMeeting.notes || undefined,
+        tldr: backendMeeting.tldr,
         personName: backendMeeting.personName || undefined,
         teamName: backendMeeting.teamName || undefined,
         recurrence: backendMeeting.recurrence || undefined,
@@ -292,6 +295,7 @@ export default function MeetingsPage() {
         attendees: backendMeeting.attendees,
         actionItems: backendMeeting.actionItems || undefined,
         notes: backendMeeting.notes || undefined,
+        tldr: backendMeeting.tldr,
         personName: backendMeeting.personName || undefined,
         teamName: backendMeeting.teamName || undefined,
         recurrence: backendMeeting.recurrence || undefined,
@@ -734,6 +738,24 @@ export default function MeetingsPage() {
                   </div>
                 )}
               </div>
+
+              {/* TL;DR — shown in list view when available */}
+              {selectedMeeting.tldr && (
+                <div style={{
+                  padding: "10px 14px",
+                  marginBottom: "16px",
+                  borderRadius: "6px",
+                  background: "var(--surf-2)",
+                  border: "1px solid var(--border-2)",
+                }}>
+                  <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", fontWeight: 600, display: "block", marginBottom: "4px" }}>
+                    AI Summary
+                  </span>
+                  <p style={{ fontSize: "var(--text-label)", color: "var(--text-2)", lineHeight: 1.5, margin: 0 }}>
+                    {selectedMeeting.tldr}
+                  </p>
+                </div>
+              )}
 
               {/* Meta fields grid */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "16px" }}>
