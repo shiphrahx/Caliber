@@ -14,6 +14,7 @@ import {
   buildActionItemPrompt,
   buildGrowthPlanPrompt,
   buildTaskPrioritisationPrompt,
+  buildNaturalLanguageTaskPrompt,
   REVIEW_DRAFT_SYSTEM,
   ONE_ON_ONE_PREP_SYSTEM,
   PROMOTION_PACKET_SYSTEM,
@@ -24,7 +25,9 @@ import {
   RECURRING_TOPICS_SYSTEM,
   SUMMARY_REWRITE_PROMPTS,
   TASK_PRIORITISATION_SYSTEM,
+  NATURAL_LANGUAGE_TASK_SYSTEM,
   type TaskPrioritisationInput,
+  type NaturalLanguageTaskPerson,
 } from '../prompts'
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
@@ -499,5 +502,106 @@ describe('buildTaskPrioritisationPrompt', () => {
     const prompt = buildTaskPrioritisationPrompt({ tasks, today: '2026-05-23' })
     // No person info — should not contain "linked to"
     expect(prompt).not.toContain('linked to')
+  })
+})
+
+// ─── Natural Language Task Prompt ─────────────────────────────────────────────
+
+const NL_PEOPLE: NaturalLanguageTaskPerson[] = [
+  { id: 'person-alice', name: 'Alice Chen' },
+  { id: 'person-bob', name: 'Bob Smith' },
+]
+
+describe('buildNaturalLanguageTaskPrompt', () => {
+  it('includes user input in prompt', () => {
+    const prompt = buildNaturalLanguageTaskPrompt({
+      input: 'Follow up with Alice about the deploy',
+      today: '2026-05-23',
+      people: NL_PEOPLE,
+    })
+    expect(prompt).toContain('Follow up with Alice about the deploy')
+  })
+
+  it('includes today date', () => {
+    const prompt = buildNaturalLanguageTaskPrompt({
+      input: 'Write team update',
+      today: '2026-05-23',
+      people: NL_PEOPLE,
+    })
+    expect(prompt).toContain('Today: 2026-05-23')
+  })
+
+  it('includes all people with their IDs', () => {
+    const prompt = buildNaturalLanguageTaskPrompt({
+      input: 'Check in with Bob',
+      today: '2026-05-23',
+      people: NL_PEOPLE,
+    })
+    expect(prompt).toContain('Alice Chen')
+    expect(prompt).toContain('person-alice')
+    expect(prompt).toContain('Bob Smith')
+    expect(prompt).toContain('person-bob')
+  })
+
+  it('handles empty people list gracefully', () => {
+    const prompt = buildNaturalLanguageTaskPrompt({
+      input: 'Write docs',
+      today: '2026-05-23',
+      people: [],
+    })
+    expect(prompt).toContain('No people in directory')
+  })
+
+  it('wraps user input in quotes', () => {
+    const prompt = buildNaturalLanguageTaskPrompt({
+      input: 'some task',
+      today: '2026-05-23',
+      people: [],
+    })
+    expect(prompt).toContain('"some task"')
+  })
+})
+
+describe('NATURAL_LANGUAGE_TASK_SYSTEM', () => {
+  it('specifies all valid priority values', () => {
+    expect(NATURAL_LANGUAGE_TASK_SYSTEM).toContain('Low')
+    expect(NATURAL_LANGUAGE_TASK_SYSTEM).toContain('Medium')
+    expect(NATURAL_LANGUAGE_TASK_SYSTEM).toContain('High')
+    expect(NATURAL_LANGUAGE_TASK_SYSTEM).toContain('Very High')
+  })
+
+  it('specifies all valid category values', () => {
+    expect(NATURAL_LANGUAGE_TASK_SYSTEM).toContain('Task')
+    expect(NATURAL_LANGUAGE_TASK_SYSTEM).toContain('Meeting')
+    expect(NATURAL_LANGUAGE_TASK_SYSTEM).toContain('Career Growth')
+    expect(NATURAL_LANGUAGE_TASK_SYSTEM).toContain('People')
+  })
+
+  it('demands JSON-only output', () => {
+    expect(NATURAL_LANGUAGE_TASK_SYSTEM).toContain('"title"')
+    expect(NATURAL_LANGUAGE_TASK_SYSTEM).toContain('"priority"')
+    expect(NATURAL_LANGUAGE_TASK_SYSTEM).toContain('"category"')
+    expect(NATURAL_LANGUAGE_TASK_SYSTEM).toContain('"dueDate"')
+    expect(NATURAL_LANGUAGE_TASK_SYSTEM).toContain('"list"')
+    expect(NATURAL_LANGUAGE_TASK_SYSTEM).toContain('"confidence"')
+  })
+
+  it('includes confidence levels', () => {
+    expect(NATURAL_LANGUAGE_TASK_SYSTEM).toContain('"high"')
+    expect(NATURAL_LANGUAGE_TASK_SYSTEM).toContain('"medium"')
+    expect(NATURAL_LANGUAGE_TASK_SYSTEM).toContain('"low"')
+  })
+
+  it('describes ISO 8601 date format', () => {
+    expect(NATURAL_LANGUAGE_TASK_SYSTEM).toContain('YYYY-MM-DD')
+  })
+
+  it('mentions relative date examples', () => {
+    expect(NATURAL_LANGUAGE_TASK_SYSTEM).toContain('next Friday')
+  })
+
+  it('lists week and backlog as valid list values', () => {
+    expect(NATURAL_LANGUAGE_TASK_SYSTEM).toContain('"week"')
+    expect(NATURAL_LANGUAGE_TASK_SYSTEM).toContain('"backlog"')
   })
 })
