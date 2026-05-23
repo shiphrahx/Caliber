@@ -300,17 +300,21 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
           {/* Attention indicator */}
           {!signalsLoading && score > 0 && (
             <div style={{ marginTop: "4px", display: "flex", flexDirection: "column", gap: "4px" }}>
-              <span style={{
-                fontSize: "var(--text-caption)",
-                fontWeight: 600,
-                color: scoreToColor(score),
-                background: scoreToBg(score),
-                border: `1px solid ${scoreToColor(score)}40`,
-                borderRadius: "4px",
-                padding: "3px 8px",
-                whiteSpace: "nowrap",
-              }}>
-                Needs attention ({score})
+              <span
+                title={`${score} active signal${score === 1 ? '' : 's'} — things that may need your attention for this person`}
+                style={{
+                  fontSize: "var(--text-caption)",
+                  fontWeight: 600,
+                  color: scoreToColor(score),
+                  background: scoreToBg(score),
+                  border: `1px solid ${scoreToColor(score)}40`,
+                  borderRadius: "4px",
+                  padding: "3px 8px",
+                  whiteSpace: "nowrap",
+                  cursor: "help",
+                }}
+              >
+                {score} signal{score === 1 ? '' : 's'} need attention
               </span>
               {(showAllSignals ? signals : signals.slice(0, 3)).map((s, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
