@@ -8,6 +8,7 @@ import { ChevronRight, ChevronDown, ChevronsRight, ChevronsDown, BookOpen, ListC
 import { LogEvidenceModal } from "@/components/evidence/log-evidence-modal"
 import { FollowUpForm } from "@/components/follow-ups/follow-up-form"
 import { MeetingFormDialog } from "@/components/meeting-form-dialog"
+import { FollowUpDraftModal } from "@/components/follow-up-draft-modal"
 import { AIButton } from "@/components/ui/ai-button"
 import { useAIConfig } from "@/lib/hooks/use-ai-config"
 import { callAI, handleAIError } from "@/lib/services/ai"
@@ -72,6 +73,9 @@ export default function MeetingsPage() {
   const [logEvidenceOpen, setLogEvidenceOpen] = useState(false)
   const [trackFollowUpOpen, setTrackFollowUpOpen] = useState(false)
   const [extractingActions, setExtractingActions] = useState(false)
+  const [followUpDraftOpen, setFollowUpDraftOpen] = useState(false)
+  const [followUpDraftMeeting, setFollowUpDraftMeeting] = useState<Meeting | null>(null)
+  const [showFollowUpBanner, setShowFollowUpBanner] = useState(false)
   const aiConfig = useAIConfig()
 
   useEffect(() => {
@@ -236,6 +240,12 @@ export default function MeetingsPage() {
 
       setMeetings([uiMeeting, ...meetings])
       setSelectedMeeting(uiMeeting)
+
+      // Offer AI follow-up draft if AI is configured and meeting has notes or action items
+      if (aiConfig.configured && (uiMeeting.notes || uiMeeting.actionItems)) {
+        setFollowUpDraftMeeting(uiMeeting)
+        setShowFollowUpBanner(true)
+      }
 
       const actionItemTexts = parseActionItems(newMeeting.actionItems || "")
       if (actionItemTexts.length > 0) {
@@ -664,6 +674,34 @@ export default function MeetingsPage() {
         <div style={{ flex: 1, overflowY: "auto", padding: "22px 24px" }}>
           {selectedMeeting ? (
             <div>
+              {/* Follow-up draft banner — shown after a new meeting is saved with AI configured */}
+              {showFollowUpBanner && followUpDraftMeeting?.id === selectedMeeting.id && (
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  gap: "12px", padding: "10px 14px", marginBottom: "16px",
+                  borderRadius: "6px", border: "1px solid var(--border-2)",
+                  background: "var(--surf-2)",
+                }}>
+                  <p style={{ fontSize: "var(--text-label)", color: "var(--text-2)", margin: 0 }}>
+                    Meeting saved. Draft a follow-up message?
+                  </p>
+                  <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
+                    <button
+                      onClick={() => setFollowUpDraftOpen(true)}
+                      style={{ padding: "4px 12px", borderRadius: "4px", fontSize: "var(--text-label)", fontFamily: "var(--font-sans)", cursor: "pointer", background: "var(--surf-3)", color: "var(--text-1)", border: "1px solid var(--border-3)", fontWeight: 600 }}
+                    >
+                      Draft message
+                    </button>
+                    <button
+                      onClick={() => setShowFollowUpBanner(false)}
+                      style={{ padding: "4px 10px", borderRadius: "4px", fontSize: "var(--text-label)", fontFamily: "var(--font-sans)", cursor: "pointer", background: "transparent", color: "var(--text-3)", border: "1px solid var(--border-2)" }}
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Title */}
               <h1 style={{ marginBottom: "4px" }}>
                 {selectedMeeting.title}
@@ -877,6 +915,24 @@ export default function MeetingsPage() {
           sourceId={selectedMeeting.id}
           onSaved={() => setTrackFollowUpOpen(false)}
           onCancel={() => setTrackFollowUpOpen(false)}
+        />
+      )}
+
+      {followUpDraftMeeting && (
+        <FollowUpDraftModal
+          open={followUpDraftOpen}
+          onOpenChange={(open) => {
+            setFollowUpDraftOpen(open)
+            if (!open) setShowFollowUpBanner(false)
+          }}
+          meetingArgs={{
+            personName: followUpDraftMeeting.personName ?? followUpDraftMeeting.attendees[0] ?? '',
+            meetingTitle: followUpDraftMeeting.title,
+            meetingDate: followUpDraftMeeting.date,
+            notes: followUpDraftMeeting.notes ?? null,
+            actionItems: followUpDraftMeeting.actionItems ?? null,
+            followUps: [],
+          }}
         />
       )}
     </div>
