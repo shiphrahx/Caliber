@@ -21,6 +21,7 @@ import {
   Award,
   Settings,
   LogOut,
+  BarChart2,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { fetchSignalCounts } from "@/lib/hooks/use-weekly-review-signals"
@@ -42,6 +43,7 @@ const navigation: NavItem[] = [
   { name: "Evidence", href: "/evidence", icon: BookOpen },
   { name: "Follow-ups", href: "/follow-ups", icon: ListChecks },
   { name: "Career Framework", href: "/framework", icon: Award },
+  { name: "Team Health", href: "/team-health", icon: BarChart2 },
   { label: "Output" },
   { name: "Weekly Summary", href: "/summary", icon: FileText },
 ]
