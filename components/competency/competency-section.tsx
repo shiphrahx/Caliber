@@ -44,12 +44,12 @@ interface RadarData {
 
 function CompetencyRadar({ data }: { data: RadarData[] }) {
   if (data.length === 0) return (
-    <div style={{ height: "240px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <p style={{ color: "var(--text-3)" }}>No assessments yet</p>
+    <div className="radar-empty">
+      <p className="radar-empty-text">No assessments yet</p>
     </div>
   )
   return (
-    <div style={{ height: "300px" }}>
+    <div className="radar-wrap">
       <ResponsiveContainer width="100%" height="100%">
         <RadarChart data={data}>
           <PolarGrid stroke="var(--border-2)" />
@@ -76,12 +76,12 @@ function CompetencyRadar({ data }: { data: RadarData[] }) {
           />
         </RadarChart>
       </ResponsiveContainer>
-      <div style={{ display: "flex", gap: "16px", justifyContent: "center", marginTop: "4px" }}>
-        <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", display: "flex", alignItems: "center", gap: "5px" }}>
-          <span style={{ display: "inline-block", width: "12px", height: "2px", background: "#00ffe5", borderRadius: "2px" }} /> Assessed
+      <div className="radar-legend">
+        <span className="radar-legend-item">
+          <span className="radar-legend-line" style={{ background: "#00ffe5" }} /> Assessed
         </span>
-        <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", display: "flex", alignItems: "center", gap: "5px" }}>
-          <span style={{ display: "inline-block", width: "12px", height: "2px", background: "#00f058", borderRadius: "2px", opacity: 0.5 }} /> Expected
+        <span className="radar-legend-item">
+          <span className="radar-legend-line" style={{ background: "#00f058", opacity: 0.5 }} /> Expected
         </span>
       </div>
     </div>
@@ -98,20 +98,19 @@ function PromotionBanner({ readiness }: { readiness: PromotionReadiness }) {
     early:   { bg: "#1a1a22", color: "#6b7280", border: "#6b728040" },
   }[readiness.signal]
   return (
-    <div style={{
-      padding: "12px 16px", borderRadius: "6px", marginBottom: "20px",
-      background: colors.bg, border: `1px solid ${colors.border}`,
-      display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px",
-    }}>
+    <div
+      className="promo-banner"
+      style={{ background: colors.bg, border: `1px solid ${colors.border}` }}
+    >
       <div>
-        <span style={{ fontWeight: 600, color: colors.color, fontSize: "var(--text-body)" }}>
+        <span className="promo-banner-label" style={{ color: colors.color }}>
           {readiness.label}
         </span>
-        <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", marginLeft: "10px" }}>
+        <span className="promo-banner-sub">
           {readiness.atNextLevel} of {readiness.total} areas at {readiness.nextLevel} level
         </span>
       </div>
-      <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>
+      <span className="promo-banner-note">
         Based on your framework and assessments
       </span>
     </div>
@@ -221,29 +220,19 @@ function CompetencyCard({
   const linkedEvidence = allEvidence.filter(e => assessment?.evidenceIds?.includes(e.id))
 
   return (
-    <div style={{
-      background: "var(--surf)",
-      border: "1px solid var(--border-1)",
-      borderRadius: "6px",
-      marginBottom: "12px",
-    }}>
+    <div className="comp-card">
       {/* Card header */}
-      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-        <button
-          onClick={() => setExpanded(e => !e)}
-          style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-3)", padding: "2px", flexShrink: 0 }}
-        >
+      <div className="comp-card-header">
+        <button className="comp-card-toggle-btn" onClick={() => setExpanded(e => !e)}>
           {expanded
-            ? <ChevronDown style={{ width: "13px", height: "13px" }} />
-            : <ChevronRight style={{ width: "13px", height: "13px" }} />}
+            ? <ChevronDown />
+            : <ChevronRight />}
         </button>
 
-        <span style={{ fontWeight: 600, color: "var(--text-1)", flex: 1, fontSize: "var(--text-body)" }}>
-          {area.name}
-        </span>
+        <span className="comp-card-name">{area.name}</span>
 
         {/* Level buttons */}
-        <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+        <div className="comp-level-btns">
           {LEVELS.map(level => {
             const isActive = assessment?.assessedLevel === level
             const { bg, color } = LEVEL_COLORS[level] ?? { bg: "#222", color: "#888" }
@@ -277,39 +266,38 @@ function CompetencyCard({
 
         {/* Saved flash */}
         {savedFlash && (
-          <span style={{ fontSize: "var(--text-caption)", color: "#4ade80", display: "flex", alignItems: "center", gap: "4px" }}>
-            <Check style={{ width: "11px", height: "11px" }} /> Saved
+          <span className="comp-saved-flash">
+            <Check /> Saved
           </span>
         )}
       </div>
 
       {/* Expected level for this person */}
       {personLevel && (
-        <div style={{ paddingLeft: "40px", paddingBottom: "8px", paddingRight: "16px" }}>
+        <div className="comp-expected-level">
           {expectedLevel ? (
-            <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>
+            <span>
               Expected at {personLevel}: <span style={{ color: LEVEL_COLORS[expectedLevel]?.color ?? "var(--text-2)" }}>{expectedLevel}</span>
             </span>
           ) : (
-            <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>
-              No expectation defined for {personLevel}
-            </span>
+            <span>No expectation defined for {personLevel}</span>
           )}
         </div>
       )}
 
       {/* Expanded body */}
       {expanded && (
-        <div style={{ padding: "12px 16px 16px 40px", borderTop: "1px solid var(--border-1)" }}>
+        <div className="comp-card-body">
           {/* Notes */}
-          <div style={{ marginBottom: "16px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "4px" }}>
+          <div className="comp-notes-wrap">
+            <div className="comp-notes-header">
               <Label>Assessment notes</Label>
               {aiConfigured && assessment && (
                 <button
                   onClick={handleGenerateReasoning}
                   disabled={generatingReasoning}
-                  style={{ fontSize: "var(--text-caption)", color: generatingReasoning ? "var(--text-3)" : "#00f058", background: "none", border: "none", cursor: generatingReasoning ? "not-allowed" : "pointer", padding: 0, fontFamily: "var(--font-sans)" }}
+                  className="comp-gen-reasoning-btn"
+                  style={{ color: generatingReasoning ? "var(--text-3)" : "#00f058", cursor: generatingReasoning ? "not-allowed" : "pointer" }}
                 >
                   {generatingReasoning ? "Generating…" : "✦ Generate reasoning"}
                 </button>
@@ -326,46 +314,38 @@ function CompetencyCard({
           </div>
 
           {/* Linked evidence */}
-          <div style={{ marginBottom: "16px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
+          <div className="comp-evidence-wrap">
+            <div className="comp-evidence-header">
               <Label>Linked evidence</Label>
               <button
                 onClick={() => setShowEvidencePicker(p => !p)}
-                style={{
-                  display: "flex", alignItems: "center", gap: "4px", background: "none",
-                  border: "1px solid var(--border-2)", borderRadius: "4px",
-                  color: "var(--text-3)", fontSize: "var(--text-caption)", padding: "3px 8px",
-                  cursor: "pointer", fontFamily: "var(--font-sans)",
-                }}
+                className="comp-link-evidence-btn"
               >
-                <Link2 style={{ width: "11px", height: "11px" }} /> Link evidence
+                <Link2 /> Link evidence
               </button>
             </div>
 
             {linkedEvidence.length > 0 ? (
-              <div style={{ display: "grid", gap: "4px" }}>
+              <div className="comp-evidence-list">
                 {linkedEvidence.map(e => (
-                  <div key={e.id} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "4px 8px", background: "var(--surf-2)", borderRadius: "4px" }}>
-                    <span style={{ flex: 1, fontSize: "var(--text-caption)", color: "var(--text-2)" }}>{e.title}</span>
-                    <span style={{ fontSize: "var(--text-overline)", color: "var(--text-3)" }}>{e.occurredAt}</span>
-                    <button
-                      onClick={() => toggleEvidence(e.id)}
-                      style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-3)", padding: "2px" }}
-                    >
-                      <Trash2 style={{ width: "11px", height: "11px" }} />
+                  <div key={e.id} className="comp-evidence-item">
+                    <span className="comp-evidence-item-title">{e.title}</span>
+                    <span className="comp-evidence-item-date">{e.occurredAt}</span>
+                    <button className="comp-evidence-unlink-btn" onClick={() => toggleEvidence(e.id)}>
+                      <Trash2 />
                     </button>
                   </div>
                 ))}
               </div>
             ) : (
-              <p style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>No evidence linked.</p>
+              <p className="comp-evidence-empty">No evidence linked.</p>
             )}
 
             {/* Evidence picker */}
             {showEvidencePicker && (
-              <div style={{ marginTop: "8px", background: "var(--surf-2)", border: "1px solid var(--border-2)", borderRadius: "6px", maxHeight: "180px", overflowY: "auto" }}>
+              <div className="comp-evidence-picker">
                 {allEvidence.length === 0 ? (
-                  <p style={{ padding: "12px 16px", fontSize: "var(--text-caption)", color: "var(--text-3)" }}>No evidence entries yet.</p>
+                  <p className="comp-evidence-picker-empty">No evidence entries yet.</p>
                 ) : (
                   allEvidence.map(e => {
                     const linked = assessment?.evidenceIds?.includes(e.id)
@@ -373,16 +353,12 @@ function CompetencyCard({
                       <div
                         key={e.id}
                         onClick={() => toggleEvidence(e.id)}
-                        style={{
-                          display: "flex", alignItems: "center", gap: "8px", padding: "6px 12px",
-                          cursor: "pointer", borderLeft: `2px solid ${linked ? "#00f058" : "transparent"}`,
-                        }}
-                        onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "var(--surf-3)")}
-                        onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "none")}
+                        className="comp-evidence-picker-item"
+                        style={{ borderLeft: `2px solid ${linked ? "#00f058" : "transparent"}` }}
                       >
-                        <span style={{ flex: 1, fontSize: "var(--text-caption)", color: "var(--text-2)" }}>{e.title}</span>
-                        <span style={{ fontSize: "var(--text-overline)", color: "var(--text-3)" }}>{e.occurredAt}</span>
-                        {linked && <Check style={{ width: "11px", height: "11px", color: "#4ade80", flexShrink: 0 }} />}
+                        <span className="comp-evidence-picker-item-title">{e.title}</span>
+                        <span className="comp-evidence-picker-item-date">{e.occurredAt}</span>
+                        {linked && <Check className="comp-evidence-picker-check" />}
                       </div>
                     )
                   })
@@ -392,31 +368,28 @@ function CompetencyCard({
           </div>
 
           {/* Assessment history */}
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+          <div className="comp-history-wrap">
+            <div className="comp-history-header">
               <Label>Assessment history</Label>
               {!historyLoaded && (
-                <button
-                  onClick={onLoadHistory}
-                  style={{ background: "none", border: "none", cursor: "pointer", fontSize: "var(--text-caption)", color: "#00f058", fontFamily: "var(--font-sans)", padding: 0 }}
-                >
+                <button className="comp-load-history-btn" onClick={onLoadHistory}>
                   Load history
                 </button>
               )}
             </div>
             {historyLoaded && history.length === 0 && (
-              <p style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>No history yet.</p>
+              <p className="comp-history-empty">No history yet.</p>
             )}
             {historyLoaded && history.length > 0 && (
-              <div style={{ display: "grid", gap: "4px" }}>
+              <div className="comp-history-list">
                 {history.map(h => (
-                  <div key={h.id} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "4px 8px", background: "var(--surf-2)", borderRadius: "4px" }}>
-                    <span style={{ fontSize: "var(--text-overline)", color: "var(--text-3)", flexShrink: 0 }}>{h.assessedAt}</span>
-                    <span style={{ fontSize: "var(--text-caption)", color: LEVEL_COLORS[h.assessedLevel]?.color ?? "var(--text-2)", fontWeight: 500 }}>
+                  <div key={h.id} className="comp-history-item">
+                    <span className="comp-history-date">{h.assessedAt}</span>
+                    <span className="comp-history-level" style={{ color: LEVEL_COLORS[h.assessedLevel]?.color ?? "var(--text-2)" }}>
                       {h.assessedLevel}
                     </span>
                     {h.notes && (
-                      <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <span className="comp-history-notes">
                         {h.notes.slice(0, 60)}{h.notes.length > 60 ? "…" : ""}
                       </span>
                     )}
@@ -462,68 +435,55 @@ function GrowthPlanCard({ plan, areas, onUpdate, onDelete }: GrowthPlanCardProps
   }
 
   return (
-    <div style={{ background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "6px", marginBottom: "8px" }}>
-      <div style={{ padding: "10px 14px", display: "flex", alignItems: "center", gap: "10px" }}>
-        <button
-          onClick={() => setExpanded(e => !e)}
-          style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-3)", padding: "2px", flexShrink: 0 }}
-        >
-          {expanded ? <ChevronDown style={{ width: "13px", height: "13px" }} /> : <ChevronRight style={{ width: "13px", height: "13px" }} />}
+    <div className="growth-plan-card">
+      <div className="growth-plan-header">
+        <button className="growth-plan-toggle-btn" onClick={() => setExpanded(e => !e)}>
+          {expanded ? <ChevronDown /> : <ChevronRight />}
         </button>
-        <span style={{ flex: 1, fontWeight: 600, color: "var(--text-1)", fontSize: "var(--text-body)" }}>{plan.title}</span>
+        <span className="growth-plan-title">{plan.title}</span>
         {plan.areaName && (
-          <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", background: "var(--surf-2)", padding: "1px 6px", borderRadius: "4px" }}>
-            {plan.areaName}
-          </span>
+          <span className="growth-plan-area-chip">{plan.areaName}</span>
         )}
         {plan.targetLevel && (
-          <span style={{ fontSize: "var(--text-caption)", color: LEVEL_COLORS[plan.targetLevel]?.color ?? "var(--text-2)", fontWeight: 500 }}>
+          <span className="growth-plan-target-level" style={{ color: LEVEL_COLORS[plan.targetLevel]?.color ?? "var(--text-2)" }}>
             → {plan.targetLevel}
           </span>
         )}
-        <span style={{ padding: "2px 8px", borderRadius: "4px", fontSize: "var(--text-caption)", fontWeight: 500, background: statusColors.bg, color: statusColors.color }}>
+        <span className="growth-plan-status-chip" style={{ background: statusColors.bg, color: statusColors.color }}>
           {plan.status}
         </span>
         {plan.status === 'active' && (
-          <button
-            onClick={() => save({ status: 'completed' })}
-            style={{ background: "none", border: "1px solid var(--border-2)", borderRadius: "4px", color: "var(--text-3)", fontSize: "var(--text-caption)", padding: "3px 8px", cursor: "pointer", fontFamily: "var(--font-sans)" }}
-          >
+          <button className="growth-plan-complete-btn" onClick={() => save({ status: 'completed' })}>
             Complete
           </button>
         )}
-        <button
-          onClick={() => onDelete(plan.id)}
-          style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-3)", padding: "4px" }}
-          onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "#f87171")}
-          onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-3)")}
-        >
-          <Trash2 style={{ width: "12px", height: "12px" }} />
+        <button className="growth-plan-delete-btn" onClick={() => onDelete(plan.id)}>
+          <Trash2 />
         </button>
       </div>
 
       {expanded && (
-        <div style={{ padding: "12px 14px 16px 40px", borderTop: "1px solid var(--border-1)", display: "grid", gap: "12px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+        <div className="growth-plan-body">
+          <div className="growth-plan-2col">
             <div>
-              <Label style={{ display: "block", marginBottom: "4px" }}>Target area</Label>
+              <Label className="growth-plan-label">Target area</Label>
               <select
                 value={plan.areaId ?? ""}
                 onChange={e => save({ areaId: e.target.value || null })}
                 disabled={saving}
-                style={{ width: "100%", background: "var(--surf-2)", border: "1px solid var(--border-2)", borderRadius: "4px", color: "var(--text-2)", padding: "6px 8px", fontSize: "var(--text-label)", fontFamily: "var(--font-sans)" }}
+                className="evidence-form-select"
               >
                 <option value="">No area</option>
                 {areas.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
               </select>
             </div>
             <div>
-              <Label style={{ display: "block", marginBottom: "4px" }}>Target level</Label>
+              <Label className="growth-plan-label">Target level</Label>
               <select
                 value={plan.targetLevel ?? ""}
                 onChange={e => save({ targetLevel: e.target.value || null })}
                 disabled={saving}
-                style={{ width: "100%", background: "var(--surf-2)", border: "1px solid var(--border-2)", borderRadius: "4px", color: "var(--text-2)", padding: "6px 8px", fontSize: "var(--text-label)", fontFamily: "var(--font-sans)" }}
+                className="evidence-form-select"
               >
                 <option value="">No target</option>
                 {LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
@@ -531,32 +491,32 @@ function GrowthPlanCard({ plan, areas, onUpdate, onDelete }: GrowthPlanCardProps
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+          <div className="growth-plan-2col">
             <div>
-              <Label style={{ display: "block", marginBottom: "4px" }}>Status</Label>
+              <Label className="growth-plan-label">Status</Label>
               <select
                 value={plan.status}
                 onChange={e => save({ status: e.target.value as GrowthPlan['status'] })}
                 disabled={saving}
-                style={{ width: "100%", background: "var(--surf-2)", border: "1px solid var(--border-2)", borderRadius: "4px", color: "var(--text-2)", padding: "6px 8px", fontSize: "var(--text-label)", fontFamily: "var(--font-sans)" }}
+                className="evidence-form-select"
               >
                 {['active', 'paused', 'completed', 'cancelled'].map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
             <div>
-              <Label style={{ display: "block", marginBottom: "4px" }}>Target date</Label>
+              <Label className="growth-plan-label">Target date</Label>
               <input
                 type="date"
                 value={plan.targetDate ?? ""}
                 onChange={e => save({ targetDate: e.target.value || null })}
                 disabled={saving}
-                style={{ width: "100%", background: "var(--surf-2)", border: "1px solid var(--border-2)", borderRadius: "4px", color: "var(--text-2)", padding: "6px 8px", fontSize: "var(--text-label)", fontFamily: "var(--font-sans)" }}
+                className="evidence-form-select"
               />
             </div>
           </div>
 
           <div>
-            <Label style={{ display: "block", marginBottom: "4px" }}>Description</Label>
+            <Label className="growth-plan-label">Description</Label>
             <div onBlur={() => save({ description: descLocal })}>
               <MarkdownTextarea
                 value={descLocal}
@@ -568,7 +528,7 @@ function GrowthPlanCard({ plan, areas, onUpdate, onDelete }: GrowthPlanCardProps
           </div>
 
           <div>
-            <Label style={{ display: "block", marginBottom: "4px" }}>Progress notes</Label>
+            <Label className="growth-plan-label">Progress notes</Label>
             <div onBlur={() => save({ progressNotes: progressLocal })}>
               <MarkdownTextarea
                 value={progressLocal}
@@ -613,44 +573,38 @@ function AddGrowthPlanForm({ personId, areas, defaultAreaId, onSaved, onCancel }
   }
 
   return (
-    <div style={{ background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "6px", padding: "16px", marginBottom: "8px" }}>
-      <div style={{ display: "grid", gap: "10px" }}>
+    <div className="add-growth-plan-form">
+      <div className="add-growth-plan-grid">
         <div>
-          <Label style={{ display: "block", marginBottom: "4px" }}>Title *</Label>
+          <Label className="growth-plan-label">Title *</Label>
           <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Improve system design skills" />
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
+        <div className="growth-plan-3col">
           <div>
-            <Label style={{ display: "block", marginBottom: "4px" }}>Target area</Label>
-            <select value={areaId} onChange={e => setAreaId(e.target.value)} style={{ width: "100%", background: "var(--surf-2)", border: "1px solid var(--border-2)", borderRadius: "4px", color: "var(--text-2)", padding: "6px 8px", fontSize: "var(--text-label)", fontFamily: "var(--font-sans)" }}>
+            <Label className="growth-plan-label">Target area</Label>
+            <select value={areaId} onChange={e => setAreaId(e.target.value)} className="evidence-form-select">
               <option value="">None</option>
               {areas.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
             </select>
           </div>
           <div>
-            <Label style={{ display: "block", marginBottom: "4px" }}>Target level</Label>
-            <select value={targetLevel} onChange={e => setTargetLevel(e.target.value)} style={{ width: "100%", background: "var(--surf-2)", border: "1px solid var(--border-2)", borderRadius: "4px", color: "var(--text-2)", padding: "6px 8px", fontSize: "var(--text-label)", fontFamily: "var(--font-sans)" }}>
+            <Label className="growth-plan-label">Target level</Label>
+            <select value={targetLevel} onChange={e => setTargetLevel(e.target.value)} className="evidence-form-select">
               <option value="">None</option>
               {LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
             </select>
           </div>
           <div>
-            <Label style={{ display: "block", marginBottom: "4px" }}>Target date</Label>
-            <input type="date" value={targetDate} onChange={e => setTargetDate(e.target.value)} style={{ width: "100%", background: "var(--surf-2)", border: "1px solid var(--border-2)", borderRadius: "4px", color: "var(--text-2)", padding: "6px 8px", fontSize: "var(--text-label)", fontFamily: "var(--font-sans)" }} />
+            <Label className="growth-plan-label">Target date</Label>
+            <input type="date" value={targetDate} onChange={e => setTargetDate(e.target.value)} className="evidence-form-select" />
           </div>
         </div>
-        <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-          <button onClick={onCancel} style={{ background: "none", border: "1px solid var(--border-2)", borderRadius: "4px", color: "var(--text-2)", fontSize: "var(--text-label)", padding: "5px 12px", cursor: "pointer", fontFamily: "var(--font-sans)" }}>Cancel</button>
+        <div className="add-growth-plan-footer">
+          <button onClick={onCancel} className="add-growth-plan-cancel-btn">Cancel</button>
           <button
             onClick={handleSave}
             disabled={!title.trim() || saving}
-            style={{
-              background: "linear-gradient(90deg, #00ffe5 0%, #00f058 100%)", border: "none", borderRadius: "4px",
-              color: "#0a1a0a", fontSize: "var(--text-label)", fontWeight: 600, padding: "5px 14px",
-              cursor: title.trim() && !saving ? "pointer" : "not-allowed",
-              opacity: title.trim() && !saving ? 1 : 0.5,
-              fontFamily: "var(--font-sans)",
-            }}
+            className="add-growth-plan-save-btn"
           >
             {saving ? "Saving…" : "Save plan"}
           </button>
@@ -854,48 +808,40 @@ export function CompetencySection({ personId, personLevel, personName = "this en
 
   if (loading) {
     return (
-      <div style={{ marginTop: "24px", background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "8px", padding: "24px" }}>
-        <p style={{ color: "var(--text-3)" }}>Loading competency data…</p>
+      <div className="competency-section">
+        <div className="competency-card-wrap competency-card-wrap--loading">
+          <p className="competency-loading-text">Loading competency data…</p>
+        </div>
       </div>
     )
   }
 
   if (!framework) {
     return (
-      <div style={{ marginTop: "24px", background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "8px", padding: "24px" }}>
-        <h2 style={{ marginBottom: "8px" }}>Competencies</h2>
-        <p style={{ color: "var(--text-3)", marginBottom: "12px" }}>
-          No career framework set up yet. Define competency areas and level expectations to start tracking.
-        </p>
-        <a
-          href="/framework"
-          style={{
-            display: "inline-flex", alignItems: "center", gap: "5px",
-            background: "linear-gradient(90deg, #00ffe5 0%, #00f058 100%)",
-            border: "none", borderRadius: "4px", color: "#0a1a0a",
-            fontSize: "var(--text-label)", fontWeight: 600, padding: "5px 12px",
-            textDecoration: "none",
-          }}
-        >
-          <ExternalLink style={{ width: "11px", height: "11px" }} /> Set up Career Framework
-        </a>
+      <div className="competency-section">
+        <div className="competency-card-wrap">
+          <h2 style={{ marginBottom: "8px" }}>Competencies</h2>
+          <p style={{ color: "var(--text-3)", marginBottom: "12px" }}>
+            No career framework set up yet. Define competency areas and level expectations to start tracking.
+          </p>
+          <a href="/framework" className="competency-setup-link">
+            <ExternalLink /> Set up Career Framework
+          </a>
+        </div>
       </div>
     )
   }
 
   return (
-    <div style={{ marginTop: "24px" }}>
-      <div style={{ background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "8px", padding: "24px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px", flexWrap: "wrap", gap: "8px" }}>
+    <div className="competency-section">
+      <div className="competency-card-wrap">
+        <div className="competency-card-header">
           <div>
-            <h2 style={{ margin: 0 }}>Competencies</h2>
-            <p style={{ marginTop: "2px" }}>{framework.name}</p>
+            <h2 className="competency-card-title">Competencies</h2>
+            <p className="competency-card-subtitle">{framework.name}</p>
           </div>
-          <a
-            href="/framework"
-            style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", display: "flex", alignItems: "center", gap: "4px", textDecoration: "none" }}
-          >
-            <ExternalLink style={{ width: "11px", height: "11px" }} /> Edit framework
+          <a href="/framework" className="competency-framework-link">
+            <ExternalLink /> Edit framework
           </a>
         </div>
 
@@ -905,7 +851,7 @@ export function CompetencySection({ personId, personLevel, personName = "this en
             <PromotionBanner readiness={readiness} />
             {readiness.nextLevel && (
               <div style={{ marginBottom: "20px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: promotionPacket ? "12px" : 0 }}>
+                <div className="promo-packet-row">
                   <AIButton
                     configured={aiConfig.configured}
                     loading={aiConfig.loading}
@@ -916,18 +862,13 @@ export function CompetencySection({ personId, personLevel, personName = "this en
                     showSetupLink={false}
                   />
                   {promotionPacket && (
-                    <button
-                      onClick={() => setPromotionPacket(null)}
-                      style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
-                    >
+                    <button className="promo-packet-clear-btn" onClick={() => setPromotionPacket(null)}>
                       ✕ Clear
                     </button>
                   )}
                 </div>
                 {promotionPacket && (
-                  <div style={{ background: "var(--surf-2)", border: "1px solid var(--border-1)", borderRadius: "6px", padding: "16px 20px", fontSize: "var(--text-label)", color: "var(--text-2)", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
-                    {promotionPacket}
-                  </div>
+                  <div className="promo-packet-content">{promotionPacket}</div>
                 )}
               </div>
             )}
@@ -936,16 +877,16 @@ export function CompetencySection({ personId, personLevel, personName = "this en
 
         {/* Radar chart */}
         {areas.length > 0 && (
-          <div style={{ marginBottom: "28px" }}>
+          <div className="competency-radar-wrap">
             <CompetencyRadar data={radarData} />
           </div>
         )}
 
         {/* Competency area cards */}
         {areas.length === 0 ? (
-          <p style={{ color: "var(--text-3)", marginBottom: "24px" }}>No competency areas defined in the framework.</p>
+          <p className="competency-no-areas">No competency areas defined in the framework.</p>
         ) : (
-          <div style={{ marginBottom: "28px" }}>
+          <div className="competency-areas-wrap">
             {areas.map(area => (
               <CompetencyCard
                 key={area.id}
@@ -966,9 +907,9 @@ export function CompetencySection({ personId, personLevel, personName = "this en
 
         {/* Growth plans */}
         <div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
-            <h3 style={{ margin: 0 }}>Growth Plans</h3>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div className="growth-plans-header">
+            <h3 className="growth-plans-title">Growth Plans</h3>
+            <div className="growth-plans-actions">
               <AIButton
                 configured={aiConfig.configured}
                 loading={aiConfig.loading}
@@ -978,16 +919,8 @@ export function CompetencySection({ personId, personLevel, personName = "this en
                 tooltip={aiConfig.tooltip ?? "Suggests a plan for your biggest competency gap"}
                 showSetupLink={false}
               />
-              <button
-                onClick={() => setAddingPlan(true)}
-                style={{
-                  display: "flex", alignItems: "center", gap: "4px",
-                  background: "linear-gradient(90deg, #00ffe5 0%, #00f058 100%)", border: "none", borderRadius: "4px",
-                  color: "#0a1a0a", fontSize: "var(--text-caption)", padding: "4px 10px",
-                  cursor: "pointer", fontFamily: "var(--font-sans)", fontWeight: 600,
-                }}
-              >
-                <Plus style={{ width: "11px", height: "11px" }} /> Add plan
+              <button className="growth-plan-add-btn" onClick={() => setAddingPlan(true)}>
+                <Plus /> Add plan
               </button>
             </div>
           </div>
@@ -1002,7 +935,7 @@ export function CompetencySection({ personId, personLevel, personName = "this en
           )}
 
           {activeGrowthPlans.length === 0 && !addingPlan && (
-            <p style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", marginBottom: "12px" }}>No active growth plans.</p>
+            <p className="growth-plan-empty">No active growth plans.</p>
           )}
 
           {activeGrowthPlans.map(plan => (
@@ -1016,8 +949,8 @@ export function CompetencySection({ personId, personLevel, personName = "this en
           ))}
 
           {completedGrowthPlans.length > 0 && (
-            <details style={{ marginTop: "8px" }}>
-              <summary style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", cursor: "pointer", marginBottom: "8px" }}>
+            <details className="growth-plan-archive">
+              <summary className="growth-plan-archive-summary">
                 {completedGrowthPlans.length} completed / cancelled plan{completedGrowthPlans.length !== 1 ? "s" : ""}
               </summary>
               {completedGrowthPlans.map(plan => (
