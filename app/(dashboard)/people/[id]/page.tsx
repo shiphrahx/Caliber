@@ -298,31 +298,27 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
             <p style={{ marginTop: "2px" }}>{formData.role}</p>
           </div>
           {/* Attention indicator */}
-          {!signalsLoading && score > 0 && (
+          {!signalsLoading && signals.length > 0 && (
             <div style={{ marginTop: "4px", display: "flex", flexDirection: "column", gap: "4px" }}>
-              <span
-                title={`${score} active signal${score === 1 ? '' : 's'} — things that may need your attention for this person`}
-                style={{
-                  fontSize: "var(--text-caption)",
-                  fontWeight: 600,
-                  color: scoreToColor(score),
-                  background: scoreToBg(score),
-                  border: `1px solid ${scoreToColor(score)}40`,
-                  borderRadius: "4px",
-                  padding: "3px 8px",
-                  whiteSpace: "nowrap",
-                  cursor: "help",
-                }}
-              >
-                {score} signal{score === 1 ? '' : 's'} need attention
+              <span style={{
+                fontSize: "var(--text-caption)",
+                fontWeight: 600,
+                color: scoreToColor(score),
+                background: scoreToBg(score),
+                border: `1px solid ${scoreToColor(score)}40`,
+                borderRadius: "4px",
+                padding: "3px 8px",
+                whiteSpace: "nowrap",
+              }}>
+                {signals.length} thing{signals.length === 1 ? '' : 's'} to action
               </span>
-              {(showAllSignals ? signals : signals.slice(0, 3)).map((s, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+              {signals.map((s, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "5px" }}>
                   {s.severity === "critical"
-                    ? <AlertCircle style={{ width: "11px", height: "11px", color: "#ff6b6b", flexShrink: 0 }} />
+                    ? <AlertCircle style={{ width: "11px", height: "11px", color: "#ff6b6b", flexShrink: 0, marginTop: "2px" }} />
                     : s.severity === "warning"
-                    ? <AlertTriangle style={{ width: "11px", height: "11px", color: "#ffa94d", flexShrink: 0 }} />
-                    : <Info style={{ width: "11px", height: "11px", color: "var(--text-3)", flexShrink: 0 }} />
+                    ? <AlertTriangle style={{ width: "11px", height: "11px", color: "#ffa94d", flexShrink: 0, marginTop: "2px" }} />
+                    : <Info style={{ width: "11px", height: "11px", color: "var(--text-3)", flexShrink: 0, marginTop: "2px" }} />
                   }
                   <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>{s.message}</span>
                   {s.meta?.isNewHire === true && (
@@ -332,14 +328,6 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
                   )}
                 </div>
               ))}
-              {signals.length > 3 && (
-                <button
-                  onClick={() => setShowAllSignals(v => !v)}
-                  style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", background: "none", border: "none", cursor: "pointer", padding: "0", textAlign: "left", textDecoration: "underline" }}
-                >
-                  {showAllSignals ? "Show less" : `+${signals.length - 3} more`}
-                </button>
-              )}
             </div>
           )}
           {/* Onboarding progress bar — visible for first 90 days */}
