@@ -144,18 +144,22 @@ export function LogEvidenceModal({
         </DialogHeader>
 
         {/* Linked meeting indicator */}
-        <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 10px", borderRadius: "4px", background: "var(--surf-2)", border: "1px solid var(--border-2)", fontSize: "var(--text-caption)", color: "#60a5fa" }}>
-          <Link2 style={{ width: "12px", height: "12px" }} />
+        <div className="log-evidence-meeting-link">
+          <Link2 />
           {meetingTitle} · {new Date(meetingDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
         </div>
 
-        <div style={{ display: "grid", gap: "14px", paddingTop: "4px" }}>
+        <div className="log-evidence-grid">
           {/* Person selector — shown if no pre-resolved person */}
           {!personId && (
-            <div style={{ display: "grid", gap: "4px" }}>
+            <div className="log-evidence-person-field">
               <label className="form-label">Person *</label>
-              <select value={resolvedPersonId} onChange={e => setResolvedPersonId(e.target.value)}
-                style={{ background: "var(--surf-2)", border: "1px solid var(--border-2)", borderRadius: "6px", color: resolvedPersonId ? "var(--text-1)" : "var(--text-3)", padding: "6px 10px", fontSize: "var(--text-label)", cursor: "pointer" }}>
+              <select
+                value={resolvedPersonId}
+                onChange={e => setResolvedPersonId(e.target.value)}
+                className="evidence-form-select"
+                style={{ color: resolvedPersonId ? "var(--text-1)" : "var(--text-3)" }}
+              >
                 <option value="">Select person...</option>
                 {availablePeople.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
@@ -163,38 +167,41 @@ export function LogEvidenceModal({
           )}
 
           {personName && (
-            <p style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>
+            <p className="log-evidence-person-hint">
               Evidence will be logged for <strong style={{ color: "var(--text-1)" }}>{personName}</strong>
             </p>
           )}
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 160px", gap: "12px" }}>
-            <div style={{ display: "grid", gap: "4px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div className="log-evidence-row-2col">
+            <div className="log-evidence-field">
+              <div className="log-evidence-cat-row">
                 <label className="form-label" style={{ margin: 0 }}>Category</label>
                 {aiConfig.configured && title.trim().length >= 10 && (
                   <button
                     type="button"
                     onClick={handleSuggestCategory}
                     disabled={suggesting}
-                    style={{ fontSize: "var(--text-caption)", color: suggesting ? "var(--text-3)" : "#00f058", background: "none", border: "none", cursor: suggesting ? "not-allowed" : "pointer", padding: 0, fontFamily: "var(--font-sans)" }}
+                    className={`log-evidence-suggest-btn ${suggesting ? "log-evidence-suggest-btn--loading" : "log-evidence-suggest-btn--active"}`}
                   >
                     {suggesting ? "Suggesting…" : "✦ Suggest"}
                   </button>
                 )}
               </div>
-              <select value={category} onChange={e => setCategory(e.target.value as EvidenceCategory)}
-                style={{ background: "var(--surf-2)", border: "1px solid var(--border-2)", borderRadius: "6px", color: "var(--text-1)", padding: "6px 10px", fontSize: "var(--text-label)", cursor: "pointer" }}>
+              <select
+                value={category}
+                onChange={e => setCategory(e.target.value as EvidenceCategory)}
+                className="evidence-form-select"
+              >
                 {CATEGORIES.map(c => <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>)}
               </select>
             </div>
-            <div style={{ display: "grid", gap: "4px" }}>
+            <div className="log-evidence-field">
               <label className="form-label">Date</label>
               <Input type="date" value={occurredAt} onChange={e => setOccurredAt(e.target.value)} />
             </div>
           </div>
 
-          <div style={{ display: "grid", gap: "4px" }}>
+          <div className="log-evidence-field">
             <label className="form-label">Title *</label>
             <Input
               value={title}
@@ -204,12 +211,12 @@ export function LogEvidenceModal({
             />
           </div>
 
-          <div style={{ display: "grid", gap: "4px" }}>
+          <div className="log-evidence-field">
             <label className="form-label">Notes (optional)</label>
             <MarkdownTextarea value={content} onValueChange={setContent} placeholder="Add context or specifics..." rows={3} />
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div className="log-evidence-sentiment-row">
             <label className="form-label" style={{ margin: 0 }}>Sentiment</label>
             {SENTIMENTS.map(s => {
               const cfg = SENTIMENT_CONFIG[s]
@@ -223,7 +230,7 @@ export function LogEvidenceModal({
             })}
           </div>
 
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", paddingTop: "4px" }}>
+          <div className="log-evidence-footer">
             <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
             <Button onClick={handleSave} disabled={!title.trim() || (!personId && !resolvedPersonId) || saving}>
               {saving ? "Saving..." : "Save Evidence"}
