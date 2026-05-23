@@ -982,9 +982,9 @@ export function CompetencySection({ personId, personLevel, personName = "this en
                 onClick={() => setAddingPlan(true)}
                 style={{
                   display: "flex", alignItems: "center", gap: "4px",
-                  background: "var(--surf-2)", border: "1px solid var(--border-2)", borderRadius: "4px",
-                  color: "var(--text-2)", fontSize: "var(--text-label)", padding: "4px 10px",
-                  cursor: "pointer", fontFamily: "var(--font-sans)",
+                  background: "linear-gradient(90deg, #00ffe5 0%, #00f058 100%)", border: "none", borderRadius: "4px",
+                  color: "#0a1a0a", fontSize: "var(--text-label)", padding: "4px 10px",
+                  cursor: "pointer", fontFamily: "var(--font-sans)", fontWeight: 600,
                 }}
               >
                 <Plus style={{ width: "11px", height: "11px" }} /> Add plan
