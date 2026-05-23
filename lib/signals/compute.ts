@@ -245,6 +245,12 @@ export function computePeopleSignals(
     const lastNoteDate = notesDateByPerson[person.id]
     const newHire = isNewHire((person as any).start_date, today)
 
+    // Grace period: suppress all person-level signals for the first 7 days
+    // A person hired today cannot have missed a 1:1, logged evidence, or meeting notes yet
+    const startDate = (person as any).start_date
+    const daysInRole = startDate ? daysBetween(new Date(startDate + 'T00:00:00'), today) : 999
+    if (daysInRole < 7) continue
+
     // Thresholds adjusted for new hires
     const oneOnOneWarnDays = newHire ? 7 : 14
     const oneOnOneCritDays = newHire ? 14 : 21
