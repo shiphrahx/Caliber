@@ -210,6 +210,7 @@ export function BatchEvidenceImportModal({
     } finally {
       setSaving(false)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rows, onSaved])
 
   const updateRow = (key: string, patch: Partial<PreviewRow>) => {

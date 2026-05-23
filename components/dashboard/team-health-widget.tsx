@@ -260,7 +260,7 @@ export function TeamHealthWidget() {
                 </p>
               ) : narrative ? (
                 <>
-                  <AIGeneratedBadge />
+                  <AIGeneratedBadge onDismiss={() => setNarrative(null)} />
                   <p style={{ fontSize: "var(--text-body)", color: "var(--text-2)", lineHeight: 1.5, margin: 0, marginTop: "4px" }}>
                     {narrative}
                   </p>

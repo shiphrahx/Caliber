@@ -465,7 +465,7 @@ export function EvidenceSection({
         people={batchPeople}
         contextPersonId={personId}
         contextPersonName={personName}
-        onSaved={(count) => {
+        onSaved={() => {
           // Refresh entries after batch save
           getEvidenceForPerson(personId).then(setEntries).catch(console.error)
         }}
