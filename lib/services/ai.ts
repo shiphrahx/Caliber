@@ -111,11 +111,30 @@ export interface AIRequest {
   preferFast?: boolean
 }
 
+export interface AITokenUsage {
+  input: number
+  output: number
+  /** Tokens served from Anthropic prompt cache (charged at ~10% of normal input rate) */
+  cacheRead?: number
+  /** Tokens written to Anthropic prompt cache (charged at ~125% of normal input rate) */
+  cacheWrite?: number
+}
+
 export interface AIResponse {
   content: string
-  tokensUsed: { input: number; output: number }
+  tokensUsed: AITokenUsage
   model: string
   error?: string
+}
+
+// ─── Session-level cache stats ────────────────────────────────────────────────
+// Tracks cumulative cache read/write tokens across all callAI calls this session.
+// Resets on page reload (intentional — "this session" means browser session).
+
+const _sessionCacheStats = { cacheRead: 0, cacheWrite: 0, calls: 0 }
+
+export function getSessionCacheStats(): { cacheRead: number; cacheWrite: number; calls: number } {
+  return { ..._sessionCacheStats }
 }
 
 export async function callAI(request: AIRequest, signal?: AbortSignal): Promise<AIResponse> {
@@ -144,6 +163,12 @@ export async function callAI(request: AIRequest, signal?: AbortSignal): Promise<
   if (data.error) {
     throw new AIError(data.error)
   }
+
+  // Accumulate session cache stats
+  _sessionCacheStats.calls++
+  _sessionCacheStats.cacheRead += data.tokensUsed.cacheRead ?? 0
+  _sessionCacheStats.cacheWrite += data.tokensUsed.cacheWrite ?? 0
+
   return data
 }
 

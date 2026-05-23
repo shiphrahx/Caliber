@@ -10,6 +10,8 @@ import {
   truncateToTokenBudget,
   assembleMeetingContext,
   assembleEvidenceContext,
+  getSessionCacheStats,
+  type AITokenUsage,
 } from '../ai'
 
 describe('estimateTokens', () => {
@@ -154,5 +156,44 @@ describe('assembleEvidenceContext', () => {
 
   it('returns empty string for empty array', () => {
     expect(assembleEvidenceContext([])).toBe('')
+  })
+})
+
+describe('AITokenUsage type', () => {
+  it('accepts usage without cache fields', () => {
+    const usage: AITokenUsage = { input: 100, output: 50 }
+    expect(usage.input).toBe(100)
+    expect(usage.cacheRead).toBeUndefined()
+    expect(usage.cacheWrite).toBeUndefined()
+  })
+
+  it('accepts usage with cache fields', () => {
+    const usage: AITokenUsage = { input: 100, output: 50, cacheRead: 80, cacheWrite: 120 }
+    expect(usage.cacheRead).toBe(80)
+    expect(usage.cacheWrite).toBe(120)
+  })
+})
+
+describe('getSessionCacheStats', () => {
+  it('returns an object with numeric fields', () => {
+    const stats = getSessionCacheStats()
+    expect(typeof stats.cacheRead).toBe('number')
+    expect(typeof stats.cacheWrite).toBe('number')
+    expect(typeof stats.calls).toBe('number')
+  })
+
+  it('returns a snapshot (not a live reference)', () => {
+    const stats1 = getSessionCacheStats()
+    const stats2 = getSessionCacheStats()
+    // Should be equal in value but not the same reference
+    expect(stats1).toEqual(stats2)
+    expect(stats1).not.toBe(stats2)
+  })
+
+  it('has non-negative values', () => {
+    const stats = getSessionCacheStats()
+    expect(stats.cacheRead).toBeGreaterThanOrEqual(0)
+    expect(stats.cacheWrite).toBeGreaterThanOrEqual(0)
+    expect(stats.calls).toBeGreaterThanOrEqual(0)
   })
 })

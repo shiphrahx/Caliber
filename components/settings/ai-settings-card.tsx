@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
-  getAIConfig, saveAIConfig, deleteAIConfig, testAIConnection,
+  getAIConfig, saveAIConfig, deleteAIConfig, testAIConnection, getSessionCacheStats,
   PROVIDER_LABELS, PROVIDER_MODELS,
   type AIProvider, type AIConfig,
 } from "@/lib/services/ai"
@@ -149,6 +149,24 @@ export function AISettingsCard() {
                 <span>· Last used: {new Date(config.lastUsedAt).toLocaleDateString()}</span>
               )}
             </div>
+
+            {/* Session cache stats — only shown for Anthropic (prompt caching supported) */}
+            {config.provider === 'anthropic' && (() => {
+              const stats = getSessionCacheStats()
+              return stats.calls > 0 ? (
+                <div style={{
+                  display: "flex", gap: "12px",
+                  fontSize: "var(--text-caption)", color: "var(--text-3)",
+                  padding: "6px 10px", borderRadius: "5px",
+                  background: "var(--surf-2)", border: "1px solid var(--border-2)",
+                }}>
+                  <span style={{ fontWeight: 600, color: "var(--text-2)" }}>This session</span>
+                  <span>Cache hits: {stats.cacheRead.toLocaleString()} tokens</span>
+                  <span>Cache writes: {stats.cacheWrite.toLocaleString()} tokens</span>
+                  <span>Calls: {stats.calls}</span>
+                </div>
+              ) : null
+            })()}
 
             {testResult === 'ok' && (
               <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#4ade80", fontSize: "var(--text-caption)" }}>
