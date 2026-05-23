@@ -248,7 +248,7 @@ export function TaskPriorityChart() {
                 <Legend
                   iconType="circle"
                   iconSize={8}
-                  formatter={(value) => <span style={{ color: "#9ca3af", fontSize: 13 }}>{value}</span>}
+                  formatter={(value) => <span className="chart-legend-label">{value}</span>}
                 />
               </PieChart>
             </ResponsiveContainer>

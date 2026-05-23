@@ -660,6 +660,46 @@ label { font-size: var(--text-label); color: var(--text-2); }
 /* ── Background tokens ── */
 .bg-base { background: var(--bg-base); }
 
+/* ── Chart legend text ── */
+.chart-legend-label { color: #9ca3af; font-size: 13px; }
+
+/* ── People / Teams table cells ── */
+.avatar-chip {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--surf-3); color: var(--text-2);
+  font-size: var(--text-overline); font-weight: 500;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.level-chip {
+  display: inline-flex; align-items: center;
+  padding: 2px 7px; border-radius: 3px;
+  font-size: var(--text-overline); font-weight: 500; font-family: var(--font-mono);
+}
+.attention-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.team-chip {
+  background: var(--surf-3); padding: 1px 5px; border-radius: 3px;
+  font-size: var(--text-overline); margin-right: 2px;
+}
+.status-badge { font-size: var(--text-caption); }
+.status-badge--active { color: #00f058; }
+.status-badge--inactive { color: var(--text-3); }
+.table-action-btn {
+  border: 1px solid var(--border-2); color: var(--text-3); border-radius: 4px;
+  padding: 2px 7px; font-size: var(--text-meta); background: none; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.table-action-btn:hover { color: var(--text-1); }
+.table-action-btn--danger:hover { color: #f87171; }
+.table-action-btn svg { width: 11px; height: 11px; }
+.table-name-row { display: flex; align-items: center; gap: 6px; }
+.table-name { font-weight: 500; font-size: var(--text-meta); }
+.table-name--active { color: var(--text-1); }
+.table-name--inactive { color: var(--text-3); }
+.table-role { font-size: var(--text-meta); }
+.table-role--active { color: var(--text-2); }
+.table-role--inactive { color: var(--text-3); }
+.table-teams { display: flex; flex-wrap: wrap; gap: 2px; }
+
 /* ── Spinner ── */
 .spinner-brand {
   border-color: rgb(0,255,229);
