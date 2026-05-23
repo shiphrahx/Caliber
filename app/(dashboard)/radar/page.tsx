@@ -183,6 +183,11 @@ function PersonCard({
             >
               <SeverityIcon severity={signal.severity} />
               <span style={{ flex: 1, color: 'var(--text-2)' }}>{signal.message}</span>
+              {signal.meta?.isNewHire === true && (
+                <span style={{ fontSize: '10px', fontWeight: 600, padding: '2px 6px', borderRadius: '4px', background: 'rgba(0,240,88,0.12)', color: '#00f058', border: '1px solid rgba(0,240,88,0.3)', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  New hire
+                </span>
+              )}
               {/* Quick actions per signal type */}
               {signal.type === 'overdue_task' && (
                 <button

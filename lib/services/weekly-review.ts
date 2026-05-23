@@ -15,6 +15,7 @@ export type DismissedItemType =
   | 'surfaced_follow_up'
   | 'action_overload'
   | 'sentiment_drift'
+  | 'new_hire_at_risk'
 
 export interface WeeklyReview {
   id: string
