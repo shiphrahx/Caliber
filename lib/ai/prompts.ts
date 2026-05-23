@@ -160,6 +160,70 @@ ${assessmentText}
 ${evidenceText}`, 6000)
 }
 
+// ─── Follow-up Draft ─────────────────────────────────────────────────────────
+
+export type FollowUpDraftTone = 'formal' | 'casual' | 'slack'
+
+export const FOLLOW_UP_DRAFT_SYSTEM = `You are an engineering manager writing a follow-up message to a direct report after a 1:1 or meeting.
+
+Write a concise, professional follow-up message the manager can send directly. The message should:
+- Open with a brief acknowledgement of the meeting
+- Reference specific action items and commitments made (by name, not vaguely)
+- List next steps clearly so the recipient knows what to expect
+- Close naturally
+
+Rules:
+- Keep under 200 words
+- Do not fabricate items not mentioned in the input
+- If there are no action items or follow-ups, write a general summary of what was discussed
+- Do not use em-dashes or corporate filler phrases ("as per our discussion", "going forward")
+- Output plain text only — no markdown headers
+
+Tone variants:
+- formal: professional, third-person-neutral, full sentences
+- casual: warm, first-person, conversational — as if sent to someone you know well
+- slack: very short, bullet-point friendly, Slack-ready (you may use emoji sparingly)`
+
+export interface FollowUpDraftArgs {
+  personName: string
+  meetingTitle: string
+  meetingDate: string
+  notes: string | null | undefined
+  actionItems: string | null | undefined
+  followUps: Array<{ title: string }>
+  tone: FollowUpDraftTone
+}
+
+export function buildFollowUpDraftPrompt(args: FollowUpDraftArgs): string {
+  const hasNotes = args.notes && args.notes.trim().length > 0
+  const hasActionItems = args.actionItems && args.actionItems.trim().length > 0
+  const hasFollowUps = args.followUps.length > 0
+
+  const followUpLines = hasFollowUps
+    ? args.followUps.map(f => `- ${f.title}`).join('\n')
+    : null
+
+  const sections = [
+    `Person: ${args.personName}`,
+    `Meeting: ${args.meetingTitle} (${args.meetingDate})`,
+    `Tone: ${args.tone}`,
+    '',
+    hasNotes
+      ? `=== Meeting Notes ===\n${args.notes!.slice(0, 1500)}`
+      : '=== Meeting Notes ===\nNo notes recorded.',
+    '',
+    hasActionItems
+      ? `=== Action Items ===\n${args.actionItems!.slice(0, 800)}`
+      : '=== Action Items ===\nNone recorded.',
+    '',
+    followUpLines
+      ? `=== Manager Commitments (Follow-ups) ===\n${followUpLines}`
+      : '=== Manager Commitments (Follow-ups) ===\nNone recorded.',
+  ]
+
+  return truncateToTokenBudget(sections.join('\n'), 4000)
+}
+
 // ─── Action Item Extraction ───────────────────────────────────────────────────
 
 export const ACTION_ITEM_EXTRACTION_SYSTEM = `Extract action items from meeting notes. An action item is something someone committed to DO — not a discussion point or observation.
