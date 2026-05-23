@@ -145,18 +145,7 @@ export function FollowUpDraftModal({ open, onOpenChange, meetingArgs }: FollowUp
           </div>
 
           {/* Draft area */}
-          {!hasGenerated && !loading ? (
-            <div className="flex flex-col items-center justify-center gap-3 py-8 rounded-md border border-dashed border-border">
-              <p className="text-sm text-muted-foreground text-center">
-                {meetingArgs.notes || meetingArgs.actionItems
-                  ? "Click generate to draft a follow-up based on your meeting."
-                  : "No notes or action items — the draft will be a general meeting summary."}
-              </p>
-              <Button type="button" onClick={handleGenerate} disabled={loading}>
-                Generate draft
-              </Button>
-            </div>
-          ) : loading ? (
+          {loading ? (
             <div className="flex flex-col items-center justify-center gap-2 py-10">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
               <p className="text-sm text-muted-foreground">Drafting message…</p>
@@ -166,6 +155,17 @@ export function FollowUpDraftModal({ open, onOpenChange, meetingArgs }: FollowUp
               <p className="text-sm text-destructive">{error}</p>
               <Button type="button" variant="outline" size="sm" onClick={handleGenerate}>
                 Try again
+              </Button>
+            </div>
+          ) : !hasGenerated ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-8 rounded-md border border-dashed border-border">
+              <p className="text-sm text-muted-foreground text-center">
+                {meetingArgs.notes || meetingArgs.actionItems
+                  ? "Click generate to draft a follow-up based on your meeting."
+                  : "No notes or action items — the draft will be a general meeting summary."}
+              </p>
+              <Button type="button" onClick={handleGenerate} disabled={loading}>
+                Generate draft
               </Button>
             </div>
           ) : (
