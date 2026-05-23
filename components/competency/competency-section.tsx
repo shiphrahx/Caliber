@@ -71,7 +71,7 @@ function CompetencyRadar({ data }: { data: RadarData[] }) {
             strokeWidth={2}
           />
           <Tooltip
-            contentStyle={{ background: "var(--surf-2)", border: "1px solid var(--border-2)", borderRadius: "6px", fontSize: "11px" }}
+            contentStyle={{ background: "var(--surf-2)", border: "1px solid var(--border-2)", borderRadius: "6px", fontSize: "13px" }}
             formatter={(value: number | undefined, name: string | undefined) => [value !== undefined ? LEVELS[value - 1] ?? value : value, name ?? ""]}
           />
         </RadarChart>

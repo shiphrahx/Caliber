@@ -193,7 +193,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
             }
             return (
               <div key={`label-${idx}`} style={{
-                fontSize: "9px",
+                fontSize: "13px",
                 textTransform: "uppercase",
                 letterSpacing: "0.08em",
                 color: "var(--text-3)",

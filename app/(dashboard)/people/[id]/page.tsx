@@ -322,7 +322,7 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
                   }
                   <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>{s.message}</span>
                   {s.meta?.isNewHire === true && (
-                    <span style={{ fontSize: "10px", fontWeight: 600, padding: "1px 5px", borderRadius: "3px", background: "rgba(0,240,88,0.12)", color: "#00f058", border: "1px solid rgba(0,240,88,0.3)", whiteSpace: "nowrap", flexShrink: 0 }}>
+                    <span style={{ fontSize: "13px", fontWeight: 600, padding: "1px 5px", borderRadius: "3px", background: "rgba(0,240,88,0.12)", color: "#00f058", border: "1px solid rgba(0,240,88,0.3)", whiteSpace: "nowrap", flexShrink: 0 }}>
                       New hire
                     </span>
                   )}
@@ -337,8 +337,8 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
             return (
               <div style={{ marginTop: "8px", minWidth: "160px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                  <span style={{ fontSize: "10px", fontWeight: 600, color: "#00f058", textTransform: "uppercase", letterSpacing: "0.04em" }}>Onboarding</span>
-                  <span style={{ fontSize: "10px", color: "var(--text-3)" }}>Day {daysIn} / {NEW_HIRE_WINDOW_DAYS}</span>
+                  <span style={{ fontSize: "13px", fontWeight: 600, color: "#00f058", textTransform: "uppercase", letterSpacing: "0.04em" }}>Onboarding</span>
+                  <span style={{ fontSize: "13px", color: "var(--text-3)" }}>Day {daysIn} / {NEW_HIRE_WINDOW_DAYS}</span>
                 </div>
                 <div style={{ height: "4px", borderRadius: "2px", background: "var(--border-1)", overflow: "hidden" }}>
                   <div style={{ height: "100%", width: `${pct}%`, borderRadius: "2px", background: "linear-gradient(90deg, hsl(174,100%,50%), hsl(142,100%,47%))", transition: "width 0.3s ease" }} />

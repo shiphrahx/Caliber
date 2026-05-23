@@ -32,7 +32,7 @@ function Tooltip({ bucket }: { bucket: WeeklySentimentBucket }) {
       border: "1px solid var(--border-2)",
       borderRadius: "4px",
       padding: "6px 8px",
-      fontSize: "11px",
+      fontSize: "13px",
       color: "var(--text-1)",
       whiteSpace: "nowrap",
       zIndex: 10,
@@ -191,7 +191,7 @@ export function SentimentTrendChart({ personId, days = 60 }: SentimentTrendChart
             {(["positive", "neutral", "negative"] as const).map(s => (
               <div key={s} style={{ display: "flex", alignItems: "center", gap: "3px" }}>
                 <div style={{ width: "8px", height: "8px", borderRadius: "2px", background: COLORS[s] }} />
-                <span style={{ fontSize: "11px", color: "var(--text-3)", textTransform: "capitalize" }}>{s}</span>
+                <span style={{ fontSize: "13px", color: "var(--text-3)", textTransform: "capitalize" }}>{s}</span>
               </div>
             ))}
           </div>
@@ -234,7 +234,7 @@ export function SentimentTrendChart({ personId, days = 60 }: SentimentTrendChart
                   key={b.weekStart}
                   style={{
                     width: `${BAR_WIDTH}px`,
-                    fontSize: "10px",
+                    fontSize: "13px",
                     color: "var(--text-3)",
                     textAlign: "center",
                     flexShrink: 0,
