@@ -663,6 +663,67 @@ label { font-size: var(--text-label); color: var(--text-2); }
 /* ── Chart legend text ── */
 .chart-legend-label { color: #9ca3af; font-size: 13px; }
 
+/* ── Dual-list picker (person/team form dialogs) ── */
+.dual-list-col { flex: 1; }
+.dual-list-label {
+  font-size: var(--text-label);
+  color: var(--text-3);
+  display: block;
+  margin-bottom: 4px;
+}
+.dual-list-box {
+  border: 1px solid var(--border-2);
+  border-radius: 4px;
+  overflow-y: auto;
+  background: var(--surf-2);
+}
+.dual-list-box--sm { height: 128px; }
+.dual-list-box--md { height: 192px; }
+.dual-list-item {
+  padding: 6px 12px;
+  font-size: var(--text-label);
+  cursor: pointer;
+  user-select: none;
+}
+.dual-list-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: var(--text-label);
+  color: var(--text-3);
+}
+.dual-list-arrows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dual-list-arrow-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  border: 1px solid var(--border-2);
+  background: var(--surf-2);
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dual-list-arrow-btn:disabled { cursor: not-allowed; opacity: 0.4; }
+.dual-list-arrow-btn:not(:disabled) { cursor: pointer; }
+.dual-list-arrow-btn svg { width: 16px; height: 16px; }
+
+/* ── Level picker buttons ── */
+.level-btn {
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: var(--text-label);
+  font-weight: 500;
+  font-family: var(--font-sans);
+  cursor: pointer;
+}
+.level-btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
+
 /* ── People / Teams table cells ── */
 .avatar-chip {
   width: 24px; height: 24px; border-radius: 50%;

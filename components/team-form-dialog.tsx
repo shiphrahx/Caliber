@@ -174,83 +174,77 @@ export function TeamFormDialog({ open, onOpenChange, team, onSave, availablePeop
                 <Label>Team Members</Label>
                 <div className="flex gap-3 items-center">
                   {/* Available People */}
-                  <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: "var(--text-label)", color: "var(--text-3)", display: "block", marginBottom: "4px" }}>Available People</label>
-                    <div style={{ border: "1px solid var(--border-2)", borderRadius: "4px", height: "192px", overflowY: "auto", background: "var(--surf-2)" }}>
+                  <div className="dual-list-col">
+                    <label className="dual-list-label">Available People</label>
+                    <div className="dual-list-box dual-list-box--md">
                       {availablePeopleList.length > 0 ? (
-                        availablePeopleList.map((person) => (
-                          <div
-                            key={person.id}
-                            onClick={() => toggleAvailableSelection(person.id!)}
-                            onDoubleClick={() => handleDoubleClickAvailable(person.id!)}
-                            className="dual-list-item"
-                            style={{
-                              padding: "6px 12px",
-                              fontSize: "var(--text-label)",
-                              cursor: "pointer",
-                              userSelect: "none",
-                              color: selectedAvailable.includes(person.id!) ? "#111" : "var(--text-2)",
-                              borderLeft: selectedAvailable.includes(person.id!) ? "2px solid #00f058" : "2px solid transparent",
-                            }}
-                          >
-                            {person.name}
-                          </div>
-                        ))
+                        availablePeopleList.map((person) => {
+                          const isSelected = selectedAvailable.includes(person.id!)
+                          return (
+                            <div
+                              key={person.id}
+                              onClick={() => toggleAvailableSelection(person.id!)}
+                              onDoubleClick={() => handleDoubleClickAvailable(person.id!)}
+                              className="dual-list-item"
+                              style={{
+                                color: isSelected ? "#111" : "var(--text-2)",
+                                borderLeft: isSelected ? "2px solid #00f058" : "2px solid transparent",
+                              }}
+                            >
+                              {person.name}
+                            </div>
+                          )
+                        })
                       ) : (
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: "var(--text-label)", color: "var(--text-3)" }}>
-                          All people assigned
-                        </div>
+                        <div className="dual-list-empty">All people assigned</div>
                       )}
                     </div>
                   </div>
 
                   {/* Arrow Buttons */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <div className="dual-list-arrows">
                     <button
                       type="button"
                       onClick={handleAddToTeam}
                       disabled={selectedAvailable.length === 0}
-                      style={{ width: "32px", height: "32px", borderRadius: "4px", border: "1px solid var(--border-2)", background: "var(--surf-2)", color: "var(--text-2)", cursor: selectedAvailable.length === 0 ? "not-allowed" : "pointer", opacity: selectedAvailable.length === 0 ? 0.4 : 1, display: "flex", alignItems: "center", justifyContent: "center" }}
+                      className="dual-list-arrow-btn"
                     >
-                      <ChevronRight style={{ width: "16px", height: "16px" }} />
+                      <ChevronRight />
                     </button>
                     <button
                       type="button"
                       onClick={handleRemoveFromTeam}
                       disabled={selectedMembers.length === 0}
-                      style={{ width: "32px", height: "32px", borderRadius: "4px", border: "1px solid var(--border-2)", background: "var(--surf-2)", color: "var(--text-2)", cursor: selectedMembers.length === 0 ? "not-allowed" : "pointer", opacity: selectedMembers.length === 0 ? 0.4 : 1, display: "flex", alignItems: "center", justifyContent: "center" }}
+                      className="dual-list-arrow-btn"
                     >
-                      <ChevronLeft style={{ width: "16px", height: "16px" }} />
+                      <ChevronLeft />
                     </button>
                   </div>
 
                   {/* Team Members */}
-                  <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: "var(--text-label)", color: "var(--text-3)", display: "block", marginBottom: "4px" }}>Team Members ({teamMembersList.length})</label>
-                    <div style={{ border: "1px solid var(--border-2)", borderRadius: "4px", height: "192px", overflowY: "auto", background: "var(--surf-2)" }}>
+                  <div className="dual-list-col">
+                    <label className="dual-list-label">Team Members ({teamMembersList.length})</label>
+                    <div className="dual-list-box dual-list-box--md">
                       {teamMembersList.length > 0 ? (
-                        teamMembersList.map((person) => (
-                          <div
-                            key={person.id}
-                            onClick={() => toggleMemberSelection(person.id!)}
-                            onDoubleClick={() => handleDoubleClickMember(person.id!)}
-                            className="dual-list-item"
-                            style={{
-                              padding: "6px 12px",
-                              fontSize: "var(--text-label)",
-                              cursor: "pointer",
-                              userSelect: "none",
-                              color: selectedMembers.includes(person.id!) ? "#111" : "var(--text-2)",
-                              borderLeft: selectedMembers.includes(person.id!) ? "2px solid #00f058" : "2px solid transparent",
-                            }}
-                          >
-                            {person.name}
-                          </div>
-                        ))
+                        teamMembersList.map((person) => {
+                          const isSelected = selectedMembers.includes(person.id!)
+                          return (
+                            <div
+                              key={person.id}
+                              onClick={() => toggleMemberSelection(person.id!)}
+                              onDoubleClick={() => handleDoubleClickMember(person.id!)}
+                              className="dual-list-item"
+                              style={{
+                                color: isSelected ? "#111" : "var(--text-2)",
+                                borderLeft: isSelected ? "2px solid #00f058" : "2px solid transparent",
+                              }}
+                            >
+                              {person.name}
+                            </div>
+                          )
+                        })
                       ) : (
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: "var(--text-label)", color: "var(--text-3)" }}>
-                          No members yet
-                        </div>
+                        <div className="dual-list-empty">No members yet</div>
                       )}
                     </div>
                   </div>
