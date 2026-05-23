@@ -140,7 +140,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       }}
     >
       {/* Logo + collapse toggle */}
-      <div style={{ display: "flex", alignItems: "center", height: "48px", padding: "0 10px", gap: "6px" }}>
+      <div style={{ display: "flex", alignItems: "center", height: "72px", padding: "12px 10px", gap: "6px" }}>
         {isOpen && (
           <Link href="/dashboard" style={{ flex: 1, display: "flex", alignItems: "center" }}>
             <Image
