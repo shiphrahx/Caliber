@@ -112,40 +112,19 @@ export function DataTable<T extends { id?: number | string }>({
   }, [data, searchQuery, searchKeys, filterValues, filters, sortField, sortDirection, columns])
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
+    <div className="data-table-wrap">
       {/* Search + controls row */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", marginBottom: "12px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+      <div className="data-table-controls">
+        <div className="data-table-controls-left">
           {searchKeys.length > 0 && (
-            <div style={{ position: "relative" }}>
-              <Search
-                style={{
-                  position: "absolute",
-                  width: "14px",
-                  height: "14px",
-                  left: "10px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: "var(--text-3)",
-                  pointerEvents: "none",
-                }}
-              />
+            <div className="data-table-search-wrap">
+              <Search className="data-table-search-icon" />
               <input
                 type="text"
                 placeholder={searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  background: "var(--surf)",
-                  border: "1px solid var(--border-1)",
-                  borderRadius: "6px",
-                  padding: "5px 10px 5px 30px",
-                  fontSize: "var(--text-label)",
-                  color: "var(--text-1)",
-                  width: "180px",
-                  outline: "none",
-                  fontFamily: "var(--font-sans)",
-                }}
+                className="data-table-search-input"
                 onFocus={e => (e.currentTarget.style.borderColor = "var(--border-2)")}
                 onBlur={e => (e.currentTarget.style.borderColor = "var(--border-1)")}
               />
@@ -154,41 +133,15 @@ export function DataTable<T extends { id?: number | string }>({
           {filters.length > 0 && (
             <button
               onClick={() => setShowFilters(!showFilters)}
-              style={{
-                background: showFilters ? "var(--surf-3)" : "transparent",
-                border: "1px solid var(--border-2)",
-                color: "var(--text-2)",
-                fontSize: "var(--text-label)",
-                padding: "5px 10px",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontFamily: "var(--font-sans)",
-              }}
-              onMouseEnter={e => (e.currentTarget.style.color = "var(--text-1)")}
-              onMouseLeave={e => (e.currentTarget.style.color = "var(--text-2)")}
+              className="data-table-filters-btn"
+              style={{ background: showFilters ? "var(--surf-3)" : "transparent" }}
             >
               Filters
             </button>
           )}
         </div>
         {onQuickAdd && (
-          <button
-            onClick={onQuickAdd}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "5px",
-              background: "linear-gradient(90deg, #00ffe5 0%, #00f058 100%)",
-              border: "none",
-              color: "#0a1a0a",
-              padding: "4px 10px",
-              borderRadius: "4px",
-              fontSize: "var(--text-caption)",
-              fontWeight: 600,
-              cursor: "pointer",
-              fontFamily: "var(--font-sans)",
-            }}
-          >
+          <button onClick={onQuickAdd} className="data-table-add-btn">
             + {quickAddLabel}
           </button>
         )}
@@ -196,34 +149,14 @@ export function DataTable<T extends { id?: number | string }>({
 
       {/* Filter panel */}
       {showFilters && filters.length > 0 && (
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "16px",
-          padding: "12px 16px",
-          background: "var(--surf)",
-          border: "1px solid var(--border-1)",
-          borderRadius: "8px",
-          marginBottom: "12px",
-        }}>
+        <div className="data-table-filter-panel">
           {filters.map((filter) => (
-            <div key={filter.id} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <label style={{ fontSize: "var(--text-label)", color: "var(--text-2)", fontWeight: 500, fontFamily: "var(--font-sans)" }}>
-                {filter.label}:
-              </label>
+            <div key={filter.id} className="data-table-filter-item">
+              <label className="data-table-filter-label">{filter.label}:</label>
               <select
                 value={filterValues[filter.id]}
                 onChange={(e) => setFilterValues({ ...filterValues, [filter.id]: e.target.value })}
-                style={{
-                  background: "var(--surf-2)",
-                  border: "1px solid var(--border-2)",
-                  borderRadius: "4px",
-                  padding: "3px 6px",
-                  fontSize: "var(--text-label)",
-                  color: "var(--text-1)",
-                  cursor: "pointer",
-                  fontFamily: "var(--font-sans)",
-                }}
+                className="data-table-filter-select"
               >
                 <option value="all">All</option>
                 {filter.options.map((option) => (
@@ -238,40 +171,22 @@ export function DataTable<T extends { id?: number | string }>({
       )}
 
       {/* Table */}
-      <div style={{
-        background: "var(--surf)",
-        border: "1px solid var(--border-1)",
-        borderRadius: "8px",
-        overflow: "hidden",
-      }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      <div className="data-table-box">
+        <table className="data-table">
           <thead>
-            <tr style={{ borderBottom: "1px solid var(--border-1)" }}>
+            <tr className="data-table-head-row">
               {columns.map((column) => (
                 <th
                   key={column.id}
-                  className={`col-header ${column.className ?? ""}`}
-                  style={{ padding: "8px 12px", background: "var(--surf)" }}
+                  className={`data-table-th col-header ${column.className ?? ""}`}
                 >
                   {column.sortable !== false ? (
                     <button
                       onClick={() => handleSort(column.id)}
-                      className="col-header"
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "4px",
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        padding: 0,
-                        fontFamily: "var(--font-sans)",
-                      }}
-                      onMouseEnter={e => (e.currentTarget.style.color = "var(--text-2)")}
-                      onMouseLeave={e => (e.currentTarget.style.color = "var(--text-3)")}
+                      className="data-table-sort-btn col-header"
                     >
                       {column.header}
-                      <ArrowUpDown style={{ width: "11px", height: "11px", flexShrink: 0 }} />
+                      <ArrowUpDown />
                     </button>
                   ) : (
                     column.header
@@ -295,11 +210,7 @@ export function DataTable<T extends { id?: number | string }>({
                   onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "transparent")}
                 >
                   {columns.map((column) => (
-                    <td
-                      key={column.id}
-                      style={{ padding: "9px 12px", fontSize: "var(--text-meta)", color: "var(--text-1)" }}
-                      className={column.className}
-                    >
+                    <td key={column.id} className={`data-table-td ${column.className ?? ""}`}>
                       {column.cell
                         ? column.cell(item)
                         : column.accessorKey
@@ -311,10 +222,10 @@ export function DataTable<T extends { id?: number | string }>({
               ))
             ) : (
               <tr>
-                <td colSpan={columns.length} style={{ padding: 0 }}>
+                <td colSpan={columns.length} className="data-table-empty-td">
                   {emptyState || (
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "40px", textAlign: "center" }}>
-                      <p style={{ fontSize: "var(--text-meta)", color: "var(--text-3)" }}>No items found</p>
+                    <div className="data-table-empty-state">
+                      <p className="data-table-empty-text">No items found</p>
                     </div>
                   )}
                 </td>
