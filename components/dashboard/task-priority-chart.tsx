@@ -95,7 +95,7 @@ function BarTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   const total = payload.reduce((s: number, e: any) => s + (e.value ?? 0), 0)
   return (
-    <div className="bg-[#1e1e1e] border border-[#383838] rounded-lg p-3 shadow-xl text-xs">
+    <div className="bg-[#1e1e1e] border border-[#383838] rounded-lg p-3 shadow-xl text-[13px]">
       <p className="text-gray-300 font-semibold mb-2">Week of {label}</p>
       {payload.map((e: any) =>
         e.value > 0 ? (
@@ -120,7 +120,7 @@ function PieTooltip({ active, payload }: any) {
   if (!active || !payload?.length) return null
   const e = payload[0]
   return (
-    <div className="bg-[#1e1e1e] border border-[#383838] rounded-lg px-3 py-2 shadow-xl text-xs">
+    <div className="bg-[#1e1e1e] border border-[#383838] rounded-lg px-3 py-2 shadow-xl text-[13px]">
       <div className="flex items-center gap-1.5">
         <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: e.payload.fill }} />
         <span className="text-gray-300 font-medium">{e.name}</span>
@@ -164,7 +164,7 @@ export function TaskPriorityChart() {
               key={w}
               onClick={() => setWeeks(w)}
               className={cn(
-                "px-2 py-0.5 rounded text-[11px] font-medium transition-colors",
+                "px-2 py-0.5 rounded text-[13px] font-medium transition-colors",
                 weeks === w
                   ? "bg-[#383838] text-gray-100"
                   : "text-gray-500 hover:text-gray-300"
@@ -202,7 +202,7 @@ export function TaskPriorityChart() {
 
       {loading ? (
         <div className="h-[220px] flex items-center justify-center">
-          <span className="text-gray-600 text-xs">Loading...</span>
+          <span className="text-gray-600 text-[13px]">Loading...</span>
         </div>
       ) : chartType === "bar" ? (
         <ResponsiveContainer width="100%" height={200}>
@@ -226,7 +226,7 @@ export function TaskPriorityChart() {
         <div className="h-[200px]">
           {pieTotals.length === 0 ? (
             <div className="h-full flex items-center justify-center">
-              <span className="text-gray-600 text-xs">No tasks in this period</span>
+              <span className="text-gray-600 text-[13px]">No tasks in this period</span>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">

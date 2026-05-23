@@ -88,7 +88,7 @@ function DraggableTaskChip({
       {...attributes}
       onClick={onClick}
       className={cn(
-        "flex flex-col px-1.5 py-1 rounded text-[12px] font-medium cursor-grab active:cursor-grabbing transition-opacity bg-[#2a2a2a] text-gray-200 border border-[#383838]",
+        "flex flex-col px-1.5 py-1 rounded text-[13px] font-medium cursor-grab active:cursor-grabbing transition-opacity bg-[#2a2a2a] text-gray-200 border border-[#383838]",
         PRIORITY_BORDER[task.priority],
         isDragging && !overlay && "opacity-30",
         overlay && "shadow-lg opacity-95 rotate-1 cursor-grabbing",
@@ -97,7 +97,7 @@ function DraggableTaskChip({
       <span className="truncate">{task.title}</span>
       <div className="flex items-center gap-1 mt-0.5">
         <span className={cn("flex-shrink-0 w-1.5 h-1.5 rounded-full", PRIORITY_DOT[task.priority])} />
-        <span className="opacity-60 font-normal text-[12px]">{task.priority}</span>
+        <span className="opacity-60 font-normal text-[13px]">{task.priority}</span>
       </div>
     </div>
   )
@@ -268,7 +268,7 @@ export function DashboardCalendar({ tasks }: DashboardCalendarProps) {
             </button>
             <button
               onClick={() => { setViewYear(today.getFullYear()); setViewMonth(today.getMonth()) }}
-              className="px-3 py-1 text-xs rounded-md hover:bg-[#2a2a2a] text-gray-400 hover:text-gray-200 transition-colors"
+              className="px-3 py-1 text-[13px] rounded-md hover:bg-[#2a2a2a] text-gray-400 hover:text-gray-200 transition-colors"
             >
               Today
             </button>
@@ -286,7 +286,7 @@ export function DashboardCalendar({ tasks }: DashboardCalendarProps) {
           {DAYS_OF_WEEK.map((day) => (
             <div
               key={day}
-              className="py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wide"
+              className="py-2 text-center text-[13px] font-medium text-gray-500 uppercase tracking-wide"
             >
               {day}
             </div>
@@ -333,7 +333,7 @@ export function DashboardCalendar({ tasks }: DashboardCalendarProps) {
                     <div className="flex justify-end mb-1.5">
                       <span
                         className={cn(
-                          "text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full",
+                          "text-[13px] font-medium w-6 h-6 flex items-center justify-center rounded-full",
                           isToday
                             ? "bg-gray-100 text-[#0f0f0f] font-bold"
                             : isCurrentMonth
@@ -355,7 +355,7 @@ export function DashboardCalendar({ tasks }: DashboardCalendarProps) {
                         />
                       ))}
                       {overflow > 0 && (
-                        <div className="text-[10px] text-gray-500 pl-1.5">
+                        <div className="text-[13px] text-gray-500 pl-1.5">
                           +{overflow} more
                         </div>
                       )}

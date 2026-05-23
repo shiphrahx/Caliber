@@ -352,7 +352,7 @@ export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availab
                   {/* Person Field for 1:1 */}
                   <div className="grid gap-2">
                     <Label htmlFor="person">Person *</Label>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-[13px] text-muted-foreground">
                       Select from your team or type a new name
                     </p>
                     <div className="relative">
@@ -485,7 +485,7 @@ export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availab
                         </div>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-[13px] text-muted-foreground">
                       Select from your teams or type a new name
                     </p>
                   </div>
@@ -632,7 +632,7 @@ export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availab
               {is1on1 && (
                 <div className="grid gap-2">
                   <Label>Templates</Label>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-[13px] text-muted-foreground">
                     Select a template to load pre-formatted notes
                   </p>
                   <div className="flex flex-wrap gap-2">

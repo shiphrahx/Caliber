@@ -906,7 +906,7 @@ export default function WeeklyReviewPage() {
                   </div>
                 )}
                 {reflectionPrompts.length === 0 && (
-                  <p style={{ fontSize: '11px', color: 'var(--text-3)', fontStyle: 'italic', marginBottom: '10px', lineHeight: 1.6 }}>
+                  <p style={{ fontSize: '12px', color: 'var(--text-3)', fontStyle: 'italic', marginBottom: '10px', lineHeight: 1.6 }}>
                     "Take a moment to reflect on your week. What patterns are you noticing?"
                   </p>
                 )}

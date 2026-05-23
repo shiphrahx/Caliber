@@ -76,7 +76,7 @@ export function BadgeSelect({
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            "inline-flex items-center justify-center rounded-md px-3 py-1 text-xs font-medium transition-colors cursor-pointer",
+            "inline-flex items-center justify-center rounded-md px-3 py-1 text-[13px] font-medium transition-colors cursor-pointer",
             "hover:opacity-80",
             selectedOption?.className || "bg-gray-100 text-gray-700"
           )}
@@ -107,7 +107,7 @@ export function BadgeSelect({
                   setIsOpen(false)
                 }}
                 className={cn(
-                  "relative flex w-full items-center rounded-sm px-2 py-1.5 text-xs outline-none cursor-pointer",
+                  "relative flex w-full items-center rounded-sm px-2 py-1.5 text-[13px] outline-none cursor-pointer",
                   "hover:bg-gray-100 hover:bg-[#292929]",
                   "transition-colors"
                 )}

@@ -139,7 +139,7 @@ export function FollowUpDraftModal({ open, onOpenChange, meetingArgs }: FollowUp
                 </button>
               ))}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[13px] text-muted-foreground">
               {TONE_OPTIONS.find((o) => o.value === tone)?.description}
             </p>
           </div>
@@ -172,7 +172,7 @@ export function FollowUpDraftModal({ open, onOpenChange, meetingArgs }: FollowUp
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium">Draft</p>
-                <p className="text-xs text-muted-foreground">Edit before sending</p>
+                <p className="text-[13px] text-muted-foreground">Edit before sending</p>
               </div>
               <Textarea
                 value={draft}

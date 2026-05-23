@@ -192,10 +192,10 @@ export default function SettingsPage() {
                       {template.name}
                     </div>
                     <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => isEditing ? handleCancelEdit() : handleStartEdit(template)}>
+                      <Button variant="ghost" size="sm" className="h-7 px-2 text-[13px]" onClick={() => isEditing ? handleCancelEdit() : handleStartEdit(template)}>
                         {isEditing ? "Cancel" : "Edit"}
                       </Button>
-                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-red-400 hover:text-red-300" onClick={() => deleteTemplate(template.id)}>
+                      <Button variant="ghost" size="sm" className="h-7 px-2 text-[13px] text-red-400 hover:text-red-300" onClick={() => deleteTemplate(template.id)}>
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
@@ -219,7 +219,7 @@ export default function SettingsPage() {
                               value={editingTemplate.notes}
                               onChange={(e) => setEditingTemplate({ ...editingTemplate, notes: e.target.value })}
                               rows={8}
-                              className="bg-[#262626] border-[#383838] text-gray-100 resize-none font-mono text-xs"
+                              className="bg-[#262626] border-[#383838] text-gray-100 resize-none font-mono text-[13px]"
                             />
                           </div>
                           <div className="flex gap-2 justify-end">
@@ -228,7 +228,7 @@ export default function SettingsPage() {
                           </div>
                         </>
                       ) : (
-                        <pre className="text-xs text-gray-400 whitespace-pre-wrap font-mono leading-relaxed">
+                        <pre className="text-[13px] text-gray-400 whitespace-pre-wrap font-mono leading-relaxed">
                           {template.notes || <span className="italic">No notes content</span>}
                         </pre>
                       )}
@@ -256,7 +256,7 @@ export default function SettingsPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 px-2 text-xs text-gray-400 hover:text-gray-200"
+                        className="h-7 px-2 text-[13px] text-gray-400 hover:text-gray-200"
                         onClick={() => restoreTemplate(template.id)}
                       >
                         <RotateCcw className="h-3.5 w-3.5 mr-1" />
