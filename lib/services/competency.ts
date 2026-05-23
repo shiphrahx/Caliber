@@ -337,6 +337,104 @@ export async function getAssessmentsForTeam(personIds: string[]): Promise<Compet
   return (data ?? []).map(r => rowToAssessment(r as AssessmentRow))
 }
 
+// ─── Team Competency Snapshot ─────────────────────────────────────────────────
+
+export interface CompetencyAreaSnapshot {
+  areaName: string
+  totalAssessed: number
+  belowExpected: number
+  atExpected: number
+  aboveExpected: number
+  avgGap: number          // negative = below, 0 = at, positive = above
+  pctBelowExpected: number
+}
+
+export interface TeamCompetencySnapshot {
+  areas: CompetencyAreaSnapshot[]
+  totalPeople: number
+  assessedPeople: number
+  teamId: string | null   // null = all teams
+}
+
+/**
+ * Aggregate competency assessments across active people, optionally filtered by team.
+ * Uses each person's expected level from their `level` field to compute gap.
+ * Returns areas ranked by % below expected (highest gap first).
+ */
+export async function getTeamCompetencySnapshot(
+  personIds: string[],
+  teamId: string | null = null
+): Promise<TeamCompetencySnapshot> {
+  if (personIds.length === 0) {
+    return { areas: [], totalPeople: 0, assessedPeople: 0, teamId }
+  }
+
+  const supabase = createClient()
+
+  // Fetch all assessments for these people, keeping only latest per person+area
+  const { data: rawAssessments, error: assessErr } = await supabase
+    .from('competency_assessments')
+    .select('person_id, area_id, assessed_level, score, competency_areas(name)')
+    .in('person_id', personIds)
+    .order('assessed_at', { ascending: false })
+  if (assessErr) throw assessErr
+
+  // Fetch people levels to compute expected score
+  const { data: rawPeople, error: peopleErr } = await supabase
+    .from('people')
+    .select('id, level')
+    .in('id', personIds)
+  if (peopleErr) throw peopleErr
+
+  const personLevelMap = new Map<string, string>(
+    (rawPeople ?? []).map((p: { id: string; level: string | null }) => [p.id, p.level ?? 'Mid'])
+  )
+
+  // Deduplicate: keep latest assessment per (person, area)
+  type RawRow = { person_id: string; area_id: string; assessed_level: string; score: number; competency_areas: { name: string } | null }
+  const seen = new Map<string, RawRow>()
+  for (const row of (rawAssessments ?? []) as unknown as RawRow[]) {
+    const key = `${row.person_id}|${row.area_id}`
+    if (!seen.has(key)) seen.set(key, row)
+  }
+
+  // Group by area
+  const byArea = new Map<string, { areaName: string; gaps: number[] }>()
+  for (const row of seen.values()) {
+    const areaName = row.competency_areas?.name ?? row.area_id
+    const expectedScore = levelToScore(personLevelMap.get(row.person_id) ?? 'Mid')
+    const gap = row.score - expectedScore
+
+    if (!byArea.has(row.area_id)) {
+      byArea.set(row.area_id, { areaName, gaps: [] })
+    }
+    byArea.get(row.area_id)!.gaps.push(gap)
+  }
+
+  const assessedPeopleSet = new Set<string>(
+    Array.from(seen.values()).map(r => r.person_id)
+  )
+
+  const areas: CompetencyAreaSnapshot[] = Array.from(byArea.entries())
+    .map(([, { areaName, gaps }]) => {
+      const totalAssessed = gaps.length
+      const belowExpected = gaps.filter(g => g < 0).length
+      const atExpected = gaps.filter(g => g === 0).length
+      const aboveExpected = gaps.filter(g => g > 0).length
+      const avgGap = totalAssessed > 0 ? gaps.reduce((a, b) => a + b, 0) / totalAssessed : 0
+      const pctBelowExpected = totalAssessed > 0 ? (belowExpected / totalAssessed) * 100 : 0
+      return { areaName, totalAssessed, belowExpected, atExpected, aboveExpected, avgGap, pctBelowExpected }
+    })
+    .sort((a, b) => b.pctBelowExpected - a.pctBelowExpected)
+
+  return {
+    areas,
+    totalPeople: personIds.length,
+    assessedPeople: assessedPeopleSet.size,
+    teamId,
+  }
+}
+
 export async function upsertAssessment(input: {
   personId: string
   areaId: string

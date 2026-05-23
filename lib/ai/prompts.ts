@@ -414,3 +414,67 @@ User input: "${args.input}"
 Active people directory (for name matching):
 ${peopleList}`
 }
+
+// ─── Team Competency Summary ──────────────────────────────────────────────────
+
+export const TEAM_COMPETENCY_SUMMARY_SYSTEM = `You are a strategic advisor helping an engineering manager understand their team's competency health. You write concise, skip-level-ready summaries based on aggregate data.
+
+Generate a 3-5 bullet narrative identifying:
+- The top 2-3 systemic skill gaps (areas with the highest % below expected)
+- Notable patterns across areas (e.g. execution vs. communication imbalance)
+- Suggested focus areas for training investment or hiring
+
+Rules:
+- Never name individuals — aggregate only
+- Use clear, direct language suitable for sharing with senior leadership
+- Ground every point in the data provided
+- If data is limited (< 3 people assessed), note this caveat
+- Return plain markdown bullets — no headers, no JSON`
+
+export interface TeamCompetencySummaryArea {
+  areaName: string
+  totalAssessed: number
+  belowExpected: number
+  atExpected: number
+  aboveExpected: number
+  avgGap: number
+  pctBelowExpected: number
+}
+
+export function buildTeamCompetencySummaryPrompt(args: {
+  teamName: string
+  totalPeople: number
+  assessedPeople: number
+  areas: TeamCompetencySummaryArea[]
+}): string {
+  if (args.areas.length === 0) {
+    return `Team: ${args.teamName}\nTotal people: ${args.totalPeople}\nNo competency assessments recorded yet.`
+  }
+
+  const areaLines = args.areas
+    .slice(0, 15)
+    .map(a => {
+      const pct = Math.round(a.pctBelowExpected)
+      const avg = a.avgGap.toFixed(1)
+      return `- ${a.areaName}: ${pct}% below expected (${a.belowExpected}/${a.totalAssessed} people), avg gap ${avg > '0' ? '+' : ''}${avg} levels`
+    })
+    .join('\n')
+
+  return truncateToTokenBudget(`Team: ${args.teamName}
+People: ${args.totalPeople} total, ${args.assessedPeople} assessed
+
+Competency areas ranked by % below expected level:
+${areaLines}`, 3000)
+}
+
+export function buildTeamCompetencySummaryPromptFromSnapshot(args: {
+  teamName: string
+  snapshot: { totalPeople: number; assessedPeople: number; areas: TeamCompetencySummaryArea[] }
+}): string {
+  return buildTeamCompetencySummaryPrompt({
+    teamName: args.teamName,
+    totalPeople: args.snapshot.totalPeople,
+    assessedPeople: args.snapshot.assessedPeople,
+    areas: args.snapshot.areas,
+  })
+}
