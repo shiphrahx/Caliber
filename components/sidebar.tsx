@@ -28,7 +28,7 @@ import { fetchSignalCounts } from "@/lib/hooks/use-weekly-review-signals"
 import { getMondayOfWeek, getWeeklyReview } from "@/lib/services/weekly-review"
 
 type NavItem =
-  | { name: string; href: string; icon: React.ComponentType<{ style?: React.CSSProperties }> }
+  | { name: string; href: string; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }> }
   | { label: string }
 
 const navigation: NavItem[] = [
@@ -132,75 +132,45 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
   return (
     <div
-      className="flex h-full flex-col flex-shrink-0 transition-all duration-300"
-      style={{
-        width: isOpen ? "200px" : "44px",
-        background: "var(--surf)",
-        borderRight: "1px solid var(--border-1)",
-      }}
+      className="flex h-full flex-col flex-shrink-0 transition-all duration-300 sidebar"
+      style={{ width: isOpen ? "200px" : "44px" }}
     >
       {/* Logo + collapse toggle */}
-      <div style={{ display: "flex", alignItems: "center", height: "72px", padding: "12px 10px", gap: "6px" }}>
+      <div className="sidebar-header">
         {isOpen && (
-          <Link href="/dashboard" style={{ flex: 1, display: "flex", alignItems: "center" }}>
+          <Link href="/dashboard" className="sidebar-logo-link">
             <Image
               src="/logo_transparent.png"
               alt="Caliber"
               width={160}
               height={42}
               unoptimized
-              className="object-contain"
-              style={{ height: "42px", width: "auto" }}
+              className="object-contain sidebar-logo"
             />
           </Link>
         )}
         <button
           onClick={onToggle}
-          style={{
-            background: "none",
-            border: "none",
-            color: "var(--text-3)",
-            cursor: "pointer",
-            padding: "4px",
-            borderRadius: "4px",
-            display: "flex",
-            alignItems: "center",
-            marginLeft: isOpen ? "auto" : "0",
-          }}
-          onMouseEnter={e => (e.currentTarget.style.color = "var(--text-1)")}
-          onMouseLeave={e => (e.currentTarget.style.color = "var(--text-3)")}
+          className="sidebar-toggle"
+          style={{ marginLeft: isOpen ? "auto" : "0" }}
           aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
         >
           {isOpen
-            ? <ChevronLeft style={{ width: "12px", height: "12px" }} />
-            : <ChevronRight style={{ width: "12px", height: "12px" }} />
+            ? <ChevronLeft className="sidebar-nav-icon" />
+            : <ChevronRight className="sidebar-nav-icon" />
           }
         </button>
       </div>
 
       {/* Nav */}
-      <nav style={{ flex: 1, padding: "4px 10px", display: "flex", flexDirection: "column" }}>
+      <nav className="sidebar-nav">
         {navigation.map((item, idx) => {
           if ('label' in item) {
             if (!isOpen) {
-              return (
-                <div key={`label-${idx}`} style={{
-                  height: "1px",
-                  background: "var(--border-1)",
-                  margin: "4px 0",
-                }} />
-              )
+              return <div key={`label-${idx}`} className="sidebar-divider" />
             }
             return (
-              <div key={`label-${idx}`} style={{
-                fontSize: "13px",
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                color: "var(--text-3)",
-                padding: "10px 4px 4px",
-                fontWeight: 500,
-                userSelect: "none",
-              }}>
+              <div key={`label-${idx}`} className="sidebar-section-label">
                 {item.label}
               </div>
             )
@@ -235,37 +205,17 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
               className={`nav-item${isActive ? " active" : ""}${!isOpen ? " nav-item-collapsed" : ""}`}
             >
               <item.icon
-                style={{
-                  width: "12px",
-                  height: "12px",
-                  flexShrink: 0,
-                  opacity: isActive ? 1 : 0.5,
-                }}
+                className={`sidebar-nav-icon${isActive ? " sidebar-nav-icon--active" : ""}`}
               />
-              {isOpen && <span style={{ flex: 1 }}>{item.name}</span>}
+              {isOpen && <span className="flex-1">{item.name}</span>}
               {dotColor && (
-                <span style={{
-                  width: "6px",
-                  height: "6px",
-                  borderRadius: "50%",
-                  background: dotColor,
-                  flexShrink: 0,
-                }} />
+                <span className="nav-dot" style={{ background: dotColor }} />
               )}
               {badge !== null && (
-                <span style={{
-                  background: badgeBg,
-                  color: badgeColor,
-                  borderRadius: "10px",
-                  padding: "0 5px",
-                  fontSize: "var(--text-overline)",
-                  fontWeight: 600,
-                  fontFamily: "var(--font-mono)",
-                  lineHeight: "16px",
-                  flexShrink: 0,
-                  minWidth: "16px",
-                  textAlign: "center",
-                }}>
+                <span
+                  className="nav-badge"
+                  style={{ background: badgeBg, color: badgeColor }}
+                >
                   {badge > 99 ? "99+" : badge}
                 </span>
               )}
@@ -275,60 +225,23 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       </nav>
 
       {/* User / Settings */}
-      <div style={{ padding: "8px 10px", position: "relative" }} ref={menuRef}>
+      <div className="sidebar-user" ref={menuRef}>
         {menuOpen && (
-          <div style={{
-            position: "absolute",
-            bottom: "calc(100% + 4px)",
-            left: "8px",
-            right: "8px",
-            background: "var(--surf-2, #1e1e1e)",
-            border: "1px solid var(--border-1)",
-            borderRadius: "8px",
-            overflow: "hidden",
-            zIndex: 200,
-            boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
-          }}>
+          <div className="sidebar-menu">
             <Link
               href="/settings"
               onClick={() => setMenuOpen(false)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "9px 12px",
-                fontSize: "var(--text-meta, 12px)",
-                color: "var(--text-2)",
-                textDecoration: "none",
-                transition: "background 0.1s",
-              }}
-              onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-3, #2a2a2a)")}
-              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+              className="sidebar-menu-item"
             >
-              <Settings style={{ width: "13px", height: "13px", flexShrink: 0 }} />
+              <Settings />
               {isOpen && <span>Settings</span>}
             </Link>
-            <div style={{ height: "1px", background: "var(--border-1)" }} />
+            <div className="sidebar-divider" />
             <button
               onClick={handleLogout}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "9px 12px",
-                width: "100%",
-                fontSize: "var(--text-meta, 12px)",
-                color: "#e05555",
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                fontFamily: "inherit",
-                transition: "background 0.1s",
-              }}
-              onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-3, #2a2a2a)")}
-              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+              className="sidebar-menu-item sidebar-menu-item--danger"
             >
-              <LogOut style={{ width: "13px", height: "13px", flexShrink: 0 }} />
+              <LogOut />
               {isOpen && <span>Log out</span>}
             </button>
           </div>
@@ -336,37 +249,24 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         <button
           onClick={() => setMenuOpen(o => !o)}
           title={!isOpen ? userName : undefined}
-          className={`nav-item${!isOpen ? " nav-item-collapsed" : ""}`}
-          style={{ marginBottom: 0, width: "100%", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}
+          className={`nav-item sidebar-user-btn${!isOpen ? " nav-item-collapsed" : ""}`}
         >
           {userAvatar ? (
             <img
               src={userAvatar}
               alt={userName}
               referrerPolicy="no-referrer"
-              style={{ width: "20px", height: "20px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
+              className="sidebar-avatar"
             />
           ) : (
-            <div style={{
-              width: "20px",
-              height: "20px",
-              borderRadius: "50%",
-              background: "var(--surf-3)",
-              color: "var(--text-2)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "var(--text-overline)",
-              fontWeight: 500,
-              flexShrink: 0,
-            }}>
+            <div className="sidebar-avatar-initials">
               {userInitials}
             </div>
           )}
           {isOpen && (
-            <div style={{ overflow: "hidden", flex: 1 }}>
-              <div style={{ fontSize: "var(--text-meta)", color: "var(--text-1)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userName}</div>
-              <div style={{ fontSize: "var(--text-overline)", color: "var(--text-3)" }}>Account</div>
+            <div className="sidebar-username">
+              <div className="sidebar-username__name">{userName}</div>
+              <div className="sidebar-username__sub">Account</div>
             </div>
           )}
         </button>
