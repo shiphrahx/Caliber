@@ -146,11 +146,11 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
             <Image
               src="/logo_transparent.png"
               alt="Caliber"
-              width={110}
-              height={28}
+              width={160}
+              height={42}
               unoptimized
               className="object-contain"
-              style={{ height: "28px", width: "auto" }}
+              style={{ height: "42px", width: "auto" }}
             />
           </Link>
         )}
