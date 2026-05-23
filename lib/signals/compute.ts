@@ -564,8 +564,18 @@ export function computeSentimentDriftSignals(
   return signals
 }
 
-/** Sort signals: critical first, warning second, info last */
+/**
+ * Sort signals: critical first, warning second, info last.
+ * Within same severity, new hire signals sort before non-new-hire signals.
+ */
 export function sortSignals(signals: Signal[]): Signal[] {
   const order: Record<string, number> = { critical: 0, warning: 1, info: 2 }
-  return [...signals].sort((a, b) => order[a.severity] - order[b.severity])
+  return [...signals].sort((a, b) => {
+    const severityDiff = order[a.severity] - order[b.severity]
+    if (severityDiff !== 0) return severityDiff
+    // New hire signals bubble up within same severity tier
+    const aIsNewHire = a.meta?.isNewHire === true || a.type === 'new_hire_at_risk' ? 0 : 1
+    const bIsNewHire = b.meta?.isNewHire === true || b.type === 'new_hire_at_risk' ? 0 : 1
+    return aIsNewHire - bIsNewHire
+  })
 }
