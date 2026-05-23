@@ -656,3 +656,12 @@ label { font-size: var(--text-label); color: var(--text-2); }
 .relative { position: relative; }
 .absolute { position: absolute; }
 .sticky-top { position: sticky; top: 0; z-index: 10; }
+
+/* ── Background tokens ── */
+.bg-base { background: var(--bg-base); }
+
+/* ── Spinner ── */
+.spinner-brand {
+  border-color: rgb(0,255,229);
+  border-top-color: transparent;
+}
