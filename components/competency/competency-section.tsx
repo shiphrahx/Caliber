@@ -983,7 +983,7 @@ export function CompetencySection({ personId, personLevel, personName = "this en
                 style={{
                   display: "flex", alignItems: "center", gap: "4px",
                   background: "linear-gradient(90deg, #00ffe5 0%, #00f058 100%)", border: "none", borderRadius: "4px",
-                  color: "#0a1a0a", fontSize: "var(--text-label)", padding: "4px 10px",
+                  color: "#0a1a0a", fontSize: "var(--text-caption)", padding: "4px 10px",
                   cursor: "pointer", fontFamily: "var(--font-sans)", fontWeight: 600,
                 }}
               >
