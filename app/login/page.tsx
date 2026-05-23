@@ -41,7 +41,7 @@ export default function LoginPage() {
         <CardHeader className="text-center">
           <div className="flex justify-center mb-8">
             <Image
-              src="/logo_transparent.png"
+              src="/logo_transparent.png?v=2"
               alt="Caliber"
               width={270}
               height={60}

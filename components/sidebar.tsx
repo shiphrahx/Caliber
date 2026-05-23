@@ -144,7 +144,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         {isOpen && (
           <Link href="/dashboard" style={{ flex: 1, display: "flex", alignItems: "center" }}>
             <Image
-              src="/logo_transparent.png"
+              src="/logo_transparent.png?v=2"
               alt="Caliber"
               width={110}
               height={28}
