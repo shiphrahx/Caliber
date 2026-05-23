@@ -64,6 +64,8 @@ interface Goal {
   category: string
   categoryId: string
   status: "Not started" | "In progress" | "Completed"
+  /** ISO date string (YYYY-MM-DD) of last update — used for staleness badge */
+  updatedAt: string
 }
 
 interface AchievementRow {
@@ -180,6 +182,7 @@ export default function CareerGoalsPage() {
         category: g.category,
         categoryId: g.categoryId,
         status: g.status,
+        updatedAt: g.updatedAt.split('T')[0],
       })))
       setMidTermGoals(midGoals.map(g => ({
         id: g.id,
@@ -188,6 +191,7 @@ export default function CareerGoalsPage() {
         category: g.category,
         categoryId: g.categoryId,
         status: g.status,
+        updatedAt: g.updatedAt.split('T')[0],
       })))
       setLongTermGoals(longGoals.map(g => ({
         id: g.id,
@@ -196,6 +200,7 @@ export default function CareerGoalsPage() {
         category: g.category,
         categoryId: g.categoryId,
         status: g.status,
+        updatedAt: g.updatedAt.split('T')[0],
       })))
 
       // Load achievements
@@ -385,6 +390,7 @@ export default function CareerGoalsPage() {
         category: newGoal.category,
         categoryId: newGoal.categoryId,
         status: newGoal.status,
+        updatedAt: newGoal.updatedAt.split('T')[0],
       }])
     } catch (error) {
       console.error('Failed to create goal:', error)
@@ -399,9 +405,10 @@ export default function CareerGoalsPage() {
     field: keyof Goal,
     value: string
   ) => {
-    // Update local state immediately
+    // Update local state immediately (also bump updatedAt so staleness badge refreshes)
+    const todayISO = new Date().toISOString().split('T')[0]
     setter(goals.map(goal =>
-      goal.id === id ? { ...goal, [field]: value } : goal
+      goal.id === id ? { ...goal, [field]: value, updatedAt: todayISO } : goal
     ))
 
     // Update database
@@ -494,6 +501,36 @@ export default function CareerGoalsPage() {
     })
 
     return distribution
+  }
+
+  /** Returns staleness info for a goal: days since last update, and severity if stale. */
+  const getGoalStaleness = (updatedAt: string): { daysSince: number; severity: 'info' | 'warning' | 'critical' } | null => {
+    const today = new Date()
+    const last = new Date(updatedAt + 'T00:00:00')
+    const daysSince = Math.floor((today.getTime() - last.getTime()) / (24 * 60 * 60 * 1000))
+    if (daysSince < 60) return null
+    const severity = daysSince >= 120 ? 'critical' : daysSince >= 90 ? 'warning' : 'info'
+    return { daysSince, severity }
+  }
+
+  /** Renders a small staleness badge for stale goals. */
+  const stalenessBadge = (updatedAt: string, status: Goal['status']) => {
+    if (status === 'Completed') return null
+    const staleness = getGoalStaleness(updatedAt)
+    if (!staleness) return null
+    const { daysSince, severity } = staleness
+    const bg = severity === 'critical' ? '#2a0a0a' : severity === 'warning' ? '#2a1a08' : '#0c1a3d'
+    const color = severity === 'critical' ? '#f87171' : severity === 'warning' ? '#f97316' : '#60a5fa'
+    return (
+      <span title={`No activity in ${daysSince} days`} style={{
+        display: 'inline-flex', alignItems: 'center', gap: '3px',
+        background: bg, color, fontSize: '10px', fontFamily: 'var(--font-mono)',
+        fontWeight: 500, borderRadius: '3px', padding: '1px 5px',
+        marginLeft: '4px', verticalAlign: 'middle', cursor: 'default',
+      }}>
+        {daysSince}d stale
+      </span>
+    )
   }
 
   const getCategoryColor = (category: string) => {
@@ -849,6 +886,7 @@ export default function CareerGoalsPage() {
                               rows={2}
                               autoResize
                             />
+                            {stalenessBadge(goal.updatedAt, goal.status)}
                           </td>
                           <td className="p-2">
                             <BadgeSelect
@@ -1056,6 +1094,7 @@ export default function CareerGoalsPage() {
                               rows={2}
                               autoResize
                             />
+                            {stalenessBadge(goal.updatedAt, goal.status)}
                           </td>
                           <td className="p-2">
                             <BadgeSelect
@@ -1263,6 +1302,7 @@ export default function CareerGoalsPage() {
                               rows={2}
                               autoResize
                             />
+                            {stalenessBadge(goal.updatedAt, goal.status)}
                           </td>
                           <td className="p-2">
                             <BadgeSelect
