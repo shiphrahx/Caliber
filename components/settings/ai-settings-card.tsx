@@ -222,7 +222,7 @@ export function AISettingsCard() {
                     <div style={{ fontSize: "var(--text-label)", fontWeight: 600, color: selectedProvider === p ? "#00f058" : "var(--text-2)", marginBottom: "2px" }}>
                       {PROVIDER_LABELS[p]}
                     </div>
-                    <div style={{ fontSize: "var(--text-overline)", color: "var(--text-3)", lineHeight: 1.3 }}>
+                    <div style={{ fontSize: "var(--text-overline)", color: "var(--text-2)", lineHeight: 1.3 }}>
                       {PROVIDER_DESCRIPTIONS[p]}
                     </div>
                   </button>
@@ -262,7 +262,7 @@ export function AISettingsCard() {
                   {showKey ? <EyeOff style={{ width: "14px", height: "14px" }} /> : <Eye style={{ width: "14px", height: "14px" }} />}
                 </button>
               </div>
-              <p style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", marginTop: "4px" }}>
+              <p style={{ fontSize: "var(--text-caption)", color: "var(--text-2)", marginTop: "4px" }}>
                 When you use AI features, your data (meeting notes, evidence entries, etc.) is sent to {PROVIDER_LABELS[selectedProvider]} for processing. Caliber does not store or access your data beyond what's in your account.
               </p>
             </div>
