@@ -128,22 +128,22 @@ export function AISettingsCard() {
       <CardContent>
         {/* Configured state */}
         {config && !editMode && (
-          <div style={{ display: "grid", gap: "16px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
-              <div style={{ background: "#0d2015", border: "1px solid #4ade8040", borderRadius: "6px", padding: "8px 14px" }}>
-                <span style={{ fontSize: "var(--text-caption)", color: "#4ade80", fontWeight: 600 }}>
+          <div className="grid gap-16">
+            <div className="flex-align gap-16 flex-wrap">
+              <div className="ai-config-badge">
+                <span className="ai-config-badge__provider">
                   {PROVIDER_LABELS[config.provider]}
                 </span>
-                <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", marginLeft: "8px" }}>
+                <span className="ai-config-badge__model">
                   {config.model}
                 </span>
               </div>
-              <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
+              <span className="text-caption font-mono">
                 key ending ···{config.keyHint}
               </span>
             </div>
 
-            <div style={{ display: "flex", gap: "8px", fontSize: "var(--text-caption)", color: "var(--text-3)" }}>
+            <div className="flex-align gap-8 text-caption text-3">
               <span>Requests: {config.totalRequests}</span>
               {config.lastUsedAt && (
                 <span>· Last used: {new Date(config.lastUsedAt).toLocaleDateString()}</span>
@@ -154,13 +154,8 @@ export function AISettingsCard() {
             {config.provider === 'anthropic' && (() => {
               const stats = getSessionCacheStats()
               return stats.calls > 0 ? (
-                <div style={{
-                  display: "flex", gap: "12px",
-                  fontSize: "var(--text-caption)", color: "var(--text-3)",
-                  padding: "6px 10px", borderRadius: "5px",
-                  background: "var(--surf-2)", border: "1px solid var(--border-2)",
-                }}>
-                  <span style={{ fontWeight: 600, color: "var(--text-2)" }}>This session</span>
+                <div className="ai-cache-stats">
+                  <span className="font-600 text-2">This session</span>
                   <span>Cache hits: {stats.cacheRead.toLocaleString()} tokens</span>
                   <span>Cache writes: {stats.cacheWrite.toLocaleString()} tokens</span>
                   <span>Calls: {stats.calls}</span>
@@ -169,17 +164,17 @@ export function AISettingsCard() {
             })()}
 
             {testResult === 'ok' && (
-              <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#4ade80", fontSize: "var(--text-caption)" }}>
-                <Check style={{ width: "12px", height: "12px" }} /> Connection working
+              <div className="ai-status-ok">
+                <Check /> Connection working
               </div>
             )}
             {testResult === 'fail' && (
-              <div style={{ color: "#f87171", fontSize: "var(--text-caption)" }}>
+              <div className="ai-status-fail">
                 ✕ {testError}
               </div>
             )}
 
-            <div style={{ display: "flex", gap: "8px" }}>
+            <div className="flex-align gap-8">
               <Button variant="outline" size="sm" onClick={handleRetest} disabled={testing}>
                 {testing ? <><Loader2 className="h-3 w-3 mr-1 animate-spin" /> Testing…</> : 'Test Connection'}
               </Button>
@@ -190,7 +185,7 @@ export function AISettingsCard() {
                 variant="outline"
                 size="sm"
                 onClick={handleRemove}
-                style={{ color: "#f87171", borderColor: "#f8717140" }}
+                className="ai-remove-btn"
               >
                 <Trash2 className="h-3 w-3 mr-1" />
                 Remove Key
@@ -201,28 +196,28 @@ export function AISettingsCard() {
 
         {/* Setup / edit form */}
         {editMode && (
-          <div style={{ display: "grid", gap: "20px" }}>
+          <div className="grid gap-20">
             {/* Provider selection */}
             <div>
-              <Label style={{ display: "block", marginBottom: "8px" }}>Provider</Label>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px" }}>
+              <Label className="block mb-8">Provider</Label>
+              <div className="ai-provider-grid">
                 {PROVIDERS.map(p => (
                   <button
                     key={p}
                     onClick={() => setSelectedProvider(p)}
+                    className="ai-provider-btn"
                     style={{
-                      padding: "10px 12px",
-                      borderRadius: "6px",
                       border: `1px solid ${selectedProvider === p ? '#00f05860' : 'var(--border-2)'}`,
                       background: selectedProvider === p ? "#0d200f" : "var(--surf-2)",
-                      cursor: "pointer",
-                      textAlign: "left",
                     }}
                   >
-                    <div style={{ fontSize: "var(--text-label)", fontWeight: 600, color: selectedProvider === p ? "#00f058" : "var(--text-2)", marginBottom: "2px" }}>
+                    <div
+                      className="ai-provider-btn__name"
+                      style={{ color: selectedProvider === p ? "#00f058" : "var(--text-2)" }}
+                    >
                       {PROVIDER_LABELS[p]}
                     </div>
-                    <div style={{ fontSize: "var(--text-overline)", color: "var(--text-2)", lineHeight: 1.3 }}>
+                    <div className="ai-provider-btn__desc">
                       {PROVIDER_DESCRIPTIONS[p]}
                     </div>
                   </button>
@@ -232,11 +227,11 @@ export function AISettingsCard() {
 
             {/* Model selection */}
             <div>
-              <Label style={{ display: "block", marginBottom: "6px" }}>Model</Label>
+              <Label className="block mb-6">Model</Label>
               <select
                 value={selectedModel}
                 onChange={e => setSelectedModel(e.target.value)}
-                style={{ width: "100%", background: "var(--surf-2)", border: "1px solid var(--border-2)", borderRadius: "4px", color: "var(--text-2)", padding: "7px 10px", fontSize: "var(--text-label)", fontFamily: "var(--font-sans)" }}
+                className="ai-model-select"
               >
                 {PROVIDER_MODELS[selectedProvider].map(m => (
                   <option key={m.id} value={m.id}>{m.label}</option>
@@ -246,8 +241,8 @@ export function AISettingsCard() {
 
             {/* API key */}
             <div>
-              <Label style={{ display: "block", marginBottom: "6px" }}>API Key</Label>
-              <div style={{ position: "relative" }}>
+              <Label className="block mb-6">API Key</Label>
+              <div className="relative">
                 <Input
                   type={showKey ? "text" : "password"}
                   value={apiKey}
@@ -257,24 +252,24 @@ export function AISettingsCard() {
                 />
                 <button
                   onClick={() => setShowKey(s => !s)}
-                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "var(--text-3)", padding: 0 }}
+                  className="ai-key-toggle"
                 >
-                  {showKey ? <EyeOff style={{ width: "14px", height: "14px" }} /> : <Eye style={{ width: "14px", height: "14px" }} />}
+                  {showKey ? <EyeOff /> : <Eye />}
                 </button>
               </div>
-              <p style={{ fontSize: "var(--text-caption)", color: "var(--text-2)", marginTop: "4px" }}>
+              <p className="ai-key-hint">
                 When you use AI features, your data (meeting notes, evidence entries, etc.) is sent to {PROVIDER_LABELS[selectedProvider]} for processing. Caliber does not store or access your data beyond what's in your account.
               </p>
             </div>
 
             {testResult === 'fail' && (
-              <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 12px", borderRadius: "4px", background: "#2a0a0a", border: "1px solid #f8717140", color: "#f87171", fontSize: "var(--text-caption)" }}>
-                <X style={{ width: "12px", height: "12px", flexShrink: 0 }} />
+              <div className="ai-error-box">
+                <X />
                 {testError}
               </div>
             )}
 
-            <div style={{ display: "flex", gap: "8px" }}>
+            <div className="flex-align gap-8">
               <Button onClick={handleSaveAndTest} disabled={!apiKey.trim() || saving || testing}>
                 {saving || testing
                   ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{testing ? 'Testing connection…' : 'Saving…'}</>
