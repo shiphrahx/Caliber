@@ -35,18 +35,8 @@ export function WeeklyReviewBanner() {
   // Completed — show subtle badge
   if (review?.status === 'completed') {
     return (
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        padding: '10px 14px',
-        background: '#0d1f14',
-        border: '1px solid #1a3a25',
-        borderRadius: '8px',
-        fontSize: 'var(--text-meta)',
-        color: '#00c44a',
-      }}>
-        <CheckCircle style={{ width: '13px', height: '13px' }} />
+      <div className="review-banner-done">
+        <CheckCircle />
         Week reviewed ✓
       </div>
     )
@@ -59,28 +49,16 @@ export function WeeklyReviewBanner() {
   // In-progress review
   if (review?.status === 'in_progress') {
     return (
-      <Link href="/review" style={{ textDecoration: 'none' }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          padding: '12px 16px',
-          background: '#1a1a2e',
-          border: '1px solid #2a2a4a',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          transition: 'border-color 0.15s',
-        }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 'var(--text-body)', fontWeight: 600, color: 'var(--text-1)', marginBottom: '2px' }}>
-              Continue your weekly review
-            </div>
-            <div style={{ fontSize: 'var(--text-meta)', color: 'var(--text-2)' }}>
-              {signalCount > 0 ? `${signalCount} item${signalCount === 1 ? '' : 's'} remaining` : 'Pick up where you left off'}
-            </div>
+      <Link href="/review" className="review-banner review-banner--progress">
+        <div className="review-banner__body">
+          <div className="review-banner__title">
+            Continue your weekly review
           </div>
-          <ArrowRight style={{ width: '14px', height: '14px', color: 'var(--text-3)' }} />
+          <div className="review-banner__sub">
+            {signalCount > 0 ? `${signalCount} item${signalCount === 1 ? '' : 's'} remaining` : 'Pick up where you left off'}
+          </div>
         </div>
+        <ArrowRight className="review-banner__arrow" />
       </Link>
     )
   }
@@ -88,27 +66,16 @@ export function WeeklyReviewBanner() {
   // No review yet — prompt on Mon/Tue/Wed
   if (!review && isEarlyWeek) {
     return (
-      <Link href="/review" style={{ textDecoration: 'none' }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          padding: '12px 16px',
-          background: 'linear-gradient(135deg, #0f1f15 0%, #1a1a2e 100%)',
-          border: '1px solid #2a3a30',
-          borderRadius: '8px',
-          cursor: 'pointer',
-        }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 'var(--text-body)', fontWeight: 600, color: 'var(--text-1)', marginBottom: '2px' }}>
-              Start your weekly review
-            </div>
-            <div style={{ fontSize: 'var(--text-meta)', color: 'var(--text-2)' }}>
-              {signalCount > 0 ? `${signalCount} signal${signalCount === 1 ? '' : 's'} to check` : 'Review your week and close the loop'}
-            </div>
+      <Link href="/review" className="review-banner review-banner--new">
+        <div className="review-banner__body">
+          <div className="review-banner__title">
+            Start your weekly review
           </div>
-          <ArrowRight style={{ width: '14px', height: '14px', color: 'var(--text-3)' }} />
+          <div className="review-banner__sub">
+            {signalCount > 0 ? `${signalCount} signal${signalCount === 1 ? '' : 's'} to check` : 'Review your week and close the loop'}
+          </div>
         </div>
+        <ArrowRight className="review-banner__arrow" />
       </Link>
     )
   }

@@ -112,48 +112,48 @@ export function TasksWidget() {
   })()
 
   return (
-    <div style={{ background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "12px", padding: "20px" }}>
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "16px" }}>
+    <div className="widget-card">
+      <div className="widget-header">
         <div>
           <h2>Tasks Due</h2>
-          <p style={{ marginTop: "2px" }}>{rangeLabel}</p>
+          <p className="mt-0.5">{rangeLabel}</p>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+        <div className="widget-nav-btns">
           <button
             onClick={() => setAnchorMonday((d) => addDays(d, -56))}
             disabled={isAtCurrentWindow}
-            style={{ padding: "4px", borderRadius: "4px", background: "none", border: "none", color: "var(--text-3)", cursor: isAtCurrentWindow ? "not-allowed" : "pointer", opacity: isAtCurrentWindow ? 0.3 : 1 }}
-            onMouseEnter={e => { if (!isAtCurrentWindow) { (e.currentTarget.style.background = "var(--surf-3)"); (e.currentTarget.style.color = "var(--text-1)") } }}
-            onMouseLeave={e => { (e.currentTarget.style.background = "none"); (e.currentTarget.style.color = "var(--text-3)") }}
+            className="widget-nav-btn"
+            style={{
+              cursor: isAtCurrentWindow ? "not-allowed" : "pointer",
+              opacity: isAtCurrentWindow ? 0.3 : 1,
+            }}
             aria-label="Previous 8 weeks"
           >
-            <ChevronLeft style={{ width: "14px", height: "14px" }} />
+            <ChevronLeft />
           </button>
           <button
             onClick={() => setAnchorMonday((d) => addDays(d, 56))}
-            style={{ padding: "4px", borderRadius: "4px", background: "none", border: "none", color: "var(--text-3)", cursor: "pointer" }}
-            onMouseEnter={e => { (e.currentTarget.style.background = "var(--surf-3)"); (e.currentTarget.style.color = "var(--text-1)") }}
-            onMouseLeave={e => { (e.currentTarget.style.background = "none"); (e.currentTarget.style.color = "var(--text-3)") }}
+            className="widget-nav-btn"
             aria-label="Next week"
           >
-            <ChevronRight style={{ width: "14px", height: "14px" }} />
+            <ChevronRight />
           </button>
         </div>
       </div>
 
       {loading ? (
-        <div style={{ height: "220px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>Loading...</span>
+        <div className="widget-loading">
+          <span className="widget-loading-text">Loading...</span>
         </div>
       ) : (
         <TasksBarChart data={data} />
       )}
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 12px", marginTop: "12px" }}>
+      <div className="widget-legend">
         {TASK_STATUSES.map((s) => (
-          <div key={s} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <span style={{ width: "8px", height: "8px", borderRadius: "50%", flexShrink: 0, backgroundColor: STATUS_COLORS[s] }} />
-            <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>{s}</span>
+          <div key={s} className="widget-legend-item">
+            <span className="widget-legend-dot" style={{ backgroundColor: STATUS_COLORS[s] }} />
+            <span className="widget-legend-label">{s}</span>
           </div>
         ))}
       </div>

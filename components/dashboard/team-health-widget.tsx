@@ -141,24 +141,19 @@ export function TeamHealthWidget() {
   const labelStyle = health ? LABEL_COLORS[health.label] : LABEL_COLORS['Healthy']
 
   return (
-    <div
-      className="bg-[#1c1c1c] border border-[#383838] rounded-xl p-5"
-      style={{ display: "flex", flexDirection: "column", gap: "14px" }}
-    >
+    <div className="health-widget-card">
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div className="flex items-center justify-between">
         <div>
           <h2>Team Health</h2>
-          <p style={{ marginTop: "2px" }}>Aggregate signal score</p>
+          <p className="mt-0.5">Aggregate signal score</p>
         </div>
         <button
           onClick={handleRefresh}
           disabled={loading}
           title="Refresh"
-          style={{
-            background: "none", border: "none", cursor: loading ? "not-allowed" : "pointer",
-            color: "var(--text-3)", padding: "4px",
-          }}
+          className="widget-refresh-btn"
+          style={{ cursor: loading ? "not-allowed" : "pointer" }}
         >
           <RefreshCw
             size={14}
@@ -168,16 +163,16 @@ export function TeamHealthWidget() {
       </div>
 
       {loading ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-          <div style={{ height: "40px", borderRadius: "6px", background: "var(--surf-2)", animation: "pulse 1.5s ease-in-out infinite" }} />
-          <div style={{ height: "16px", borderRadius: "4px", background: "var(--surf-2)", width: "60%", animation: "pulse 1.5s ease-in-out infinite" }} />
+        <div className="health-skeleton">
+          <div className="health-skeleton__bar" style={{ height: "40px" }} />
+          <div className="health-skeleton__bar" style={{ height: "16px", width: "60%" }} />
         </div>
       ) : health ? (
         <>
           {/* Score ring + label */}
-          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <div className="health-score-row">
             {/* Score ring */}
-            <div style={{ position: "relative", width: "64px", height: "64px", flexShrink: 0 }}>
+            <div className="health-score-ring">
               <svg width="64" height="64" viewBox="0 0 64 64">
                 <circle
                   cx="32" cy="32" r="26"
@@ -195,23 +190,19 @@ export function TeamHealthWidget() {
                   transform="rotate(-90 32 32)"
                 />
               </svg>
-              <span style={{
-                position: "absolute",
-                top: "50%", left: "50%",
-                transform: "translate(-50%, -50%)",
-                fontSize: "16px",
-                fontWeight: 700,
-                color: labelStyle.color,
-              }}>
+              <span
+                className="health-score-ring__value"
+                style={{ color: labelStyle.color }}
+              >
                 {health.score}
               </span>
             </div>
 
             {/* Label + breakdown */}
-            <div style={{ flex: 1 }}>
+            <div className="flex-1">
               <span
+                className="inline-block mb-2"
                 style={{
-                  display: "inline-block",
                   padding: "2px 10px",
                   borderRadius: "20px",
                   fontSize: "var(--text-label)",
@@ -219,14 +210,13 @@ export function TeamHealthWidget() {
                   color: labelStyle.color,
                   background: labelStyle.bg,
                   border: `1px solid ${labelStyle.border}`,
-                  marginBottom: "8px",
                 }}
               >
                 {health.label}
               </span>
 
               {/* Category breakdown badges */}
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+              <div className="flex flex-wrap gap-1">
                 {(Object.entries(health.breakdown) as [string, number][]).map(([key, count]) => (
                   <span
                     key={key}
@@ -248,20 +238,15 @@ export function TeamHealthWidget() {
 
           {/* AI Narrative */}
           {aiConfig.configured && (
-            <div style={{
-              borderRadius: "6px",
-              padding: "10px 12px",
-              background: "var(--surf-2)",
-              border: "1px solid var(--border-2)",
-            }}>
+            <div className="health-narrative">
               {narrativeLoading ? (
-                <p style={{ fontSize: "var(--text-body)", color: "var(--text-3)", fontStyle: "italic", margin: 0 }}>
+                <p className="text-body text-3 italic m-0">
                   Generating summary…
                 </p>
               ) : narrative ? (
                 <>
                   <AIGeneratedBadge onDismiss={() => setNarrative(null)} />
-                  <p style={{ fontSize: "var(--text-body)", color: "var(--text-2)", lineHeight: 1.5, margin: 0, marginTop: "4px" }}>
+                  <p className="text-body text-2 m-0 mt-1" style={{ lineHeight: 1.5 }}>
                     {narrative}
                   </p>
                 </>
@@ -270,26 +255,14 @@ export function TeamHealthWidget() {
           )}
 
           {/* View details link */}
-          <div style={{ display: "flex", justifyContent: "flex-end" }}>
-            <Link
-              href="/radar"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "4px",
-                fontSize: "var(--text-caption)",
-                color: "var(--text-3)",
-                textDecoration: "none",
-              }}
-              onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-2)")}
-              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-3)")}
-            >
+          <div className="flex justify-end">
+            <Link href="/radar" className="health-detail-link">
               View details <ExternalLink size={10} />
             </Link>
           </div>
         </>
       ) : (
-        <p style={{ color: "var(--text-3)", fontSize: "var(--text-body)" }}>Could not load team health.</p>
+        <p className="text-body text-3">Could not load team health.</p>
       )}
     </div>
   )
