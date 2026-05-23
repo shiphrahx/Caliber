@@ -49,7 +49,7 @@ function SortableArea({
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: area.id })
 
-  const style = {
+  const dndStyle = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
@@ -58,27 +58,18 @@ function SortableArea({
   const levelMap = Object.fromEntries(levels.map(l => [l.level, l.expectations]))
 
   return (
-    <div
-      ref={setNodeRef}
-      style={{
-        ...style,
-        background: "var(--surf)",
-        border: "1px solid var(--border-1)",
-        borderRadius: "6px",
-        marginBottom: "8px",
-      }}
-    >
+    <div ref={setNodeRef} style={dndStyle} className="fw-area-card">
       {/* Area header row */}
-      <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 12px" }}>
+      <div className="fw-area-header">
         <button
           {...attributes}
           {...listeners}
-          style={{ background: "none", border: "none", cursor: "grab", color: "var(--text-3)", padding: "2px", flexShrink: 0 }}
+          className="fw-drag-btn"
           aria-label="Drag to reorder"
         >
           <GripVertical style={{ width: "14px", height: "14px" }} />
         </button>
-        <button onClick={onToggle} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-3)", padding: "2px", flexShrink: 0 }}>
+        <button onClick={onToggle} className="fw-toggle-btn">
           {expanded
             ? <ChevronDown style={{ width: "14px", height: "14px" }} />
             : <ChevronRight style={{ width: "14px", height: "14px" }} />}
@@ -87,16 +78,12 @@ function SortableArea({
           value={area.name}
           onChange={e => onNameChange(e.target.value)}
           onBlur={onNameBlur}
-          style={{
-            flex: 1, background: "none", border: "none", outline: "none",
-            fontSize: "var(--text-body)", fontWeight: 500, color: "var(--text-1)",
-            fontFamily: "var(--font-sans)",
-          }}
+          className="fw-area-name-input"
           placeholder="Area name"
         />
         <button
           onClick={onDelete}
-          style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-3)", padding: "4px", flexShrink: 0 }}
+          className="fw-delete-btn"
           onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "#f87171")}
           onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-3)")}
           aria-label="Delete area"
@@ -107,9 +94,9 @@ function SortableArea({
 
       {/* Expanded body */}
       {expanded && (
-        <div style={{ padding: "0 12px 16px 40px", borderTop: "1px solid var(--border-1)" }}>
+        <div className="fw-area-body">
           {/* Description */}
-          <div style={{ paddingTop: "12px", marginBottom: "16px" }}>
+          <div className="fw-area-desc-wrap">
             <Label style={{ marginBottom: "4px", display: "block" }}>Description</Label>
             <Input
               value={area.description ?? ""}
@@ -120,11 +107,11 @@ function SortableArea({
           </div>
 
           {/* Level expectations grid */}
-          <div style={{ display: "grid", gap: "12px" }}>
+          <div className="fw-area-levels">
             <Label>Level Expectations</Label>
             {LEVELS.map(level => (
-              <div key={level} style={{ display: "grid", gap: "4px" }}>
-                <label style={{ fontSize: "var(--text-label)", color: "var(--text-3)", fontWeight: 500 }}>
+              <div key={level} className="fw-area-level-field">
+                <label className="fw-area-level-label">
                   {level}
                 </label>
                 <div onBlur={() => onLevelBlur(level)}>
@@ -292,16 +279,16 @@ export default function FrameworkPage() {
   // ─────────────────────────────────────────────────────────────────────────
 
   if (loading) {
-    return <div style={{ padding: "32px" }}><p style={{ color: "var(--text-3)" }}>Loading…</p></div>
+    return <div className="fw-loading"><p>Loading…</p></div>
   }
 
   if (setupMode) {
     return (
-      <div style={{ padding: "32px", maxWidth: "720px" }}>
+      <div className="fw-setup">
         <h1 style={{ marginBottom: "4px" }}>Career Framework</h1>
         <p style={{ marginBottom: "32px" }}>Define what "good" looks like at each level. Use a template to get started, or build from scratch.</p>
 
-        <div style={{ background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "8px", padding: "24px", marginBottom: "24px" }}>
+        <div className="fw-setup-card">
           <Label style={{ display: "block", marginBottom: "8px" }}>Framework name</Label>
           <Input
             value={newFrameworkName}
@@ -310,22 +297,18 @@ export default function FrameworkPage() {
             style={{ maxWidth: "360px", marginBottom: "20px" }}
           />
 
-          <p style={{ fontSize: "var(--text-label)", color: "var(--text-3)", marginBottom: "12px" }}>Start from a template:</p>
-          <div style={{ display: "grid", gap: "8px", marginBottom: "20px" }}>
+          <p className="fw-template-label">Start from a template:</p>
+          <div className="fw-template-grid">
             {FRAMEWORK_TEMPLATES.map((t, i) => (
               <button
                 key={i}
                 onClick={() => handleApplyTemplate(i)}
-                style={{
-                  display: "flex", flexDirection: "column", alignItems: "flex-start",
-                  padding: "12px 16px", border: "1px solid var(--border-2)", borderRadius: "6px",
-                  background: "var(--surf-2)", cursor: "pointer", textAlign: "left",
-                }}
+                className="fw-template-btn"
                 onMouseEnter={e => ((e.currentTarget as HTMLElement).style.borderColor = "#00f05860")}
                 onMouseLeave={e => ((e.currentTarget as HTMLElement).style.borderColor = "var(--border-2)")}
               >
-                <span style={{ fontWeight: 600, color: "var(--text-1)", fontSize: "var(--text-body)" }}>{t.name}</span>
-                <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", marginTop: "2px" }}>
+                <span className="fw-template-name">{t.name}</span>
+                <span className="fw-template-meta">
                   {t.areas.length} competency areas
                 </span>
               </button>
@@ -335,13 +318,8 @@ export default function FrameworkPage() {
           <button
             onClick={handleCreateBlank}
             disabled={!newFrameworkName.trim()}
-            style={{
-              background: "none", border: "1px solid var(--border-2)", borderRadius: "4px",
-              color: "var(--text-2)", fontSize: "var(--text-label)", padding: "6px 14px",
-              cursor: newFrameworkName.trim() ? "pointer" : "not-allowed",
-              opacity: newFrameworkName.trim() ? 1 : 0.4,
-              fontFamily: "var(--font-sans)",
-            }}
+            className="fw-blank-btn"
+            style={{ opacity: newFrameworkName.trim() ? 1 : 0.4, cursor: newFrameworkName.trim() ? "pointer" : "not-allowed" }}
           >
             Start blank
           </button>
@@ -349,17 +327,12 @@ export default function FrameworkPage() {
 
         {allFrameworks.filter(f => f.status === 'archived').length > 0 && (
           <div>
-            <p style={{ fontSize: "var(--text-label)", color: "var(--text-3)", marginBottom: "8px" }}>Archived frameworks:</p>
+            <p className="fw-restore-label">Archived frameworks:</p>
             {allFrameworks.filter(f => f.status === 'archived').map(f => (
               <button
                 key={f.id}
                 onClick={async () => { await updateFramework(f.id, { status: 'active' }); await loadFramework() }}
-                style={{
-                  display: "flex", alignItems: "center", gap: "6px",
-                  background: "none", border: "1px solid var(--border-2)", borderRadius: "4px",
-                  color: "var(--text-2)", fontSize: "var(--text-label)", padding: "5px 10px",
-                  cursor: "pointer", fontFamily: "var(--font-sans)",
-                }}
+                className="fw-restore-btn"
               >
                 <RotateCcw style={{ width: "11px", height: "11px" }} /> Restore "{f.name}"
               </button>
@@ -373,42 +346,33 @@ export default function FrameworkPage() {
   if (!framework) return null
 
   return (
-    <div style={{ padding: "32px", maxWidth: "860px" }}>
+    <div className="fw-page">
       {/* Header */}
-      <div style={{ marginBottom: "28px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "4px", flexWrap: "wrap" }}>
+      <div className="fw-header">
+        <div className="fw-header-row">
           <input
             value={framework.name}
             onChange={e => setFramework({ ...framework, name: e.target.value })}
             onBlur={handleFrameworkNameBlur}
-            style={{
-              fontSize: "var(--text-h1)", fontWeight: 700, background: "none", border: "none",
-              outline: "none", color: "var(--text-1)", fontFamily: "var(--font-sans)", flex: 1, minWidth: "200px",
-            }}
+            className="fw-name-input"
           />
-          <span style={{
-            padding: "2px 8px", borderRadius: "4px", fontSize: "var(--text-caption)", fontWeight: 600,
-            background: framework.status === 'active' ? "#0d2015" : "#222",
-            color: framework.status === 'active' ? "#4ade80" : "#888",
-            border: `1px solid ${framework.status === 'active' ? "#4ade8040" : "#44444440"}`,
-          }}>
-            {framework.status === 'active' ? 'Active' : 'Archived'}
-          </span>
-          <button
-            onClick={handleArchive}
+          <span
+            className="fw-status-badge"
             style={{
-              display: "flex", alignItems: "center", gap: "5px", background: "none",
-              border: "1px solid var(--border-2)", borderRadius: "4px", color: "var(--text-3)",
-              fontSize: "var(--text-label)", padding: "4px 10px", cursor: "pointer",
-              fontFamily: "var(--font-sans)",
+              background: framework.status === 'active' ? "#0d2015" : "#222",
+              color: framework.status === 'active' ? "#4ade80" : "#888",
+              border: `1px solid ${framework.status === 'active' ? "#4ade8040" : "#44444440"}`,
             }}
           >
+            {framework.status === 'active' ? 'Active' : 'Archived'}
+          </span>
+          <button onClick={handleArchive} className="fw-archive-btn">
             {framework.status === 'active'
               ? <><Archive style={{ width: "11px", height: "11px" }} /> Archive</>
               : <><RotateCcw style={{ width: "11px", height: "11px" }} /> Restore</>}
           </button>
         </div>
-        <p style={{ color: "var(--text-3)", fontSize: "var(--text-caption)" }}>
+        <p className="fw-header-meta">
           {areas.length} competency area{areas.length !== 1 ? 's' : ''}. Changes auto-save on blur.
         </p>
       </div>
@@ -443,23 +407,18 @@ export default function FrameworkPage() {
       </DndContext>
 
       {areas.length === 0 && (
-        <div style={{ textAlign: "center", padding: "48px 24px", border: "1px dashed var(--border-2)", borderRadius: "8px", marginBottom: "16px" }}>
-          <p style={{ color: "var(--text-3)", marginBottom: "12px" }}>No competency areas yet.</p>
+        <div className="fw-empty">
+          <p>No competency areas yet.</p>
         </div>
       )}
 
       {Object.values(saving).some(Boolean) && (
-        <p style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", marginBottom: "8px" }}>Saving…</p>
+        <p className="fw-saving">Saving…</p>
       )}
 
       <button
         onClick={handleAddArea}
-        style={{
-          display: "flex", alignItems: "center", gap: "5px",
-          background: "var(--surf-2)", border: "1px solid var(--border-2)", borderRadius: "4px",
-          color: "var(--text-2)", fontSize: "var(--text-label)", padding: "6px 14px",
-          cursor: "pointer", fontFamily: "var(--font-sans)",
-        }}
+        className="fw-add-area-btn"
         onMouseEnter={e => ((e.currentTarget as HTMLElement).style.borderColor = "#00f05860")}
         onMouseLeave={e => ((e.currentTarget as HTMLElement).style.borderColor = "var(--border-2)")}
       >
