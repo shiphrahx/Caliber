@@ -724,6 +724,38 @@ label { font-size: var(--text-label); color: var(--text-2); }
 }
 .level-btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
 
+/* ── Table cell text helpers ── */
+.cell-link {
+  font-weight: 500;
+  color: var(--text-1);
+  font-size: var(--text-meta);
+  text-decoration: none;
+}
+.cell-link:hover { color: #00f058; }
+.cell-text { color: var(--text-2); font-size: var(--text-meta); }
+.cell-mono { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--text-1); }
+.cell-date { color: var(--text-3); font-size: var(--text-overline); font-family: var(--font-mono); }
+
+/* ── Tone picker (follow-up draft modal) ── */
+.tone-btn {
+  padding: 4px 14px;
+  border-radius: 4px;
+  font-size: var(--text-label);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.tone-btn--active {
+  background: var(--surf-3);
+  color: var(--text-1);
+  border: 1px solid var(--border-3);
+}
+.tone-btn--inactive {
+  background: var(--surf-2);
+  color: var(--text-2);
+  border: 1px solid var(--border-2);
+}
+
 /* ── People / Teams table cells ── */
 .avatar-chip {
   width: 24px; height: 24px; border-radius: 50%;

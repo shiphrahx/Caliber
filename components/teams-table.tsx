@@ -30,9 +30,7 @@ export function TeamsTable({
       cell: (team) => (
         <Link
           href={`/teams/${team.id}`}
-          style={{ fontWeight: 500, color: "var(--text-1)", fontSize: "var(--text-meta)", textDecoration: "none" }}
-          onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "#00f058")}
-          onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-1)")}
+          className="cell-link"
           onClick={e => e.stopPropagation()}
         >
           {team.name}
@@ -44,7 +42,7 @@ export function TeamsTable({
       header: "Description",
       accessorKey: "description",
       cell: (team) => (
-        <span style={{ color: "var(--text-2)", fontSize: "var(--text-meta)" }}>{team.description}</span>
+        <span className="cell-text">{team.description}</span>
       ),
     },
     {
@@ -52,7 +50,7 @@ export function TeamsTable({
       header: "Members",
       accessorKey: "memberCount",
       cell: (team) => (
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-meta)", color: "var(--text-1)" }}>{team.memberCount}</span>
+        <span className="cell-mono">{team.memberCount}</span>
       ),
     },
     {
@@ -60,7 +58,7 @@ export function TeamsTable({
       header: "Created",
       accessorKey: "createdAt",
       cell: (team) => (
-        <span style={{ color: "var(--text-3)", fontSize: "var(--text-overline)", fontFamily: "var(--font-mono)" }}>
+        <span className="cell-date">
           {new Date(team.createdAt).toLocaleDateString("en-GB", {
             day: "2-digit",
             month: "short",
@@ -74,10 +72,7 @@ export function TeamsTable({
       header: "Status",
       accessorKey: "status",
       cell: (team) => (
-        <span style={{
-          color: team.status === "active" ? "#00f058" : "var(--text-3)",
-          fontSize: "var(--text-caption)",
-        }}>
+        <span className={`status-badge ${team.status === "active" ? "status-badge--active" : "status-badge--inactive"}`}>
           ● {team.status}
         </span>
       ),
@@ -91,63 +86,24 @@ export function TeamsTable({
         <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 justify-end">
           <button
             onClick={(e) => { e.stopPropagation(); onEdit(team) }}
-            style={{
-              border: "1px solid var(--border-2)",
-              color: "var(--text-3)",
-              borderRadius: "4px",
-              padding: "2px 7px",
-              fontSize: "var(--text-meta)",
-              background: "none",
-              cursor: "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
-            onMouseEnter={e => (e.currentTarget.style.color = "var(--text-1)")}
-            onMouseLeave={e => (e.currentTarget.style.color = "var(--text-3)")}
+            className="table-action-btn"
           >
-            <Pencil style={{ width: "11px", height: "11px" }} /> Edit
+            <Pencil /> Edit
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onToggleStatus(team) }}
-            style={{
-              border: "1px solid var(--border-2)",
-              color: "var(--text-3)",
-              borderRadius: "4px",
-              padding: "2px 7px",
-              fontSize: "var(--text-meta)",
-              background: "none",
-              cursor: "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
-            onMouseEnter={e => (e.currentTarget.style.color = "var(--text-1)")}
-            onMouseLeave={e => (e.currentTarget.style.color = "var(--text-3)")}
+            className="table-action-btn"
           >
             {team.status === "active"
-              ? <><UserX style={{ width: "11px", height: "11px" }} /> Deactivate</>
-              : <><UserCheck style={{ width: "11px", height: "11px" }} /> Activate</>
+              ? <><UserX /> Deactivate</>
+              : <><UserCheck /> Activate</>
             }
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onDelete(team) }}
-            style={{
-              border: "1px solid var(--border-2)",
-              color: "var(--text-3)",
-              borderRadius: "4px",
-              padding: "2px 7px",
-              fontSize: "var(--text-meta)",
-              background: "none",
-              cursor: "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
-            onMouseEnter={e => (e.currentTarget.style.color = "#f87171")}
-            onMouseLeave={e => (e.currentTarget.style.color = "var(--text-3)")}
+            className="table-action-btn table-action-btn--danger"
           >
-            <Trash2 style={{ width: "11px", height: "11px" }} /> Delete
+            <Trash2 /> Delete
           </button>
         </div>
       ),
