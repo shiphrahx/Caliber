@@ -6,22 +6,30 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { User, Check, FileText, Plus, Trash2, ChevronDown, ChevronRight, RotateCcw } from "lucide-react"
+import { User, Check, FileText, Plus, Trash2, ChevronDown, ChevronRight, RotateCcw, Loader2 } from "lucide-react"
 import { useTemplates, type MeetingTemplate } from "@/lib/hooks/use-templates"
 import { AISettingsCard } from "@/components/settings/ai-settings-card"
 import { createClient } from "@/lib/supabase/client"
 
 export default function SettingsPage() {
-  const [preferredName, setPreferredName] = useState("User")
+  const [preferredName, setPreferredName] = useState("")
   const [email, setEmail] = useState("")
+  const [saveSuccess, setSaveSuccess] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     const supabase = createClient()
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user?.email) setEmail(data.user.email)
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return
+      if (data.user.email) setEmail(data.user.email)
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("name")
+        .eq("id", data.user.id)
+        .single()
+      if (profile?.name) setPreferredName(profile.name)
     })
   }, [])
-  const [saveSuccess, setSaveSuccess] = useState(false)
 
   const { templates, deletedTemplates, addTemplate, updateTemplate, deleteTemplate, restoreTemplate } = useTemplates()
   const [expandedTemplate, setExpandedTemplate] = useState<string | null>(null)
@@ -30,9 +38,20 @@ export default function SettingsPage() {
   const [newName, setNewName] = useState("")
   const [newNotes, setNewNotes] = useState("")
 
-  const handleSave = () => {
-    setSaveSuccess(true)
-    setTimeout(() => setSaveSuccess(false), 3000)
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      await supabase
+        .from("user_profiles")
+        .upsert({ id: user.id, name: preferredName, email: user.email }, { onConflict: "id" })
+      setSaveSuccess(true)
+      setTimeout(() => setSaveSuccess(false), 3000)
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleStartEdit = (template: MeetingTemplate) => {
@@ -256,12 +275,11 @@ export default function SettingsPage() {
 
         <div className="flex items-center justify-between">
           <p className="text-gray-400">Changes will be saved to your account</p>
-          <Button onClick={handleSave} className="min-w-[120px]">
-            {saveSuccess ? (
-              <>
-                <Check className="h-4 w-4 mr-2" />
-                Saved!
-              </>
+          <Button onClick={handleSave} disabled={saving} className="min-w-[120px]">
+            {saving ? (
+              <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving…</>
+            ) : saveSuccess ? (
+              <><Check className="h-4 w-4 mr-2" />Saved!</>
             ) : (
               "Save Changes"
             )}
