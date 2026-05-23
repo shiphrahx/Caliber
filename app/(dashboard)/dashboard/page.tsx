@@ -50,7 +50,7 @@ export default async function DashboardPage() {
       {/* Header */}
       <div>
         <h1>Dashboard</h1>
-        <p style={{ marginTop: "4px" }}>{label}</p>
+        <p className="mt-1">{label}</p>
       </div>
 
       {/* Weekly Review prompt */}
@@ -68,7 +68,7 @@ export default async function DashboardPage() {
         <div className="bg-[#1c1c1c] border border-[#383838] rounded-xl p-5">
           <div className="mb-4">
             <h2>Priority Breakdown</h2>
-            <p style={{ marginTop: "2px" }}>Tasks by priority</p>
+            <p className="mt-0.5">Tasks by priority</p>
           </div>
           <TaskPriorityChart />
         </div>

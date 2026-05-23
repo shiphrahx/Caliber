@@ -2741,3 +2741,75 @@ label { font-size: var(--text-label); color: var(--text-2); }
   text-align: center;
 }
 .data-table-empty-text { font-size: var(--text-meta); color: var(--text-3); }
+
+/* ── Page shared ─────────────────────────────────────────────────────────────── */
+.page-content { padding: 16px; }
+.page-content--lg { padding: 32px; }
+.stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-bottom: 14px; }
+.stat-card { background: var(--surf); border: 1px solid var(--border-1); border-radius: 6px; padding: 10px 12px; }
+.stat-card-label {} /* uses .form-label */
+.stat-card-value { font-size: 20px; font-weight: 500; color: var(--text-1); font-family: var(--font-mono); }
+.stat-card-sub { font-size: var(--text-overline); color: var(--text-3); margin-top: 2px; }
+.page-section-label {
+  font-size: var(--text-overline);
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  color: var(--text-3);
+  text-transform: uppercase;
+}
+.page-section-filter-btn {
+  background: transparent;
+  border: 1px solid var(--border-2);
+  color: var(--text-2);
+  font-size: var(--text-caption);
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.page-section-filter-btn:hover { color: var(--text-1); }
+.page-actions-row { display: flex; align-items: center; gap: 8px; }
+.page-loading { font-size: var(--text-meta); color: var(--text-3); padding: 48px 32px; }
+
+/* ── Team detail page ────────────────────────────────────────────────────────── */
+.team-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--text-2);
+  cursor: pointer;
+  font-size: var(--text-label);
+  margin-bottom: 16px;
+  padding: 4px 0;
+}
+.team-back-btn:hover { color: var(--text-1); }
+.team-back-btn svg { width: 14px; height: 14px; }
+.team-title-row { display: flex; align-items: center; gap: 12px; }
+.team-status-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+.team-overview-card {
+  background: var(--surf);
+  border: 1px solid var(--border-1);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+.team-overview-body { display: flex; gap: 32px; }
+.team-overview-stat-label { font-size: var(--text-overline); color: var(--text-3); font-weight: 600; margin-bottom: 2px; }
+.team-overview-stat-value { font-size: var(--text-h2); font-weight: 700; color: var(--text-1); }
+.team-overview-notes-label { font-size: var(--text-overline); color: var(--text-3); font-weight: 600; margin-bottom: 4px; }
+.team-overview-notes-text { font-size: var(--text-label); color: var(--text-2); }
+.team-matrix-card {
+  background: var(--surf);
+  border: 1px solid var(--border-1);
+  border-radius: 8px;
+  padding: 24px;
+}
+.team-matrix-header { margin-bottom: 20px; }
+.team-matrix-title { margin: 0; }
+.team-matrix-sub { margin-top: 2px; }

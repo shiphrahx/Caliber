@@ -343,7 +343,7 @@ export default function TasksPage() {
         <div className="page-topbar">
           <span className="page-topbar-title">Tasks</span>
         </div>
-        <div style={{ fontSize: "var(--text-meta)", color: "var(--text-3)", padding: "48px 32px" }}>Loading...</div>
+        <div className="page-loading">Loading...</div>
       </>
     )
   }
@@ -359,7 +359,7 @@ export default function TasksPage() {
       {/* Top bar */}
       <div className="page-topbar">
         <span className="page-topbar-title">Tasks</span>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div className="page-actions-row">
           <NaturalLanguageTaskInput
             people={people}
             onConfirm={handleNaturalLanguageTask}
@@ -375,38 +375,10 @@ export default function TasksPage() {
         <div>
           {/* Section header */}
           <div className="flex items-center justify-between mb-3">
-            <span style={{
-              fontSize: "var(--text-overline)",
-              fontWeight: 500,
-              letterSpacing: "0.07em",
-              color: "var(--text-3)",
-              textTransform: "uppercase",
-            }}>This week</span>
-            <div style={{ display: "flex", gap: "6px" }}>
-              <button style={{
-                background: "transparent",
-                border: "1px solid var(--border-2)",
-                color: "var(--text-2)",
-                fontSize: "var(--text-caption)",
-                padding: "3px 8px",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-                onMouseEnter={e => { e.currentTarget.style.color = "var(--text-1)" }}
-                onMouseLeave={e => { e.currentTarget.style.color = "var(--text-2)" }}
-              >Filter</button>
-              <button style={{
-                background: "transparent",
-                border: "1px solid var(--border-2)",
-                color: "var(--text-2)",
-                fontSize: "var(--text-caption)",
-                padding: "3px 8px",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-                onMouseEnter={e => { e.currentTarget.style.color = "var(--text-1)" }}
-                onMouseLeave={e => { e.currentTarget.style.color = "var(--text-2)" }}
-              >Sort</button>
+            <span className="page-section-label">This week</span>
+            <div className="flex gap-1.5">
+              <button className="page-section-filter-btn">Filter</button>
+              <button className="page-section-filter-btn">Sort</button>
             </div>
           </div>
 
@@ -429,13 +401,7 @@ export default function TasksPage() {
         <div>
           {/* Section header */}
           <div className="flex items-center justify-between mb-3">
-            <span style={{
-              fontSize: "var(--text-overline)",
-              fontWeight: 500,
-              letterSpacing: "0.07em",
-              color: "var(--text-3)",
-              textTransform: "uppercase",
-            }}>Backlog</span>
+            <span className="page-section-label">Backlog</span>
           </div>
           <BacklogTable
             tasks={backlogTasks}
