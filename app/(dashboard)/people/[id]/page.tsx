@@ -74,8 +74,7 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
   const [showPrepBadge, setShowPrepBadge] = useState(false)
   const aiConfig = useAIConfig()
 
-  const { signals, score, loading: signalsLoading } = usePersonSignals(personId ?? '')
-  const [showAllSignals, setShowAllSignals] = useState(false)
+  const { signals, score } = usePersonSignals(personId ?? '')
 
   useEffect(() => {
     params.then(({ id }) => setPersonId(id))
@@ -145,7 +144,7 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
 
   if (!formData) {
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
+      <div className="person-not-found">
         <p>Person not found</p>
       </div>
     )
@@ -277,29 +276,21 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
     }
   }
 
-  const dualListStyle = { border: "1px solid var(--border-2)", borderRadius: "4px", height: "192px", overflowY: "auto" as const, background: "var(--surf-2)" }
-  const dualLabelStyle = { fontSize: "var(--text-label)", color: "var(--text-3)", display: "block", marginBottom: "4px" }
-
   return (
-    <div style={{ padding: "32px" }}>
+    <div className="person-page">
       {/* Header */}
-      <div style={{ marginBottom: "24px" }}>
-        <button
-          onClick={handleCancel}
-          style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "none", border: "none", color: "var(--text-2)", cursor: "pointer", fontSize: "var(--text-label)", marginBottom: "16px", padding: "4px 0" }}
-          onMouseEnter={e => (e.currentTarget.style.color = "var(--text-1)")}
-          onMouseLeave={e => (e.currentTarget.style.color = "var(--text-2)")}
-        >
-          <ArrowLeft style={{ width: "14px", height: "14px" }} /> Back to People
+      <div className="person-header">
+        <button className="person-back-btn" onClick={handleCancel}>
+          <ArrowLeft /> Back to People
         </button>
-        <div style={{ display: "flex", alignItems: "flex-start", gap: "14px", flexWrap: "wrap" }}>
+        <div className="person-title-row">
           <div>
             <h1>{formData.name}</h1>
-            <p style={{ marginTop: "2px" }}>{formData.role}</p>
+            <p className="person-role-sub">{formData.role}</p>
           </div>
           {/* Attention indicator */}
-          {!signalsLoading && signals.length > 0 && (
-            <div style={{ marginTop: "4px", display: "flex", flexDirection: "column", gap: "4px" }}>
+          {signals.length > 0 && (
+            <div className="person-signals-col">
               <span style={{
                 fontSize: "var(--text-caption)",
                 fontWeight: 600,
@@ -313,18 +304,16 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
                 {signals.length} thing{signals.length === 1 ? '' : 's'} to action
               </span>
               {signals.map((s, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "5px" }}>
+                <div key={i} className="person-signal-row">
                   {s.severity === "critical"
-                    ? <AlertCircle style={{ width: "11px", height: "11px", color: "#ff6b6b", flexShrink: 0, marginTop: "2px" }} />
+                    ? <AlertCircle className="person-signal-icon" style={{ color: "#ff6b6b" }} />
                     : s.severity === "warning"
-                    ? <AlertTriangle style={{ width: "11px", height: "11px", color: "#ffa94d", flexShrink: 0, marginTop: "2px" }} />
-                    : <Info style={{ width: "11px", height: "11px", color: "var(--text-3)", flexShrink: 0, marginTop: "2px" }} />
+                    ? <AlertTriangle className="person-signal-icon" style={{ color: "#ffa94d" }} />
+                    : <Info className="person-signal-icon" style={{ color: "var(--text-3)" }} />
                   }
-                  <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>{s.message}</span>
+                  <span className="person-signal-msg">{s.message}</span>
                   {s.meta?.isNewHire === true && (
-                    <span style={{ fontSize: "13px", fontWeight: 600, padding: "1px 5px", borderRadius: "3px", background: "rgba(0,240,88,0.12)", color: "#00f058", border: "1px solid rgba(0,240,88,0.3)", whiteSpace: "nowrap", flexShrink: 0 }}>
-                      New hire
-                    </span>
+                    <span className="person-newhire-badge">New hire</span>
                   )}
                 </div>
               ))}
@@ -335,13 +324,13 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
             const daysIn = daysBetween(new Date(formData.startDate + 'T00:00:00'), new Date())
             const pct = Math.min(100, Math.round((daysIn / NEW_HIRE_WINDOW_DAYS) * 100))
             return (
-              <div style={{ marginTop: "8px", minWidth: "160px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                  <span style={{ fontSize: "13px", fontWeight: 600, color: "#00f058", textTransform: "uppercase", letterSpacing: "0.04em" }}>Onboarding</span>
-                  <span style={{ fontSize: "13px", color: "var(--text-3)" }}>Day {daysIn} / {NEW_HIRE_WINDOW_DAYS}</span>
+              <div className="person-onboarding-wrap">
+                <div className="person-onboarding-header">
+                  <span className="person-onboarding-label">Onboarding</span>
+                  <span className="person-onboarding-days">Day {daysIn} / {NEW_HIRE_WINDOW_DAYS}</span>
                 </div>
-                <div style={{ height: "4px", borderRadius: "2px", background: "var(--border-1)", overflow: "hidden" }}>
-                  <div style={{ height: "100%", width: `${pct}%`, borderRadius: "2px", background: "linear-gradient(90deg, hsl(174,100%,50%), hsl(142,100%,47%))", transition: "width 0.3s ease" }} />
+                <div className="person-onboarding-bar-track">
+                  <div className="person-onboarding-bar-fill" style={{ width: `${pct}%` }} />
                 </div>
               </div>
             )
@@ -350,21 +339,21 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
       </div>
 
       {/* Profile card */}
-      <div style={{ background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "8px", padding: "24px", marginBottom: "24px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+      <div className="person-profile-card">
+        <div className="person-profile-grid">
           {/* Left column */}
-          <div style={{ display: "grid", gap: "16px" }}>
-            <div style={{ display: "grid", gap: "6px" }}>
+          <div className="person-profile-left">
+            <div className="person-profile-field">
               <Label htmlFor="name">Name *</Label>
               <Input id="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="e.g. Sarah Miller" required />
             </div>
-            <div style={{ display: "grid", gap: "6px" }}>
+            <div className="person-profile-field">
               <Label htmlFor="role">Role *</Label>
               <Input id="role" value={formData.role ?? ''} onChange={(e) => setFormData({ ...formData, role: e.target.value })} placeholder="e.g. Senior Software Engineer" required />
             </div>
-            <div style={{ display: "grid", gap: "6px" }}>
+            <div className="person-profile-field">
               <Label>Seniority Level</Label>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+              <div className="person-level-btns">
                 {(Object.keys(LEVEL_BADGE) as Array<keyof typeof LEVEL_BADGE>).map((label) => {
                   const { bg, color } = LEVEL_BADGE[label]
                   const isOther = label === "Other"
@@ -388,48 +377,60 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
               </div>
               <Input id="level" value={formData.level ?? ''} onChange={(e) => setFormData({ ...formData, level: e.target.value })} placeholder="Or type custom level" />
             </div>
-            <div style={{ display: "grid", gap: "6px" }}>
+            <div className="person-profile-field">
               <Label htmlFor="startDate">Start Date</Label>
               <Input id="startDate" type="date" value={formData.startDate ?? ''} onChange={(e) => setFormData({ ...formData, startDate: e.target.value })} />
             </div>
 
             {/* Teams dual-list */}
-            <div style={{ display: "grid", gap: "6px" }}>
+            <div className="person-profile-field">
               <Label>Teams</Label>
-              <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                <div style={{ flex: 1 }}>
-                  <label style={dualLabelStyle}>Available Teams</label>
-                  <div style={dualListStyle}>
+              <div className="dual-list-row">
+                <div className="dual-list-col">
+                  <label className="dual-list-label">Available Teams</label>
+                  <div className="dual-list-box">
                     {availableTeamsList.length > 0 ? availableTeamsList.map((team) => (
-                      <div key={team.id} onClick={() => toggleAvailableSelection(team.id!)} onDoubleClick={() => handleDoubleClickAvailable(team.id!)} className="dual-list-item"
-                        style={{ padding: "6px 12px", fontSize: "var(--text-label)", cursor: "pointer", userSelect: "none", color: selectedAvailable.includes(team.id!) ? "#111" : "var(--text-2)", borderLeft: selectedAvailable.includes(team.id!) ? "2px solid #00f058" : "2px solid transparent" }}>
+                      <div key={team.id}
+                        onClick={() => toggleAvailableSelection(team.id!)}
+                        onDoubleClick={() => handleDoubleClickAvailable(team.id!)}
+                        className="dual-list-item"
+                        style={{
+                          color: selectedAvailable.includes(team.id!) ? "#111" : "var(--text-2)",
+                          borderLeft: selectedAvailable.includes(team.id!) ? "2px solid #00f058" : "2px solid transparent",
+                        }}
+                      >
                         {team.name}
                       </div>
                     )) : (
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: "var(--text-label)", color: "var(--text-3)" }}>All teams assigned</div>
+                      <div className="dual-list-empty">All teams assigned</div>
                     )}
                   </div>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <button type="button" onClick={handleAddToTeams} disabled={selectedAvailable.length === 0}
-                    style={{ width: "32px", height: "32px", borderRadius: "4px", border: "1px solid var(--border-2)", background: "var(--surf-2)", color: "var(--text-2)", cursor: selectedAvailable.length === 0 ? "not-allowed" : "pointer", opacity: selectedAvailable.length === 0 ? 0.4 : 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <ChevronRight style={{ width: "16px", height: "16px" }} />
+                <div className="dual-list-arrows">
+                  <button type="button" onClick={handleAddToTeams} disabled={selectedAvailable.length === 0} className="dual-list-arrow-btn">
+                    <ChevronRight />
                   </button>
-                  <button type="button" onClick={handleRemoveFromTeams} disabled={selectedTeamMembers.length === 0}
-                    style={{ width: "32px", height: "32px", borderRadius: "4px", border: "1px solid var(--border-2)", background: "var(--surf-2)", color: "var(--text-2)", cursor: selectedTeamMembers.length === 0 ? "not-allowed" : "pointer", opacity: selectedTeamMembers.length === 0 ? 0.4 : 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <ChevronLeft style={{ width: "16px", height: "16px" }} />
+                  <button type="button" onClick={handleRemoveFromTeams} disabled={selectedTeamMembers.length === 0} className="dual-list-arrow-btn">
+                    <ChevronLeft />
                   </button>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <label style={dualLabelStyle}>Assigned Teams ({assignedTeamsList.length})</label>
-                  <div style={dualListStyle}>
+                <div className="dual-list-col">
+                  <label className="dual-list-label">Assigned Teams ({assignedTeamsList.length})</label>
+                  <div className="dual-list-box">
                     {assignedTeamsList.length > 0 ? assignedTeamsList.map((team) => (
-                      <div key={team.id} onClick={() => toggleTeamMemberSelection(team.id!)} onDoubleClick={() => handleDoubleClickTeamMember(team.id!)} className="dual-list-item"
-                        style={{ padding: "6px 12px", fontSize: "var(--text-label)", cursor: "pointer", userSelect: "none", color: selectedTeamMembers.includes(team.id!) ? "#111" : "var(--text-2)", borderLeft: selectedTeamMembers.includes(team.id!) ? "2px solid #00f058" : "2px solid transparent" }}>
+                      <div key={team.id}
+                        onClick={() => toggleTeamMemberSelection(team.id!)}
+                        onDoubleClick={() => handleDoubleClickTeamMember(team.id!)}
+                        className="dual-list-item"
+                        style={{
+                          color: selectedTeamMembers.includes(team.id!) ? "#111" : "var(--text-2)",
+                          borderLeft: selectedTeamMembers.includes(team.id!) ? "2px solid #00f058" : "2px solid transparent",
+                        }}
+                      >
                         {team.name}
                       </div>
                     )) : (
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: "var(--text-label)", color: "var(--text-3)" }}>No teams assigned</div>
+                      <div className="dual-list-empty">No teams assigned</div>
                     )}
                   </div>
                 </div>
@@ -438,7 +439,7 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
           </div>
 
           {/* Right column — notes */}
-          <div style={{ display: "flex", flexDirection: "column" }}>
+          <div className="person-profile-right">
             <Label style={{ marginBottom: "8px" }}>Notes</Label>
             <div style={{ flex: 1 }}>
               <MarkdownTextarea value={formData.notes || ""} onValueChange={(value) => setFormData({ ...formData, notes: value })} placeholder="Any additional notes about this person..." className="h-full resize-none" />
@@ -446,57 +447,54 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "24px" }}>
+        <div className="person-profile-actions">
           <Button type="button" variant="outline" onClick={handleCancel}>Cancel</Button>
           <Button onClick={handleSave}>Save Changes</Button>
         </div>
       </div>
 
       {/* Meetings section */}
-      <div style={{ background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "8px", overflow: "hidden" }}>
-        <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border-1)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div className="person-meetings-card">
+        <div className="person-meetings-header">
           <div>
             <h2>Meetings</h2>
-            <p style={{ marginTop: "2px" }}>All meetings involving {formData.name}</p>
+            <p className="person-meetings-title-sub">All meetings involving {formData.name}</p>
           </div>
-          <button
-            onClick={() => setIsAddMeetingDialogOpen(true)}
-            style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "linear-gradient(90deg, #00ffe5 0%, #00f058 100%)", border: "none", color: "#0a1a0a", padding: "4px 10px", borderRadius: "4px", fontSize: "var(--text-caption)", fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-sans)" }}
-          >
-            <Plus style={{ width: "11px", height: "11px" }} /> Log meeting
+          <button className="person-meetings-log-btn" onClick={() => setIsAddMeetingDialogOpen(true)}>
+            <Plus /> Log meeting
           </button>
         </div>
 
-        <div id="meetings-section" style={{ display: "flex", height: "900px", overflow: "hidden" }}>
+        <div id="meetings-section" className="person-meetings-body">
           {/* Left panel */}
-          <div style={{ width: `${leftPanelWidth}px`, flexShrink: 0, background: "var(--surf-2)", borderRight: "1px solid var(--border-1)", overflowY: "auto" }}>
-            <div style={{ padding: "8px 0" }}>
+          <div className="person-meetings-left" style={{ width: `${leftPanelWidth}px` }}>
+            <div className="person-meetings-left-inner">
               {Object.keys(tree).length === 0 ? (
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 16px", textAlign: "center" }}>
+                <div className="person-meetings-left-empty">
                   <p style={{ marginBottom: "16px" }}>No meetings logged yet</p>
-                  <button onClick={() => setIsAddMeetingDialogOpen(true)}
-                    style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "linear-gradient(90deg, #00ffe5 0%, #00f058 100%)", border: "none", color: "#0a1a0a", padding: "4px 10px", borderRadius: "4px", fontSize: "var(--text-caption)", fontWeight: 600, cursor: "pointer" }}>
-                    <Plus style={{ width: "11px", height: "11px" }} /> Log First Meeting
+                  <button onClick={() => setIsAddMeetingDialogOpen(true)} className="person-meetings-left-empty-btn">
+                    <Plus /> Log First Meeting
                   </button>
                 </div>
               ) : (
                 Object.entries(tree).map(([type, node]) => (
                   <div key={type}>
-                    <button onClick={() => toggleType(type)}
-                      style={{ display: "flex", alignItems: "center", gap: "6px", width: "100%", padding: "6px 12px", background: "none", border: "none", cursor: "pointer", fontSize: "var(--text-meta)", fontWeight: 500, color: "var(--text-2)", textAlign: "left" }}
-                      onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "var(--surf-3)")}
-                      onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "none")}
-                    >
-                      {expandedTypes.has(type) ? <ChevronDown style={{ width: "12px", height: "12px" }} /> : <ChevronRight style={{ width: "12px", height: "12px" }} />}
+                    <button onClick={() => toggleType(type)} className="person-tree-type-btn">
+                      {expandedTypes.has(type) ? <ChevronDown /> : <ChevronRight />}
                       {type} ({node.meetings.length})
                     </button>
                     {expandedTypes.has(type) && (
-                      <div style={{ paddingLeft: "20px" }}>
+                      <div className="person-tree-meetings">
                         {node.meetings.map((meeting) => {
                           const isActive = selectedMeeting?.id === meeting.id
                           return (
                             <button key={meeting.id} onClick={() => setSelectedMeeting(meeting)}
-                              style={{ display: "block", width: "100%", padding: "5px 12px", background: isActive ? "var(--surf-3)" : "none", borderTop: "none", borderRight: "none", borderBottom: "none", borderLeft: `2px solid ${isActive ? "#00f058" : "transparent"}`, cursor: "pointer", fontSize: "var(--text-caption)", color: isActive ? "#00f058" : "var(--text-3)", textAlign: "left" }}
+                              className="person-tree-meeting-btn"
+                              style={{
+                                background: isActive ? "var(--surf-3)" : "none",
+                                borderLeft: `2px solid ${isActive ? "#00f058" : "transparent"}`,
+                                color: isActive ? "#00f058" : "var(--text-3)",
+                              }}
                               onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "var(--surf-3)" }}
                               onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "none" }}
                             >
@@ -513,22 +511,21 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
           </div>
 
           {/* Resizable divider */}
-          <div style={{ width: "4px", background: "var(--border-1)", cursor: "col-resize", flexShrink: 0 }}
+          <div
+            className="person-meetings-divider"
             onMouseDown={(e) => { e.preventDefault(); setIsResizing(true) }}
-            onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "var(--border-2)")}
-            onMouseLeave={e => { if (!isResizing) (e.currentTarget as HTMLElement).style.background = "var(--border-1)" }}
           />
 
           {/* Right panel */}
-          <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
+          <div className="person-meetings-right">
             {selectedMeeting ? (
-              <div style={{ display: "grid", gap: "16px" }}>
+              <div className="person-meeting-detail">
                 {/* 1:1 Prep Brief */}
                 {selectedMeeting.type === "1:1" && (
-                  <div style={{ background: "var(--surf-2)", border: "1px solid var(--border-1)", borderRadius: "6px", padding: "12px 16px" }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: prepBrief ? "12px" : 0 }}>
-                      <span style={{ fontSize: "var(--text-label)", fontWeight: 600, color: "var(--text-2)" }}>1:1 Prep</span>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <div className="person-prep-box">
+                    <div className="person-prep-header" style={{ marginBottom: prepBrief ? "12px" : 0 }}>
+                      <span className="person-prep-label">1:1 Prep</span>
+                      <div className="person-prep-actions">
                         {showPrepBadge && prepBrief && <AIGeneratedBadge onDismiss={() => setShowPrepBadge(false)} />}
                         <AIButton
                           configured={aiConfig.configured}
@@ -542,45 +539,43 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
                       </div>
                     </div>
                     {prepBrief && (
-                      <div style={{ fontSize: "var(--text-label)", color: "var(--text-2)", whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
-                        {prepBrief}
-                      </div>
+                      <div className="person-prep-content">{prepBrief}</div>
                     )}
                   </div>
                 )}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                  <div style={{ display: "grid", gap: "4px" }}>
+                <div className="person-meeting-2col">
+                  <div className="person-meeting-field">
                     <Label>Date</Label>
                     <Input type="date" value={selectedMeeting.date} onChange={(e) => handleUpdateMeeting({ ...selectedMeeting, date: e.target.value })} />
                   </div>
                   {selectedMeeting.type === "1:1" && selectedMeeting.recurrence && selectedMeeting.recurrence !== "none" && selectedMeeting.nextMeetingDate && (
-                    <div style={{ display: "grid", gap: "4px" }}>
+                    <div className="person-meeting-field">
                       <Label>Next Meeting</Label>
                       <Input type="date" value={selectedMeeting.nextMeetingDate} onChange={(e) => handleUpdateMeeting({ ...selectedMeeting, nextMeetingDate: e.target.value })} />
                     </div>
                   )}
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                  <div style={{ display: "grid", gap: "4px" }}>
+                <div className="person-meeting-2col">
+                  <div className="person-meeting-field">
                     <Label>Title</Label>
                     <Input value={selectedMeeting.title} onChange={(e) => handleUpdateMeeting({ ...selectedMeeting, title: e.target.value })} placeholder="Meeting title" />
                   </div>
-                  <div style={{ display: "grid", gap: "4px" }}>
+                  <div className="person-meeting-field">
                     <Label>Attendees</Label>
                     <Input value={selectedMeeting.attendees.join(", ")} onChange={(e) => handleUpdateMeeting({ ...selectedMeeting, attendees: e.target.value.split(",").map(a => a.trim()).filter(a => a.length > 0) })} placeholder="Names separated by commas" />
                   </div>
                 </div>
-                <div style={{ display: "grid", gap: "4px" }}>
+                <div className="person-meeting-field">
                   <Label>Action Items</Label>
                   <MarkdownTextarea value={selectedMeeting.actionItems || ""} onValueChange={(value) => handleUpdateMeeting({ ...selectedMeeting, actionItems: value })} placeholder={"- Action item 1\n- Action item 2"} rows={4} />
                 </div>
-                <div style={{ display: "grid", gap: "4px" }}>
+                <div className="person-meeting-field">
                   <Label>Meeting Notes</Label>
                   <MarkdownTextarea value={selectedMeeting.notes || ""} onValueChange={(value) => handleUpdateMeeting({ ...selectedMeeting, notes: value })} placeholder="Meeting notes, discussion points, decisions..." rows={8} />
                 </div>
               </div>
             ) : (
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", textAlign: "center" }}>
+              <div className="person-meetings-right-empty">
                 <p>Select a meeting to view details</p>
               </div>
             )}
@@ -589,26 +584,11 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
       </div>
 
       {/* Follow-ups section */}
-      <div style={{ marginTop: "24px", background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "8px", padding: "20px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
-          <h2 style={{ margin: 0 }}>Follow-ups</h2>
-          <button
-            onClick={() => setAddingFollowUp(true)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "5px",
-              background: "var(--surf-3)",
-              border: "1px solid var(--border-2)",
-              borderRadius: "4px",
-              color: "var(--text-2)",
-              fontSize: "var(--text-meta)",
-              padding: "5px 10px",
-              cursor: "pointer",
-              fontFamily: "var(--font-sans)",
-            }}
-          >
-            <PlusIcon style={{ width: "11px", height: "11px" }} /> Add follow-up
+      <div className="person-followups-card">
+        <div className="person-followups-header">
+          <h2 className="person-followups-title">Follow-ups</h2>
+          <button className="person-followup-add-btn" onClick={() => setAddingFollowUp(true)}>
+            <PlusIcon /> Add follow-up
           </button>
         </div>
         <FollowUpList
@@ -618,12 +598,12 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
       </div>
 
       {/* Sentiment Trend */}
-      <div style={{ marginTop: "24px" }}>
+      <div className="person-section-mt">
         <SentimentTrendChart personId={personId!} days={60} />
       </div>
 
       {/* Evidence section */}
-      <div style={{ marginTop: "24px" }}>
+      <div className="person-section-mt">
         <EvidenceSection personId={personId!} personName={formData.name} allPeople={allPeopleWithIds} />
       </div>
 
