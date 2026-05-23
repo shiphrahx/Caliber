@@ -196,64 +196,61 @@ export function EvidenceSection({
     new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
 
   return (
-    <div style={{ background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "8px", overflow: "hidden" }}>
+    <div className="evidence-section">
       {/* Header */}
-      <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border-1)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div className="evidence-header">
         <div>
           <h2>Evidence</h2>
-          <p style={{ marginTop: "2px" }}>
+          <p className="mt-0.5">
             {entries.length} {entries.length === 1 ? "entry" : "entries"} logged for {personName}
           </p>
         </div>
-        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-          <a
-            href={`/people/${personId}/review`}
-            style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "4px 10px", borderRadius: "4px", fontSize: "var(--text-caption)", fontWeight: 600, color: "var(--text-2)", border: "1px solid var(--border-2)", background: "var(--surf-2)", textDecoration: "none", cursor: "pointer" }}
-          >
+        <div className="evidence-header-actions">
+          <a href={`/people/${personId}/review`} className="evidence-header-btn">
             Review Prep
           </a>
           <button
             onClick={() => setBatchImportOpen(true)}
-            style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "4px 10px", borderRadius: "4px", fontSize: "var(--text-caption)", fontWeight: 600, color: "var(--text-2)", border: "1px solid var(--border-2)", background: "var(--surf-2)", cursor: "pointer", fontFamily: "var(--font-sans)" }}
+            className="evidence-header-btn"
             title="Import multiple evidence entries from pasted text"
           >
-            <FileText style={{ width: "11px", height: "11px" }} /> Import from text
+            <FileText /> Import from text
           </button>
           <button
             onClick={() => { setShowForm(true); setLinkedMeetingId(undefined) }}
-            style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "linear-gradient(90deg, #00ffe5 0%, #00f058 100%)", border: "none", color: "#0a1a0a", padding: "4px 10px", borderRadius: "4px", fontSize: "var(--text-caption)", fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-sans)" }}
+            className="evidence-add-btn"
           >
-            <Plus style={{ width: "11px", height: "11px" }} /> Add Evidence
+            <Plus /> Add Evidence
           </button>
         </div>
       </div>
 
       {/* Quick-add form */}
       {showForm && (
-        <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--border-1)", background: "var(--surf-2)" }}>
-          <div style={{ display: "grid", gap: "14px" }}>
+        <div className="evidence-form">
+          <div className="evidence-form-grid">
             {/* Row 1: category + date */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 180px", gap: "12px" }}>
-              <div style={{ display: "grid", gap: "4px" }}>
+            <div className="evidence-form-row-2col">
+              <div className="evidence-form-field">
                 <label className="form-label">Category</label>
                 <select
                   value={form.category}
                   onChange={e => setForm({ ...form, category: e.target.value as EvidenceCategory })}
-                  style={{ background: "var(--surf)", border: "1px solid var(--border-2)", borderRadius: "6px", color: "var(--text-1)", padding: "6px 10px", fontSize: "var(--text-label)", cursor: "pointer" }}
+                  className="evidence-form-select"
                 >
                   {CATEGORIES.map(c => (
                     <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
                   ))}
                 </select>
               </div>
-              <div style={{ display: "grid", gap: "4px" }}>
+              <div className="evidence-form-field">
                 <label className="form-label">Date</label>
                 <Input type="date" value={form.occurredAt} onChange={e => setForm({ ...form, occurredAt: e.target.value })} />
               </div>
             </div>
 
             {/* Row 2: title */}
-            <div style={{ display: "grid", gap: "4px" }}>
+            <div className="evidence-form-field">
               <label className="form-label">Title *</label>
               <Input
                 value={form.title}
@@ -264,7 +261,7 @@ export function EvidenceSection({
             </div>
 
             {/* Row 3: content */}
-            <div style={{ display: "grid", gap: "4px" }}>
+            <div className="evidence-form-field">
               <label className="form-label">Notes (optional)</label>
               <MarkdownTextarea
                 value={form.content}
@@ -275,10 +272,10 @@ export function EvidenceSection({
             </div>
 
             {/* Row 4: sentiment + linked meeting notice + actions */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div className="evidence-form-footer">
+              <div className="evidence-form-footer-left">
                 <label className="form-label" style={{ margin: 0 }}>Sentiment</label>
-                <div style={{ display: "flex", gap: "4px" }}>
+                <div className="evidence-sentiment-btns">
                   {SENTIMENTS.map(s => {
                     const cfg = SENTIMENT_CONFIG[s]
                     const active = form.sentiment === s
@@ -297,12 +294,12 @@ export function EvidenceSection({
                   })}
                 </div>
                 {linkedMeetingId && (
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "var(--text-caption)", color: "#60a5fa" }}>
-                    <Link2 style={{ width: "11px", height: "11px" }} /> Linked to meeting
+                  <span className="evidence-linked-meeting">
+                    <Link2 /> Linked to meeting
                   </span>
                 )}
               </div>
-              <div style={{ display: "flex", gap: "8px" }}>
+              <div className="evidence-form-footer-right">
                 <Button variant="outline" onClick={() => { setShowForm(false); setForm(emptyForm()); setLinkedMeetingId(undefined) }}>Cancel</Button>
                 <Button onClick={handleSubmit} disabled={!form.title.trim() || saving}>
                   {saving ? "Saving..." : "Save Evidence"}
@@ -314,12 +311,10 @@ export function EvidenceSection({
       )}
 
       {/* Timeline */}
-      <div style={{ padding: "12px 0", minHeight: "120px" }}>
+      <div className="evidence-timeline">
         {entries.length === 0 && !showForm ? (
-          <div style={{ padding: "40px 24px", textAlign: "center" }}>
-            <p style={{ color: "var(--text-3)", marginBottom: "12px" }}>
-              No evidence logged yet. Start capturing achievements, feedback, and observations throughout the year.
-            </p>
+          <div className="evidence-empty">
+            <p>No evidence logged yet. Start capturing achievements, feedback, and observations throughout the year.</p>
             <Button onClick={() => setShowForm(true)}>
               <Plus style={{ width: "14px", height: "14px" }} /> Add First Entry
             </Button>
@@ -332,79 +327,73 @@ export function EvidenceSection({
             const isEditing = editingId === entry.id
 
             return (
-              <div key={entry.id} style={{ borderBottom: "1px solid var(--border-1)", transition: "background 0.1s" }}>
+              <div key={entry.id} className="evidence-entry">
                 {/* Entry row */}
                 <div
-                  style={{ padding: "10px 20px", display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }}
+                  className="evidence-entry-row"
                   onClick={() => setExpandedId(isExpanded ? null : entry.id)}
-                  onMouseEnter={e => (e.currentTarget.style.background = "#292929")}
-                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                 >
                   {isExpanded
-                    ? <ChevronDown style={{ width: "12px", height: "12px", color: "var(--text-3)", flexShrink: 0 }} />
-                    : <ChevronRight style={{ width: "12px", height: "12px", color: "var(--text-3)", flexShrink: 0 }} />}
+                    ? <ChevronDown className="evidence-entry-chevron" />
+                    : <ChevronRight className="evidence-entry-chevron" />}
 
                   {/* Category badge */}
-                  <span style={{ padding: "2px 7px", borderRadius: "3px", fontSize: "var(--text-caption)", fontWeight: 600, background: cat.bg, color: cat.color, flexShrink: 0 }}>
+                  <span className="evidence-cat-badge" style={{ background: cat.bg, color: cat.color }}>
                     {CATEGORY_LABELS[entry.category]}
                   </span>
 
                   {/* Title */}
-                  <span style={{ flex: 1, fontSize: "var(--text-label)", color: "var(--text-1)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {entry.title}
-                  </span>
+                  <span className="evidence-entry-title">{entry.title}</span>
 
                   {/* Sentiment */}
                   {sent && (
-                    <span style={{ fontSize: "var(--text-caption)", color: sent.color, flexShrink: 0 }}>
+                    <span className="evidence-sentiment" style={{ color: sent.color }}>
                       {sent.symbol} {sent.label}
                     </span>
                   )}
 
                   {/* Date */}
-                  <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", flexShrink: 0, minWidth: "90px", textAlign: "right" }}>
-                    {formatDate(entry.occurredAt)}
-                  </span>
+                  <span className="evidence-date">{formatDate(entry.occurredAt)}</span>
 
                   {/* Meeting link indicator */}
                   {entry.meetingId && (
-                    <span title={`Linked to meeting: ${entry.meetingTitle ?? entry.meetingId}`} style={{ color: "#60a5fa" }}>
-                      <Link2 style={{ width: "12px", height: "12px" }} />
+                    <span title={`Linked to meeting: ${entry.meetingTitle ?? entry.meetingId}`} className="evidence-meeting-link">
+                      <Link2 />
                     </span>
                   )}
                 </div>
 
                 {/* Expanded content */}
                 {isExpanded && (
-                  <div style={{ padding: "12px 20px 16px 42px", borderTop: "1px solid var(--border-1)", background: "var(--surf-2)" }}>
+                  <div className="evidence-expanded">
                     {isEditing ? (
-                      <div style={{ display: "grid", gap: "12px" }}>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 180px", gap: "12px" }}>
-                          <div style={{ display: "grid", gap: "4px" }}>
+                      <div className="evidence-form-grid">
+                        <div className="evidence-form-row-2col">
+                          <div className="evidence-form-field">
                             <label className="form-label">Category</label>
                             <select
                               value={editForm.category}
                               onChange={e => setEditForm({ ...editForm, category: e.target.value as EvidenceCategory })}
-                              style={{ background: "var(--surf)", border: "1px solid var(--border-2)", borderRadius: "6px", color: "var(--text-1)", padding: "6px 10px", fontSize: "var(--text-label)", cursor: "pointer" }}
+                              className="evidence-form-select"
                             >
                               {CATEGORIES.map(c => <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>)}
                             </select>
                           </div>
-                          <div style={{ display: "grid", gap: "4px" }}>
+                          <div className="evidence-form-field">
                             <label className="form-label">Date</label>
                             <Input type="date" value={editForm.occurredAt} onChange={e => setEditForm({ ...editForm, occurredAt: e.target.value })} />
                           </div>
                         </div>
-                        <div style={{ display: "grid", gap: "4px" }}>
+                        <div className="evidence-form-field">
                           <label className="form-label">Title</label>
                           <Input value={editForm.title} onChange={e => setEditForm({ ...editForm, title: e.target.value })} />
                         </div>
-                        <div style={{ display: "grid", gap: "4px" }}>
+                        <div className="evidence-form-field">
                           <label className="form-label">Notes</label>
                           <MarkdownTextarea value={editForm.content} onValueChange={v => setEditForm({ ...editForm, content: v })} rows={3} />
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
-                          <div style={{ display: "flex", gap: "4px" }}>
+                        <div className="evidence-form-footer">
+                          <div className="evidence-sentiment-btns">
                             {SENTIMENTS.map(s => {
                               const cfg = SENTIMENT_CONFIG[s]
                               const active = editForm.sentiment === s
@@ -416,7 +405,7 @@ export function EvidenceSection({
                               )
                             })}
                           </div>
-                          <div style={{ display: "flex", gap: "8px" }}>
+                          <div className="evidence-form-footer-right">
                             <Button variant="outline" onClick={() => setEditingId(null)}>Cancel</Button>
                             <Button onClick={() => handleSaveEdit(entry.id)} disabled={saving}>
                               <Check style={{ width: "13px", height: "13px" }} /> Save
@@ -427,24 +416,24 @@ export function EvidenceSection({
                     ) : (
                       <div>
                         {entry.content ? (
-                          <p style={{ fontSize: "var(--text-label)", color: "var(--text-2)", whiteSpace: "pre-wrap", marginBottom: "12px" }}>{entry.content}</p>
+                          <p className="evidence-content">{entry.content}</p>
                         ) : (
-                          <p style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", fontStyle: "italic", marginBottom: "12px" }}>No additional notes.</p>
+                          <p className="evidence-no-notes">No additional notes.</p>
                         )}
                         {entry.meetingTitle && (
-                          <p style={{ fontSize: "var(--text-caption)", color: "#60a5fa", marginBottom: "12px" }}>
-                            <Link2 style={{ width: "11px", height: "11px", display: "inline", marginRight: "4px" }} />
+                          <p className="evidence-meeting-ref">
+                            <Link2 />
                             Meeting: {entry.meetingTitle}
                           </p>
                         )}
-                        <div style={{ display: "flex", gap: "8px" }}>
+                        <div className="evidence-row-actions">
                           <Button variant="outline" onClick={() => handleStartEdit(entry)}>Edit</Button>
                           <button
                             onClick={() => handleDelete(entry.id)}
                             disabled={deletingId === entry.id}
-                            style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "4px 10px", borderRadius: "4px", fontSize: "var(--text-label)", border: "1px solid #7f1d1d", background: "transparent", color: "#f87171", cursor: deletingId === entry.id ? "not-allowed" : "pointer", opacity: deletingId === entry.id ? 0.6 : 1 }}
+                            className="evidence-delete-btn"
                           >
-                            <Trash2 style={{ width: "13px", height: "13px" }} />
+                            <Trash2 />
                             {deletingId === entry.id ? "Deleting..." : "Delete"}
                           </button>
                         </div>
