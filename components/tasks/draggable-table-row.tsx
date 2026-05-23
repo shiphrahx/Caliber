@@ -38,13 +38,7 @@ export function DraggableTableRow({ task, children, onDoubleClick }: DraggableTa
     return (
       <tr ref={setNodeRef} style={style} {...attributes}>
         <td colSpan={7} style={{ padding: "6px 12px" }}>
-          <div style={{
-            height: "32px",
-            border: "1px dashed var(--border-2)",
-            borderRadius: "4px",
-            background: "var(--surf-2)",
-            opacity: 0.5,
-          }} />
+          <div className="drag-placeholder-row" />
         </td>
       </tr>
     )

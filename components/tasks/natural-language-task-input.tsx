@@ -119,24 +119,8 @@ export function NaturalLanguageTaskInput({
 
   return (
     <>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          background: "var(--surface-2)",
-          border: "1px solid var(--border-2)",
-          borderRadius: "8px",
-          padding: "6px 8px",
-          maxWidth: "480px",
-          width: "100%",
-        }}
-      >
-        <Sparkles
-          size={15}
-          style={{ color: "var(--text-3)", flexShrink: 0 }}
-          aria-hidden
-        />
+      <div className="nl-task-wrap">
+        <Sparkles size={15} className="nl-task-icon" aria-hidden />
         <Input
           value={input}
           onChange={e => setInput(e.target.value)}
@@ -158,22 +142,17 @@ export function NaturalLanguageTaskInput({
         <button
           onClick={handleParse}
           disabled={!input.trim() || isParsing}
+          className="nl-task-submit-btn"
           style={{
-            background: "none",
-            border: "none",
-            padding: "2px 4px",
             cursor: input.trim() && !isParsing ? "pointer" : "default",
             color: input.trim() && !isParsing ? "var(--text-2)" : "var(--text-4)",
-            flexShrink: 0,
-            display: "flex",
-            alignItems: "center",
           }}
           aria-label="Parse task"
         >
           {isParsing ? (
             <Loader2 size={14} className="animate-spin" />
           ) : (
-            <span style={{ fontSize: "var(--text-meta)" }}>⏎</span>
+            <span className="nl-task-enter">⏎</span>
           )}
         </button>
       </div>
@@ -185,7 +164,7 @@ export function NaturalLanguageTaskInput({
             <DialogTitle>Review parsed task</DialogTitle>
             <DialogDescription>
               {preview && (
-                <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span className="nl-preview-header">
                   {ConfidenceIcon && (
                     <ConfidenceIcon
                       size={14}
@@ -193,10 +172,10 @@ export function NaturalLanguageTaskInput({
                       aria-hidden
                     />
                   )}
-                  <span style={{ color: confidenceConfig?.color, fontSize: "var(--text-meta)" }}>
+                  <span className="nl-preview-confidence-label" style={{ color: confidenceConfig?.color }}>
                     {confidenceConfig?.label}
                   </span>
-                  <span style={{ color: "var(--text-3)", fontSize: "var(--text-meta)" }}>
+                  <span className="nl-preview-raw">
                     — from: &ldquo;{preview.rawInput}&rdquo;
                   </span>
                 </span>
@@ -205,9 +184,9 @@ export function NaturalLanguageTaskInput({
           </DialogHeader>
 
           {preview && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px", paddingTop: "8px" }}>
+            <div className="nl-preview-grid">
               {/* Title */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              <div className="nl-preview-field">
                 <Label htmlFor="nl-title">Title</Label>
                 <Input
                   id="nl-title"
@@ -217,47 +196,33 @@ export function NaturalLanguageTaskInput({
                 />
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div className="nl-preview-2col">
                 {/* Priority */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <div className="nl-preview-field">
                   <Label htmlFor="nl-priority">Priority</Label>
-                  <Select
-                    value={preview.priority}
-                    onValueChange={val => updatePreview("priority", val)}
-                  >
-                    <SelectTrigger id="nl-priority">
-                      <SelectValue />
-                    </SelectTrigger>
+                  <Select value={preview.priority} onValueChange={val => updatePreview("priority", val)}>
+                    <SelectTrigger id="nl-priority"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {TASK_PRIORITIES.map(p => (
-                        <SelectItem key={p} value={p}>{p}</SelectItem>
-                      ))}
+                      {TASK_PRIORITIES.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
 
                 {/* Category */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <div className="nl-preview-field">
                   <Label htmlFor="nl-category">Category</Label>
-                  <Select
-                    value={preview.category}
-                    onValueChange={val => updatePreview("category", val)}
-                  >
-                    <SelectTrigger id="nl-category">
-                      <SelectValue />
-                    </SelectTrigger>
+                  <Select value={preview.category} onValueChange={val => updatePreview("category", val)}>
+                    <SelectTrigger id="nl-category"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {TASK_CATEGORIES.map(c => (
-                        <SelectItem key={c} value={c}>{c}</SelectItem>
-                      ))}
+                      {TASK_CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div className="nl-preview-2col">
                 {/* Due date */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <div className="nl-preview-field">
                   <Label htmlFor="nl-due">Due date</Label>
                   <Input
                     id="nl-due"
@@ -268,15 +233,10 @@ export function NaturalLanguageTaskInput({
                 </div>
 
                 {/* List */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <div className="nl-preview-field">
                   <Label htmlFor="nl-list">List</Label>
-                  <Select
-                    value={preview.list}
-                    onValueChange={val => updatePreview("list", val)}
-                  >
-                    <SelectTrigger id="nl-list">
-                      <SelectValue />
-                    </SelectTrigger>
+                  <Select value={preview.list} onValueChange={val => updatePreview("list", val)}>
+                    <SelectTrigger id="nl-list"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="week">This week</SelectItem>
                       <SelectItem value="backlog">Backlog</SelectItem>
@@ -287,34 +247,17 @@ export function NaturalLanguageTaskInput({
 
               {/* Assignee (display-only, matched from people) */}
               {assigneeName && (
-                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <div className="nl-preview-field">
                   <Label>Linked person</Label>
-                  <div
-                    style={{
-                      fontSize: "var(--text-caption)",
-                      color: "var(--text-2)",
-                      background: "var(--surface-2)",
-                      border: "1px solid var(--border-2)",
-                      borderRadius: "6px",
-                      padding: "6px 10px",
-                    }}
-                  >
-                    {assigneeName}
-                  </div>
+                  <div className="nl-assignee-display">{assigneeName}</div>
                 </div>
               )}
             </div>
           )}
 
-          <DialogFooter style={{ marginTop: "8px" }}>
-            <Button variant="outline" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleConfirm}
-              disabled={!preview?.title.trim()}
-              className="btn-primary"
-            >
+          <DialogFooter className="nl-preview-footer">
+            <Button variant="outline" onClick={handleClose}>Cancel</Button>
+            <Button onClick={handleConfirm} disabled={!preview?.title.trim()} className="btn-primary">
               Create task
             </Button>
           </DialogFooter>

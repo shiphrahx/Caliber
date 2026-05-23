@@ -153,38 +153,18 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
   return (
     <div className="space-y-0">
       {/* Controls row */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", marginBottom: "12px" }}>
+      <div className="backlog-controls">
         {/* Left: search + filters button */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div className="backlog-controls-left">
           {/* Search */}
-          <div style={{ position: "relative" }}>
-            <Search
-              className="absolute"
-              style={{
-                width: "14px",
-                height: "14px",
-                left: "10px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "var(--text-3)",
-                pointerEvents: "none",
-              }}
-            />
+          <div className="backlog-search-wrap">
+            <Search className="absolute backlog-search-icon" />
             <input
               type="text"
               placeholder="Search tasks..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                background: "var(--surf)",
-                border: "1px solid var(--border-1)",
-                borderRadius: "6px",
-                padding: "5px 10px 5px 30px",
-                fontSize: "var(--text-label)",
-                color: "var(--text-1)",
-                width: "180px",
-                outline: "none",
-              }}
+              className="backlog-search-input"
               onFocus={e => (e.currentTarget.style.borderColor = "var(--border-2)")}
               onBlur={e => (e.currentTarget.style.borderColor = "var(--border-1)")}
             />
@@ -193,24 +173,15 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
           {/* Filters button */}
           <button
             onClick={() => setShowFilters(!showFilters)}
-            style={{
-              background: showFilters ? "var(--surf-3)" : "transparent",
-              border: "1px solid var(--border-2)",
-              color: "var(--text-2)",
-              fontSize: "var(--text-label)",
-              padding: "5px 10px",
-              borderRadius: "6px",
-              cursor: "pointer",
-            }}
-            onMouseEnter={e => (e.currentTarget.style.color = "var(--text-1)")}
-            onMouseLeave={e => (e.currentTarget.style.color = "var(--text-2)")}
+            className="backlog-filters-btn"
+            style={{ background: showFilters ? "var(--surf-3)" : "transparent" }}
           >
             Filters
           </button>
         </div>
 
         {/* Right: AI Prioritise + New task */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div className="backlog-controls-right">
           {/* AI Prioritise button */}
           <button
             onClick={handleAIPrioritise}
@@ -260,22 +231,7 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
           </button>
 
           {/* New task */}
-          <button
-            onClick={onQuickAdd}
-            style={{
-              background: "linear-gradient(90deg, #00ffe5 0%, #00f058 100%)",
-              color: "#0a1a0a",
-              fontSize: "var(--text-caption)",
-              fontWeight: 600,
-              padding: "4px 10px",
-              borderRadius: "4px",
-              border: "none",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "5px",
-            }}
-          >
+          <button onClick={onQuickAdd} className="backlog-new-task-btn">
             <Plus className="h-3.5 w-3.5" />
             New task
           </button>
@@ -284,54 +240,26 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
 
       {/* AI ranking active banner */}
       {aiRankings && (
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          padding: "8px 12px",
-          background: "rgba(124,58,237,0.08)",
-          border: "1px solid rgba(124,58,237,0.25)",
-          borderRadius: "6px",
-          marginBottom: "12px",
-          fontSize: "var(--text-label)",
-          color: "#a78bfa",
-        }}>
-          <Sparkles style={{ width: "13px", height: "13px", flexShrink: 0 }} />
+        <div className="backlog-ai-banner">
+          <Sparkles />
           <span>Backlog ranked by AI priority. Hover the rank number to see the reason. <strong style={{ color: "#c4b5fd" }}>Drag to reorder manually.</strong></span>
         </div>
       )}
 
       {/* Filter row */}
       {showFilters && (
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "16px",
-          padding: "12px 16px",
-          background: "var(--surf)",
-          border: "1px solid var(--border-1)",
-          borderRadius: "8px",
-          marginBottom: "12px",
-        }}>
+        <div className="backlog-filter-row">
           {[
             { label: "Status", value: statusFilter, onChange: (v: string) => setStatusFilter(v as TaskStatus | "all"), options: TASK_STATUSES },
             { label: "Priority", value: priorityFilter, onChange: (v: string) => setPriorityFilter(v as TaskPriority | "all"), options: TASK_PRIORITIES },
             { label: "Category", value: categoryFilter, onChange: (v: string) => setCategoryFilter(v as TaskCategory | "all"), options: TASK_CATEGORIES },
           ].map(({ label, value, onChange, options }) => (
-            <div key={label} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <label style={{ fontSize: "var(--text-label)", color: "var(--text-2)", fontWeight: 500 }}>{label}:</label>
+            <div key={label} className="backlog-filter-item">
+              <label className="backlog-filter-label">{label}:</label>
               <select
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                style={{
-                  background: "var(--surf-2)",
-                  border: "1px solid var(--border-2)",
-                  borderRadius: "4px",
-                  padding: "3px 6px",
-                  fontSize: "var(--text-label)",
-                  color: "var(--text-1)",
-                  cursor: "pointer",
-                }}
+                className="backlog-filter-select"
               >
                 <option value="all">All</option>
                 {options.map((opt) => (
@@ -368,13 +296,11 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
           <thead>
             <tr style={{ borderBottom: "1px solid var(--border-1)" }}>
               {/* Drag handle col */}
-              <th style={{ padding: "8px 12px", background: "var(--surf)" }} />
+              <th className="backlog-th-handle" />
               {/* AI rank col header */}
               {aiRankings && (
-                <th style={{ padding: "8px 6px", background: "var(--surf)", textAlign: "center" }}>
-                  <span style={{ fontSize: "var(--text-overline)", color: "#a78bfa", fontFamily: "var(--font-mono)", fontWeight: 600 }}>
-                    #
-                  </span>
+                <th className="backlog-th-rank">
+                  <span className="backlog-th-rank-label">#</span>
                 </th>
               )}
               {/* Sortable columns */}
@@ -387,34 +313,19 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
                   category: "Category",
                 }
                 return (
-                  <th
-                    key={field}
-                    className="col-header"
-                    style={{ padding: "8px 12px", background: "var(--surf)" }}
-                  >
+                  <th key={field} className="backlog-th">
                     <button
                       onClick={() => handleSort(field)}
-                      className="col-header"
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "4px",
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        padding: 0,
-                      }}
-                      onMouseEnter={e => (e.currentTarget.style.color = "var(--text-2)")}
-                      onMouseLeave={e => (e.currentTarget.style.color = "var(--text-3)")}
+                      className="backlog-sort-btn"
                     >
                       {labels[field]}
-                      <ArrowUpDown style={{ width: "11px", height: "11px", flexShrink: 0 }} />
+                      <ArrowUpDown />
                     </button>
                   </th>
                 )
               })}
               {/* Actions col */}
-              <th style={{ padding: "8px 12px", background: "var(--surf)" }} />
+              <th className="backlog-th" />
             </tr>
           </thead>
           <tbody>
@@ -427,7 +338,7 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
                 >
                   {/* Drag handle */}
                   <td
-                    style={{ padding: "9px 12px", textAlign: "center" }}
+                    className="backlog-td-handle"
                     onDoubleClick={(e) => e.stopPropagation()}
                   >
                     <div className="active:cursor-grabbing drag-handle cursor-grab inline-flex">
@@ -440,42 +351,33 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
                     const ranking = rankMap.get(task.id)
                     return (
                       <td
-                        style={{ padding: "9px 6px", textAlign: "center" }}
+                        className="backlog-td-rank"
                         title={ranking?.reason ?? "Not ranked"}
                       >
                         {ranking ? (
-                          <span style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            width: "22px",
-                            height: "22px",
-                            borderRadius: "50%",
-                            background: ranking.rank <= 3 ? "rgba(124,58,237,0.2)" : "var(--surf-3)",
-                            color: ranking.rank <= 3 ? "#a78bfa" : "var(--text-3)",
-                            fontSize: "var(--text-overline)",
-                            fontFamily: "var(--font-mono)",
-                            fontWeight: 700,
-                          }}>
+                          <span
+                            className="backlog-rank-badge"
+                            style={{
+                              background: ranking.rank <= 3 ? "rgba(124,58,237,0.2)" : "var(--surf-3)",
+                              color: ranking.rank <= 3 ? "#a78bfa" : "var(--text-3)",
+                            }}
+                          >
                             {ranking.rank}
                           </span>
                         ) : (
-                          <span style={{ color: "var(--text-3)", fontSize: "var(--text-overline)" }}>—</span>
+                          <span className="backlog-rank-unranked">—</span>
                         )}
                       </td>
                     )
                   })()}
 
                   {/* Name */}
-                  <td
-                    style={{ padding: "9px 12px", color: "var(--text-1)", fontSize: "var(--text-meta)", overflow: "hidden" }}
-                    title={task.title}
-                  >
+                  <td className="backlog-td-name" title={task.title}>
                     <div className="line-clamp-2 break-all max-md:break-words">{task.title}</div>
                   </td>
 
                   {/* Status */}
-                  <td style={{ padding: "9px 12px" }} onClick={(e) => e.stopPropagation()}>
+                  <td className="backlog-td" onClick={(e) => e.stopPropagation()}>
                     <BadgeSelect
                       value={task.status}
                       onValueChange={(value) => onUpdateTask(task.id, { status: value as TaskStatus })}
@@ -497,17 +399,12 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
                   </td>
 
                   {/* Due date */}
-                  <td style={{
-                    padding: "9px 12px",
-                    fontSize: "var(--text-overline)",
-                    color: "var(--text-3)",
-                    fontFamily: "var(--font-mono)",
-                  }}>
+                  <td className="backlog-td-date">
                     {formatDate(task.dueDate) || "—"}
                   </td>
 
                   {/* Priority */}
-                  <td style={{ padding: "9px 12px" }} onClick={(e) => e.stopPropagation()}>
+                  <td className="backlog-td" onClick={(e) => e.stopPropagation()}>
                     <BadgeSelect
                       value={task.priority}
                       onValueChange={(value) => onUpdateTask(task.id, { priority: value as TaskPriority })}
@@ -529,7 +426,7 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
                   </td>
 
                   {/* Category */}
-                  <td style={{ padding: "9px 12px" }} onClick={(e) => e.stopPropagation()}>
+                  <td className="backlog-td" onClick={(e) => e.stopPropagation()}>
                     <BadgeSelect
                       value={task.category}
                       onValueChange={(value) => onUpdateTask(task.id, { category: value as TaskCategory })}
@@ -552,41 +449,21 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
 
                   {/* Actions */}
                   <td
-                    style={{ padding: "9px 12px", textAlign: "center" }}
+                    className="backlog-td-actions"
                     onClick={(e) => e.stopPropagation()}
                     onDoubleClick={(e) => e.stopPropagation()}
                   >
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 justify-center">
                       <button
                         onClick={(e) => { e.stopPropagation(); onEdit(task) }}
-                        style={{
-                          border: "1px solid var(--border-2)",
-                          color: "var(--text-3)",
-                          borderRadius: "4px",
-                          padding: "2px 7px",
-                          fontSize: "var(--text-meta)",
-                          background: "none",
-                          cursor: "pointer",
-                        }}
-                        onMouseEnter={e => (e.currentTarget.style.color = "var(--text-1)")}
-                        onMouseLeave={e => (e.currentTarget.style.color = "var(--text-3)")}
+                        className="backlog-action-btn"
                       >
                         Edit
                       </button>
                       {onDelete && (
                         <button
                           onClick={(e) => { e.stopPropagation(); onDelete(task.id) }}
-                          style={{
-                            border: "1px solid var(--border-2)",
-                            color: "var(--text-3)",
-                            borderRadius: "4px",
-                            padding: "2px 7px",
-                            fontSize: "var(--text-meta)",
-                            background: "none",
-                            cursor: "pointer",
-                          }}
-                          onMouseEnter={e => (e.currentTarget.style.color = "#f87171")}
-                          onMouseLeave={e => (e.currentTarget.style.color = "var(--text-3)")}
+                          className="backlog-action-btn backlog-action-btn--danger"
                           aria-label="Delete task"
                         >
                           Delete

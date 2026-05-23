@@ -120,7 +120,7 @@ export function TaskModal({ task, isOpen, onClose, onSave, onDelete }: TaskModal
 
             <div className="grid gap-2">
               <Label>Priority</Label>
-              <div style={{ display: "flex", gap: "6px" }}>
+              <div className="flex gap-1.5">
                 {TASK_PRIORITIES.map((priority) => {
                   const isSelected = formData.priority === priority
                   const s = PRIORITY_BADGE[priority]

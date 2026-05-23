@@ -39,43 +39,16 @@ export function BoardColumn({ status, tasks, onEdit, onDelete, onQuickAdd }: Boa
       }}
     >
       {/* Column header */}
-      <div
-        style={{
-          padding: "10px 14px",
-          borderBottom: "1px solid var(--border-1)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
+      <div className="board-col-header">
         {/* Left: dot + name + count */}
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          <span style={{
-            display: "inline-block",
-            width: "7px",
-            height: "7px",
-            borderRadius: "50%",
-            background: dotColor,
-            flexShrink: 0,
-          }} />
-          <span style={{ fontSize: "var(--text-meta)", fontWeight: 500, color: "var(--text-1)" }}>{status}</span>
-          <span style={{
-            background: "var(--surf-3)",
-            color: "var(--text-3)",
-            fontSize: "var(--text-overline)",
-            borderRadius: "3px",
-            padding: "1px 5px",
-            fontFamily: "var(--font-mono)",
-          }}>{tasks.length}</span>
+        <div className="board-col-header-left">
+          <span className="board-col-dot" style={{ background: dotColor }} />
+          <span className="board-col-name">{status}</span>
+          <span className="board-col-count">{tasks.length}</span>
         </div>
 
         {/* Right: add button */}
-        <button
-          onClick={() => onQuickAdd(status)}
-          style={{ color: "var(--text-3)", background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}
-          onMouseEnter={e => (e.currentTarget.style.color = "#00f058")}
-          onMouseLeave={e => (e.currentTarget.style.color = "var(--text-3)")}
-        >
+        <button onClick={() => onQuickAdd(status)} className="board-col-add-btn">
           <Plus className="h-4 w-4" />
         </button>
       </div>
@@ -104,55 +77,21 @@ export function BoardColumn({ status, tasks, onEdit, onDelete, onQuickAdd }: Boa
 
           {/* Empty state when done column is empty (not dragging) */}
           {tasks.length === 0 && !isOver && status === "Done" && (
-            <div style={{
-              border: "1px dashed var(--border-1)",
-              borderRadius: "6px",
-              minHeight: "60px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}>
-              <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>No tasks yet</span>
+            <div className="board-col-empty">
+              <span className="board-col-empty-text">No tasks yet</span>
             </div>
           )}
 
           {/* Drop placeholder when dragging over empty column */}
           {tasks.length === 0 && isOver && (
-            <div style={{
-              height: "60px",
-              border: "1px dashed var(--border-2)",
-              borderRadius: "6px",
-              background: "var(--surf-2)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}>
-              <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>Drop here</span>
+            <div className="board-col-drop-placeholder">
+              <span className="board-col-empty-text">Drop here</span>
             </div>
           )}
         </div>
 
         {/* Add task row */}
-        <button
-          onClick={() => onQuickAdd(status)}
-          style={{
-            padding: "7px 12px",
-            borderTop: "1px solid var(--border-1)",
-            borderLeft: "none",
-            borderRight: "none",
-            borderBottom: "none",
-            color: "var(--text-3)",
-            fontSize: "var(--text-caption)",
-            background: "none",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: "5px",
-            width: "100%",
-          }}
-          onMouseEnter={e => (e.currentTarget.style.color = "#00f058")}
-          onMouseLeave={e => (e.currentTarget.style.color = "var(--text-3)")}
-        >
+        <button onClick={() => onQuickAdd(status)} className="board-col-add-task-btn">
           <Plus className="h-3.5 w-3.5" />
           Add task
         </button>

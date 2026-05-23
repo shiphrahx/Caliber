@@ -24,19 +24,8 @@ const STATUS_BORDER: Record<Task["status"], string> = {
 function PriorityPill({ priority }: { priority: Task["priority"] }) {
   const { bg, color: text, dot } = PRIORITY_BADGE[priority]
   return (
-    <span style={{
-      display: "inline-flex",
-      alignItems: "center",
-      gap: "4px",
-      padding: "2px 7px",
-      borderRadius: "4px",
-      fontSize: "var(--text-overline)",
-      fontWeight: 500,
-      fontFamily: "var(--font-mono)",
-      background: bg,
-      color: text,
-    }}>
-      <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: dot, flexShrink: 0 }} />
+    <span className="priority-pill" style={{ background: bg, color: text }}>
+      <span className="priority-pill-dot" style={{ background: dot }} />
       {priority}
     </span>
   )
@@ -45,19 +34,8 @@ function PriorityPill({ priority }: { priority: Task["priority"] }) {
 function StatusPill({ status }: { status: Task["status"] }) {
   const { bg, color: text, dot } = STATUS_BADGE[status]
   return (
-    <span style={{
-      display: "inline-flex",
-      alignItems: "center",
-      gap: "4px",
-      padding: "2px 7px",
-      borderRadius: "4px",
-      fontSize: "var(--text-overline)",
-      fontWeight: 500,
-      fontFamily: "var(--font-mono)",
-      background: bg,
-      color: text,
-    }}>
-      <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: dot, flexShrink: 0 }} />
+    <span className="priority-pill" style={{ background: bg, color: text }}>
+      <span className="priority-pill-dot" style={{ background: dot }} />
       {status}
     </span>
   )
@@ -154,48 +132,19 @@ export function TaskCard({ task, onEdit, onDelete, isDragging = false }: TaskCar
           onClick={handleMenuClick}
           onPointerDown={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
-          style={{
-            background: "none",
-            border: "none",
-            color: "var(--text-3)",
-            cursor: "pointer",
-            padding: "2px",
-            borderRadius: "4px",
-          }}
+          className="task-card-menu-btn"
           aria-label="Task actions"
         >
           <MoreVertical className="h-4 w-4" />
         </button>
 
         {menuOpen && (
-          <div style={{
-            position: "absolute",
-            right: 0,
-            marginTop: "4px",
-            width: "128px",
-            background: "var(--surf-2)",
-            border: "1px solid var(--border-2)",
-            borderRadius: "8px",
-            boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
-            zIndex: 50,
-            overflow: "hidden",
-          }}>
+          <div className="task-card-menu-dropdown">
             <button
               onClick={handleEdit}
               onPointerDown={(e) => e.stopPropagation()}
               onMouseDown={(e) => e.stopPropagation()}
-              style={{
-                width: "100%",
-                textAlign: "left",
-                padding: "8px 12px",
-                fontSize: "var(--text-label)",
-                color: "var(--text-1)",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-              }}
-              onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-3)")}
-              onMouseLeave={e => (e.currentTarget.style.background = "none")}
+              className="task-card-menu-item task-card-menu-item--edit"
             >
               Edit
             </button>
@@ -204,18 +153,7 @@ export function TaskCard({ task, onEdit, onDelete, isDragging = false }: TaskCar
                 onClick={handleDelete}
                 onPointerDown={(e) => e.stopPropagation()}
                 onMouseDown={(e) => e.stopPropagation()}
-                style={{
-                  width: "100%",
-                  textAlign: "left",
-                  padding: "8px 12px",
-                  fontSize: "var(--text-label)",
-                  color: "#f87171",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                }}
-                onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-3)")}
-                onMouseLeave={e => (e.currentTarget.style.background = "none")}
+                className="task-card-menu-item task-card-menu-item--delete"
               >
                 Delete
               </button>
@@ -225,32 +163,14 @@ export function TaskCard({ task, onEdit, onDelete, isDragging = false }: TaskCar
       </div>
 
       {/* Task name */}
-      <p style={{
-        fontSize: "var(--text-meta)",
-        fontWeight: 400,
-        color: "var(--text-1)",
-        marginBottom: "9px",
-        lineHeight: 1.4,
-        paddingRight: "20px",
-      }}
-        className="line-clamp-2 break-words"
-      >
-        {task.title}
-      </p>
+      <p className="task-title line-clamp-2 break-words">{task.title}</p>
 
       {/* Meta row */}
-      <div style={{ display: "flex", alignItems: "center", gap: "5px", flexWrap: "wrap" }}>
+      <div className="task-meta-row">
         <PriorityPill priority={task.priority} />
         <StatusPill status={task.status} />
         {task.dueDate && (
-          <span style={{
-            fontSize: "var(--text-overline)",
-            color: "var(--text-3)",
-            fontFamily: "var(--font-mono)",
-            marginLeft: "auto",
-          }}>
-            {formatDate(task.dueDate)}
-          </span>
+          <span className="task-due-date">{formatDate(task.dueDate)}</span>
         )}
       </div>
     </div>
