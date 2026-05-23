@@ -52,134 +52,52 @@ export function FollowUpForm({
   }
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,0.6)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-      }}
-      onClick={onCancel}
-    >
-      <div
-        style={{
-          background: 'var(--surf-2)',
-          border: '1px solid var(--border-2)',
-          borderRadius: '8px',
-          padding: '20px',
-          width: '400px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '14px',
-        }}
-        onClick={e => e.stopPropagation()}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: 'var(--text-body)', fontWeight: 600, color: 'var(--text-1)' }}>
-            Add follow-up for {personName}
-          </span>
-          <button onClick={onCancel} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', display: 'flex' }}>
-            <X style={{ width: '14px', height: '14px' }} />
+    <div className="modal-overlay" onClick={onCancel}>
+      <div className="modal-box modal-box--sm" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <span className="modal-title">Add follow-up for {personName}</span>
+          <button onClick={onCancel} className="modal-close-btn">
+            <X />
           </button>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div className="modal-field">
           <label className="form-label">Title</label>
           <input
             autoFocus
             value={title}
             onChange={e => setTitle(e.target.value)}
             placeholder="What did you commit to?"
-            style={{
-              background: 'var(--surf-3)',
-              border: '1px solid var(--border-2)',
-              borderRadius: '4px',
-              color: 'var(--text-1)',
-              fontSize: 'var(--text-body)',
-              padding: '7px 10px',
-              fontFamily: 'var(--font-sans)',
-              outline: 'none',
-            }}
+            className="modal-input"
           />
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div className="modal-field">
           <label className="form-label">Description (optional)</label>
           <textarea
             value={description}
             onChange={e => setDescription(e.target.value)}
             placeholder="Additional context..."
             rows={3}
-            style={{
-              background: 'var(--surf-3)',
-              border: '1px solid var(--border-2)',
-              borderRadius: '4px',
-              color: 'var(--text-1)',
-              fontSize: 'var(--text-meta)',
-              padding: '7px 10px',
-              resize: 'none',
-              fontFamily: 'var(--font-sans)',
-              outline: 'none',
-            }}
+            className="modal-textarea"
           />
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div className="modal-field">
           <label className="form-label">Due date (optional)</label>
           <input
             type="date"
             value={dueDate}
             onChange={e => setDueDate(e.target.value)}
-            style={{
-              background: 'var(--surf-3)',
-              border: '1px solid var(--border-2)',
-              borderRadius: '4px',
-              color: 'var(--text-1)',
-              fontSize: 'var(--text-meta)',
-              padding: '6px 10px',
-              fontFamily: 'var(--font-sans)',
-              outline: 'none',
-            }}
+            className="modal-input modal-input--date"
           />
         </div>
 
-        {error && <p style={{ fontSize: 'var(--text-meta)', color: '#ff6b6b', margin: 0 }}>{error}</p>}
+        {error && <p className="modal-error">{error}</p>}
 
-        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-          <button
-            onClick={onCancel}
-            style={{
-              background: 'var(--surf-3)',
-              border: '1px solid var(--border-2)',
-              borderRadius: '4px',
-              color: 'var(--text-2)',
-              fontSize: 'var(--text-meta)',
-              padding: '6px 14px',
-              cursor: 'pointer',
-              fontFamily: 'var(--font-sans)',
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            style={{
-              background: '#00f058',
-              border: '1px solid #00f058',
-              borderRadius: '4px',
-              color: '#000',
-              fontSize: 'var(--text-meta)',
-              fontWeight: 600,
-              padding: '6px 14px',
-              cursor: saving ? 'not-allowed' : 'pointer',
-              opacity: saving ? 0.7 : 1,
-              fontFamily: 'var(--font-sans)',
-            }}
-          >
+        <div className="modal-footer">
+          <button onClick={onCancel} className="modal-btn-cancel">Cancel</button>
+          <button onClick={handleSave} disabled={saving} className="modal-btn-primary">
             {saving ? 'Saving...' : 'Save follow-up'}
           </button>
         </div>
