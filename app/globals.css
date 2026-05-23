@@ -973,6 +973,40 @@ label { font-size: var(--text-label); color: var(--text-2); }
 .review-section-body--empty { padding: 14px 16px; }
 .review-empty-state { display: flex; align-items: center; gap: 8px; color: #00f058; font-size: 12px; }
 
+/* ── Batch evidence import modal ── */
+.batch-input-area { display: flex; flex-direction: column; gap: 12px; padding: 4px 0; }
+.batch-label-row { display: flex; justify-content: space-between; }
+.batch-char-count { font-size: var(--text-caption); }
+.batch-char-count--ok { color: var(--text-3); }
+.batch-char-count--over { color: #f87171; }
+.batch-textarea { margin-top: 6px; font-family: var(--font-mono); font-size: var(--text-caption); }
+.batch-context-hint { font-size: var(--text-label); color: var(--text-3); }
+.batch-extract-error { display: flex; align-items: center; gap: 6px; color: #f87171; font-size: var(--text-label); }
+.batch-preview-area { display: flex; flex-direction: column; gap: 12px; }
+.batch-toolbar { display: flex; align-items: center; justify-content: space-between; }
+.batch-toolbar-btns { display: flex; gap: 8px; align-items: center; }
+.batch-toolbar-btn {
+  font-size: var(--text-caption); color: var(--text-3);
+  background: none; border: none; cursor: pointer; padding: 2px 6px;
+}
+.batch-toolbar-count { font-size: var(--text-caption); color: var(--text-3); }
+.batch-table {
+  max-height: 420px;
+  overflow-y: auto;
+  border: 1px solid var(--border-2);
+  border-radius: 8px;
+}
+.batch-empty { padding: 24px; text-align: center; color: var(--text-3); }
+.batch-row { padding: 12px 14px; border-bottom: 1px solid var(--border-1); }
+.batch-row-inner { display: flex; align-items: flex-start; gap: 10px; }
+.batch-row-checkbox {
+  background: none; border: none; cursor: pointer; padding: 2px; flex-shrink: 0; margin-top: 2px;
+}
+.batch-row-fields { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.batch-row-grid { display: grid; grid-template-columns: 1fr 1fr 140px 1fr; gap: 6px; }
+.batch-row-warn { font-size: var(--text-caption); color: #fbbf24; margin: 0; }
+.batch-row-err { font-size: var(--text-caption); color: #f87171; margin: 0; }
+
 /* ── Tone picker (follow-up draft modal) ── */
 .tone-btn {
   padding: 4px 14px;

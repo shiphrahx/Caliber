@@ -236,11 +236,11 @@ export function BatchEvidenceImportModal({
 
         {step === 'input' && (
           <>
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px", padding: "4px 0" }}>
+            <div className="batch-input-area">
               <div>
-                <Label htmlFor="paste-input" style={{ display: "flex", justifyContent: "space-between" }}>
+                <Label htmlFor="paste-input" className="batch-label-row">
                   <span>Text to extract from</span>
-                  <span style={{ color: text.length > MAX_TEXT_LENGTH ? "#f87171" : "var(--text-3)", fontSize: "var(--text-caption)" }}>
+                  <span className={`batch-char-count ${text.length > MAX_TEXT_LENGTH ? "batch-char-count--over" : "batch-char-count--ok"}`}>
                     {text.length}/{MAX_TEXT_LENGTH}
                   </span>
                 </Label>
@@ -250,18 +250,18 @@ export function BatchEvidenceImportModal({
                   onChange={e => setText(e.target.value)}
                   placeholder="Paste Slack messages, email content, performance notes, or any text containing observations about your team..."
                   rows={10}
-                  style={{ marginTop: "6px", fontFamily: "var(--font-mono)", fontSize: "var(--text-caption)" }}
+                  className="batch-textarea"
                 />
               </div>
 
               {contextPersonName && (
-                <p style={{ fontSize: "var(--text-label)", color: "var(--text-3)" }}>
+                <p className="batch-context-hint">
                   Context: entries will be attributed to <strong style={{ color: "var(--text-2)" }}>{contextPersonName}</strong> unless another name is found.
                 </p>
               )}
 
               {error && (
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#f87171", fontSize: "var(--text-label)" }}>
+                <div className="batch-extract-error">
                   <AlertCircle size={13} /> {error}
                 </div>
               )}
@@ -269,10 +269,7 @@ export function BatchEvidenceImportModal({
 
             <DialogFooter>
               <Button variant="outline" onClick={handleClose}>Cancel</Button>
-              <Button
-                onClick={handleExtract}
-                disabled={extracting || !text.trim()}
-              >
+              <Button onClick={handleExtract} disabled={extracting || !text.trim()}>
                 {extracting
                   ? <><Loader2 size={13} style={{ marginRight: 6, animation: "spin 1s linear infinite" }} /> Extracting…</>
                   : <><Upload size={13} style={{ marginRight: 6 }} /> Extract Evidence</>
@@ -284,62 +281,41 @@ export function BatchEvidenceImportModal({
 
         {step === 'preview' && (
           <>
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div className="batch-preview-area">
               {/* Toolbar */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                  <button
-                    type="button"
-                    onClick={() => toggleAll(true)}
-                    style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", background: "none", border: "none", cursor: "pointer", padding: "2px 6px" }}
-                  >
-                    Select all
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => toggleAll(false)}
-                    style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", background: "none", border: "none", cursor: "pointer", padding: "2px 6px" }}
-                  >
-                    Deselect all
-                  </button>
+              <div className="batch-toolbar">
+                <div className="batch-toolbar-btns">
+                  <button type="button" onClick={() => toggleAll(true)} className="batch-toolbar-btn">Select all</button>
+                  <button type="button" onClick={() => toggleAll(false)} className="batch-toolbar-btn">Deselect all</button>
                 </div>
-                <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>
-                  {selectedCount} selected · {saveable} will save
-                </span>
+                <span className="batch-toolbar-count">{selectedCount} selected · {saveable} will save</span>
               </div>
 
               {/* Preview table */}
-              <div style={{
-                maxHeight: "420px",
-                overflowY: "auto",
-                border: "1px solid var(--border-2)",
-                borderRadius: "8px",
-              }}>
+              <div className="batch-table">
                 {rows.length === 0 ? (
-                  <div style={{ padding: "24px", textAlign: "center", color: "var(--text-3)" }}>
-                    No evidence entries extracted.
-                  </div>
+                  <div className="batch-empty">No evidence entries extracted.</div>
                 ) : rows.map((row) => (
                   <div
                     key={row._key}
+                    className="batch-row"
                     style={{
-                      padding: "12px 14px",
-                      borderBottom: "1px solid var(--border-1)",
                       background: row.selected ? "var(--surf)" : "var(--surf-2)",
                       opacity: row.selected ? 1 : 0.5,
                     }}
                   >
-                    <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                    <div className="batch-row-inner">
                       {/* Checkbox */}
                       <button
                         type="button"
                         onClick={() => updateRow(row._key, { selected: !row.selected })}
-                        style={{ background: "none", border: "none", cursor: "pointer", color: row.selected ? "#00f058" : "var(--text-3)", padding: "2px", flexShrink: 0, marginTop: "2px" }}
+                        className="batch-row-checkbox"
+                        style={{ color: row.selected ? "#00f058" : "var(--text-3)" }}
                       >
                         {row.selected ? <CheckSquare size={16} /> : <Square size={16} />}
                       </button>
 
-                      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "8px" }}>
+                      <div className="batch-row-fields">
                         {/* Title */}
                         <Input
                           value={row.title}
@@ -349,7 +325,7 @@ export function BatchEvidenceImportModal({
                         />
 
                         {/* Row 2: category, sentiment, date, person */}
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 140px 1fr", gap: "6px" }}>
+                        <div className="batch-row-grid">
                           {/* Category */}
                           <Select
                             value={row.category ?? 'general'}
@@ -413,16 +389,14 @@ export function BatchEvidenceImportModal({
 
                         {/* Ambiguity warning */}
                         {row.ambiguous && (
-                          <p style={{ fontSize: "var(--text-caption)", color: "#fbbf24", margin: 0 }}>
-                            ⚠ Could not match "{row.personName}" — please select a person manually.
+                          <p className="batch-row-warn">
+                            ⚠ Could not match &ldquo;{row.personName}&rdquo; — please select a person manually.
                           </p>
                         )}
 
                         {/* Missing person warning */}
                         {!row.personId && !row.ambiguous && row.selected && (
-                          <p style={{ fontSize: "var(--text-caption)", color: "#f87171", margin: 0 }}>
-                            Person required — this entry will not be saved.
-                          </p>
+                          <p className="batch-row-err">Person required — this entry will not be saved.</p>
                         )}
                       </div>
                     </div>
@@ -432,13 +406,8 @@ export function BatchEvidenceImportModal({
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => setStep('input')}>
-                ← Back
-              </Button>
-              <Button
-                onClick={handleSave}
-                disabled={saving || saveable === 0}
-              >
+              <Button variant="outline" onClick={() => setStep('input')}>← Back</Button>
+              <Button onClick={handleSave} disabled={saving || saveable === 0}>
                 {saving
                   ? <><Loader2 size={13} style={{ marginRight: 6, animation: "spin 1s linear infinite" }} /> Saving…</>
                   : `Save ${saveable} entr${saveable === 1 ? 'y' : 'ies'}`
