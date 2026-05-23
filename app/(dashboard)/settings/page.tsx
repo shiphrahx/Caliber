@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -9,10 +9,18 @@ import { Textarea } from "@/components/ui/textarea"
 import { User, Check, FileText, Plus, Trash2, ChevronDown, ChevronRight, RotateCcw } from "lucide-react"
 import { useTemplates, type MeetingTemplate } from "@/lib/hooks/use-templates"
 import { AISettingsCard } from "@/components/settings/ai-settings-card"
+import { createClient } from "@/lib/supabase/client"
 
 export default function SettingsPage() {
   const [preferredName, setPreferredName] = useState("User")
-  const [email] = useState("user@example.com")
+  const [email, setEmail] = useState("")
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user?.email) setEmail(data.user.email)
+    })
+  }, [])
   const [saveSuccess, setSaveSuccess] = useState(false)
 
   const { templates, deletedTemplates, addTemplate, updateTemplate, deleteTemplate, restoreTemplate } = useTemplates()
