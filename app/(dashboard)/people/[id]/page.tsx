@@ -75,6 +75,7 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
   const aiConfig = useAIConfig()
 
   const { signals, score, loading: signalsLoading } = usePersonSignals(personId ?? '')
+  const [showAllSignals, setShowAllSignals] = useState(false)
 
   useEffect(() => {
     params.then(({ id }) => setPersonId(id))
@@ -311,7 +312,7 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
               }}>
                 Needs attention ({score})
               </span>
-              {signals.slice(0, 3).map((s, i) => (
+              {(showAllSignals ? signals : signals.slice(0, 3)).map((s, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
                   {s.severity === "critical"
                     ? <AlertCircle style={{ width: "11px", height: "11px", color: "#ff6b6b", flexShrink: 0 }} />
@@ -328,7 +329,12 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
                 </div>
               ))}
               {signals.length > 3 && (
-                <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>+{signals.length - 3} more</span>
+                <button
+                  onClick={() => setShowAllSignals(v => !v)}
+                  style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", background: "none", border: "none", cursor: "pointer", padding: "0", textAlign: "left", textDecoration: "underline" }}
+                >
+                  {showAllSignals ? "Show less" : `+${signals.length - 3} more`}
+                </button>
               )}
             </div>
           )}
