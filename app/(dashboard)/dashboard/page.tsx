@@ -5,6 +5,7 @@ import { TaskPriorityChart } from "@/components/dashboard/task-priority-chart"
 import { DashboardCalendar, CalendarTask } from "@/components/dashboard/dashboard-calendar"
 import { WeeklyReviewBanner } from "@/components/dashboard/weekly-review-banner"
 import { UpcomingOneOnOnes } from "@/components/dashboard/upcoming-one-on-ones"
+import { TeamHealthWidget } from "@/components/dashboard/team-health-widget"
 
 async function getCalendarTasks(): Promise<CalendarTask[]> {
   const supabase = await createClient()
@@ -63,13 +64,20 @@ export default async function DashboardPage() {
         <MeetingsWidget />
         <TasksWidget />
 
-        {/* Priority breakdown placeholder */}
+        {/* Priority breakdown */}
         <div className="bg-[#1c1c1c] border border-[#383838] rounded-xl p-5">
           <div className="mb-4">
             <h2>Priority Breakdown</h2>
             <p style={{ marginTop: "2px" }}>Tasks by priority</p>
           </div>
           <TaskPriorityChart />
+        </div>
+      </div>
+
+      {/* ── Team Health ── */}
+      <div className="grid grid-cols-3 gap-4">
+        <div className="col-span-1">
+          <TeamHealthWidget />
         </div>
       </div>
 
