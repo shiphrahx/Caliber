@@ -70,12 +70,12 @@ export function TasksBarChart({ data }: TasksBarChartProps) {
         <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" vertical={false} />
         <XAxis
           dataKey="week"
-          tick={{ fill: "#9ca3af", fontSize: 11 }}
+          tick={{ fill: "#9ca3af", fontSize: 13 }}
           axisLine={false}
           tickLine={false}
         />
         <YAxis
-          tick={{ fill: "#9ca3af", fontSize: 11 }}
+          tick={{ fill: "#9ca3af", fontSize: 13 }}
           axisLine={false}
           tickLine={false}
           allowDecimals={false}

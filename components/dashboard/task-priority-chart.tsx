@@ -208,8 +208,8 @@ export function TaskPriorityChart() {
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }} barSize={weeks <= 4 ? 28 : 16}>
             <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" vertical={false} />
-            <XAxis dataKey="week" tick={{ fill: "#9ca3af", fontSize: 10 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: "#9ca3af", fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
+            <XAxis dataKey="week" tick={{ fill: "#9ca3af", fontSize: 13 }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fill: "#9ca3af", fontSize: 13 }} axisLine={false} tickLine={false} allowDecimals={false} />
             <Tooltip content={<BarTooltip />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
             {PRIORITIES.map((p, i) => (
               <Bar
@@ -248,7 +248,7 @@ export function TaskPriorityChart() {
                 <Legend
                   iconType="circle"
                   iconSize={8}
-                  formatter={(value) => <span style={{ color: "#9ca3af", fontSize: 11 }}>{value}</span>}
+                  formatter={(value) => <span style={{ color: "#9ca3af", fontSize: 13 }}>{value}</span>}
                 />
               </PieChart>
             </ResponsiveContainer>

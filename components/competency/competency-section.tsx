@@ -53,7 +53,7 @@ function CompetencyRadar({ data }: { data: RadarData[] }) {
       <ResponsiveContainer width="100%" height="100%">
         <RadarChart data={data}>
           <PolarGrid stroke="var(--border-2)" />
-          <PolarAngleAxis dataKey="area" tick={{ fill: "var(--text-3)", fontSize: 11 }} />
+          <PolarAngleAxis dataKey="area" tick={{ fill: "var(--text-3)", fontSize: 13 }} />
           <PolarRadiusAxis domain={[0, 5]} tick={false} axisLine={false} />
           <Radar
             name="Expected"
