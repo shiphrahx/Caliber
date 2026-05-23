@@ -144,10 +144,11 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         {isOpen && (
           <Link href="/dashboard" style={{ flex: 1, display: "flex", alignItems: "center" }}>
             <Image
-              src="/logo_transparent.png?v=2"
+              src="/logo_transparent.png"
               alt="Caliber"
               width={110}
               height={28}
+              unoptimized
               className="object-contain"
               style={{ height: "28px", width: "auto" }}
             />
