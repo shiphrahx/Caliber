@@ -245,7 +245,7 @@ label { font-size: var(--text-label); color: var(--text-2); }
 
 /* ── Page topbar (sticky header bar used across all pages) ── */
 .page-topbar {
-  height: 40px;
+  height: 55px;
   padding: 0 16px;
   background: var(--surf);
   border-bottom: 1px solid var(--border-1);
