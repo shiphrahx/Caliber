@@ -12,6 +12,7 @@ export type SignalType =
   | 'surfaced_follow_up'
   | 'action_overload'
   | 'sentiment_drift'
+  | 'new_hire_at_risk'
 
 export interface Signal {
   type: SignalType
@@ -37,6 +38,7 @@ export const SIGNAL_WEIGHTS: Record<SignalType, number> = {
   surfaced_follow_up: 5,
   action_overload: 3,
   sentiment_drift: 4,       // trending negative — notable attention
+  new_hire_at_risk: 5,      // new hire triggering 2+ signals — high priority
 }
 
 /** Critical signals get a bonus weight */

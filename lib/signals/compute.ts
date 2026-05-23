@@ -3,8 +3,22 @@ import type { Signal, SignalSeverity } from './types'
 
 const DAYS_MS = 24 * 60 * 60 * 1000
 
+/** Days from start_date within which a person is considered a new hire. Configurable constant. */
+export const NEW_HIRE_WINDOW_DAYS = 90
+
 export function daysBetween(a: Date, b: Date): number {
   return Math.floor((b.getTime() - a.getTime()) / DAYS_MS)
+}
+
+/**
+ * Returns true if the person started within NEW_HIRE_WINDOW_DAYS before `today`.
+ * Returns false if start_date is null/undefined.
+ */
+export function isNewHire(startDate: string | null | undefined, today: Date): boolean {
+  if (!startDate) return false
+  const start = new Date(startDate + 'T00:00:00')
+  const daysSinceStart = daysBetween(start, today)
+  return daysSinceStart >= 0 && daysSinceStart < NEW_HIRE_WINDOW_DAYS
 }
 
 export function todayStr(): string {
@@ -70,7 +84,7 @@ export async function loadSignalData() {
 
     supabase
       .from('people')
-      .select('id, full_name, role')
+      .select('id, full_name, role, start_date')
       .eq('status', 'active'),
 
     supabase
@@ -207,10 +221,31 @@ export function computePeopleSignals(
   for (const person of data.activePeople) {
     const lastOneOnOne = oneOnOneMeetingsByPerson[person.id]
     const lastNoteDate = notesDateByPerson[person.id]
+    const newHire = isNewHire((person as any).start_date, today)
+
+    // Thresholds adjusted for new hires
+    const oneOnOneWarnDays = newHire ? 7 : 14
+    const oneOnOneCritDays = newHire ? 14 : 21
+    const evidenceDays     = newHire ? 30 : 90
+    const notesDays        = newHire ? 14 : 21
+
+    // Build evidence lookup for new hire threshold (30 days)
+    // (existing evidenceRecent covers 90 days; filter down for new hire check)
+    const evidenceInWindowPersonIds = newHire
+      ? new Set(
+          (data.evidenceRecent as Array<{ person_id: string; occurred_at: string }>)
+            .filter(e => daysBetween(new Date(e.occurred_at + 'T00:00:00'), today) < evidenceDays)
+            .map(e => e.person_id)
+        )
+      : evidence90DaysPersonIds
+
+    // Track which person-level signal types fired (for compound signal)
+    const firedSignalTypes: string[] = []
 
     // Signal: no recent 1:1
     if (!isDismissed(dismissedSet, 'no_recent_1on1', person.id)) {
       if (!lastOneOnOne) {
+        firedSignalTypes.push('no_recent_1on1')
         signals.push({
           type: 'no_recent_1on1',
           severity: 'critical',
@@ -219,20 +254,21 @@ export function computePeopleSignals(
           personName: person.full_name,
           entityId: person.id,
           entityType: 'person',
-          meta: { daysSince: null },
+          meta: { daysSince: null, isNewHire: newHire },
         })
       } else {
         const daysSince = daysBetween(new Date(lastOneOnOne + 'T00:00:00'), today)
-        if (daysSince >= 14) {
+        if (daysSince >= oneOnOneWarnDays) {
+          firedSignalTypes.push('no_recent_1on1')
           signals.push({
             type: 'no_recent_1on1',
-            severity: daysSince >= 21 ? 'critical' : 'warning',
+            severity: daysSince >= oneOnOneCritDays ? 'critical' : 'warning',
             message: `No 1:1 with ${person.full_name} in ${daysSince} days`,
             personId: person.id,
             personName: person.full_name,
             entityId: person.id,
             entityType: 'person',
-            meta: { daysSince, lastDate: lastOneOnOne },
+            meta: { daysSince, lastDate: lastOneOnOne, isNewHire: newHire },
           })
         }
       }
@@ -240,31 +276,38 @@ export function computePeopleSignals(
 
     // Signal: no recent evidence
     if (!isDismissed(dismissedSet, 'no_evidence', person.id)) {
-      if (!evidence90DaysPersonIds.has(person.id)) {
+      if (!evidenceInWindowPersonIds.has(person.id)) {
+        firedSignalTypes.push('no_evidence')
         signals.push({
           type: 'no_evidence',
           severity: evidenceAnyPersonIds.has(person.id) ? 'warning' : 'info',
-          message: `No evidence logged for ${person.full_name} in 90 days`,
+          message: `No evidence logged for ${person.full_name} in ${evidenceDays} days`,
           personId: person.id,
           personName: person.full_name,
           entityId: person.id,
           entityType: 'person',
+          meta: { isNewHire: newHire },
         })
       }
     }
 
     // Signal: no recent meeting notes
     if (!isDismissed(dismissedSet, 'missing_notes', person.id)) {
-      if (!lastNoteDate) {
+      const lastNoteDateMs = lastNoteDate
+        ? daysBetween(new Date(lastNoteDate + 'T00:00:00'), today)
+        : null
+      const notesMissing = lastNoteDateMs === null || lastNoteDateMs >= notesDays
+      if (notesMissing) {
+        firedSignalTypes.push('missing_notes')
         signals.push({
           type: 'missing_notes',
           severity: 'info',
-          message: `No meeting notes involving ${person.full_name} in 21 days`,
+          message: `No meeting notes involving ${person.full_name} in ${notesDays} days`,
           personId: person.id,
           personName: person.full_name,
           entityId: person.id,
           entityType: 'person',
-          meta: { daysSince: null },
+          meta: { daysSince: lastNoteDateMs, isNewHire: newHire },
         })
       }
     }
@@ -281,6 +324,20 @@ export function computePeopleSignals(
         entityId: person.id,
         entityType: 'person',
         meta: { openTaskCount },
+      })
+    }
+
+    // Compound signal: new hire triggering 2+ person-level signals
+    if (newHire && firedSignalTypes.length >= 2 && !isDismissed(dismissedSet, 'new_hire_at_risk', person.id)) {
+      signals.push({
+        type: 'new_hire_at_risk',
+        severity: 'critical',
+        message: `${person.full_name} is a new hire with ${firedSignalTypes.length} unresolved onboarding signals`,
+        personId: person.id,
+        personName: person.full_name,
+        entityId: person.id,
+        entityType: 'person',
+        meta: { isNewHire: true, firedSignalTypes },
       })
     }
   }
