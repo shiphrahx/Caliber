@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/client'
 import type { Signal, SignalSeverity } from './types'
+import type { GoalStalenessRecord } from '@/lib/services/career-goals'
 
 const DAYS_MS = 24 * 60 * 60 * 1000
 
@@ -74,6 +75,7 @@ export async function loadSignalData() {
     { data: meetingsWithNotes },
     { data: openFollowUps },
     { data: tasksByPerson },
+    { data: careerGoals },
   ] = await Promise.all([
     supabase
       .from('tasks')
@@ -124,7 +126,26 @@ export async function loadSignalData() {
       .in('task_id',
         (await supabase.from('tasks').select('id').not('status', 'eq', 'completed')).data?.map((t: any) => t.id) ?? []
       ),
+
+    // Non-completed career goals for stale goal detection
+    supabase
+      .from('career_goals')
+      .select('id, goal, time_period, status, updated_at')
+      .neq('status', 'Completed')
+      .order('updated_at', { ascending: true }),
   ])
+
+  // Map raw career goal rows to GoalStalenessRecord
+  const goalRows = (careerGoals ?? []) as Array<{
+    id: string; goal: string; time_period: string; status: string; updated_at: string
+  }>
+  const mappedCareerGoals: GoalStalenessRecord[] = goalRows.map(r => ({
+    goalId: r.id,
+    goalTitle: r.goal,
+    timePeriod: r.time_period as GoalStalenessRecord['timePeriod'],
+    status: r.status as GoalStalenessRecord['status'],
+    lastUpdatedAt: r.updated_at.split('T')[0],
+  }))
 
   return {
     overdueTasks: overdueTasks ?? [],
@@ -135,6 +156,7 @@ export async function loadSignalData() {
     meetingsWithNotes: meetingsWithNotes ?? [],
     openFollowUps: openFollowUps ?? [],
     tasksByPerson: tasksByPerson ?? [],
+    careerGoals: mappedCareerGoals,
   }
 }
 
@@ -557,6 +579,60 @@ export function computeSentimentDriftSignals(
         priorTotal: prior.total,
         recentNegative: recent.negative,
         priorNegative: prior.negative,
+      },
+    })
+  }
+
+  return signals
+}
+
+// ── Stale Goal thresholds ─────────────────────────────────────────────────────
+export const STALE_GOAL_INFO_DAYS     = 60
+export const STALE_GOAL_WARNING_DAYS  = 90
+export const STALE_GOAL_CRITICAL_DAYS = 120
+
+/**
+ * Compute stale career goal signals.
+ *
+ * Fires when a non-completed career goal has not been updated in:
+ *   60+ days → info
+ *   90+ days → warning
+ *  120+ days → critical
+ *
+ * Goals with no activity since creation use `lastUpdatedAt` as the proxy.
+ * Completed goals are excluded (filtered at query time).
+ */
+export function computeGoalSignals(
+  goals: GoalStalenessRecord[],
+  dismissedSet: Set<DismissKey>,
+  today: Date
+): Signal[] {
+  const signals: Signal[] = []
+
+  for (const goal of goals) {
+    if (isDismissed(dismissedSet, 'stale_goal', goal.goalId)) continue
+
+    const lastDate = new Date(goal.lastUpdatedAt + 'T00:00:00')
+    const daysSince = daysBetween(lastDate, today)
+
+    if (daysSince < STALE_GOAL_INFO_DAYS) continue
+
+    const severity: SignalSeverity =
+      daysSince >= STALE_GOAL_CRITICAL_DAYS ? 'critical'
+      : daysSince >= STALE_GOAL_WARNING_DAYS ? 'warning'
+      : 'info'
+
+    signals.push({
+      type: 'stale_goal',
+      severity,
+      message: `Goal "${goal.goalTitle}" has had no activity in ${daysSince} day${daysSince === 1 ? '' : 's'}`,
+      entityId: goal.goalId,
+      entityType: 'goal',
+      meta: {
+        daysSince,
+        lastUpdatedAt: goal.lastUpdatedAt,
+        timePeriod: goal.timePeriod,
+        goalStatus: goal.status,
       },
     })
   }

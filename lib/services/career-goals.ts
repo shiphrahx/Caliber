@@ -505,3 +505,43 @@ export async function deleteAchievement(id: string): Promise<void> {
   const { error } = await supabase.from('achievements').delete().eq('id', id)
   if (error) throw error
 }
+
+// ============================================================================
+// STALE GOAL DETECTION
+// ============================================================================
+
+export interface GoalStalenessRecord {
+  goalId: string
+  goalTitle: string
+  timePeriod: CareerGoal['timePeriod']
+  status: CareerGoal['status']
+  /** ISO date string (YYYY-MM-DD) of last update, or null if never updated since creation */
+  lastUpdatedAt: string
+}
+
+/**
+ * Returns all non-completed career goals with their last-updated timestamp.
+ * Used by the stale goal signal to surface goals with no recent activity.
+ *
+ * "Last evidenced" is proxied by `updated_at` on the goal row — any status
+ * change, note edit, or explicit goal update bumps this timestamp.
+ */
+export async function getGoalsWithLastEvidenceDate(): Promise<GoalStalenessRecord[]> {
+  const supabase = createClient()
+
+  const { data, error } = await supabase
+    .from('career_goals')
+    .select('id, goal, time_period, status, updated_at')
+    .neq('status', 'Completed')
+    .order('updated_at', { ascending: true })
+
+  if (error) throw error
+
+  return (data ?? []).map((r: any) => ({
+    goalId: r.id,
+    goalTitle: r.goal,
+    timePeriod: r.time_period as CareerGoal['timePeriod'],
+    status: r.status as CareerGoal['status'],
+    lastUpdatedAt: (r.updated_at as string).split('T')[0],
+  }))
+}

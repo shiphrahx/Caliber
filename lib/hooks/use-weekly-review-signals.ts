@@ -8,6 +8,7 @@ import {
   computeFollowUpSignals,
   computeActionItemSignals,
   computeSentimentDriftSignals,
+  computeGoalSignals,
   sortSignals,
   buildDismissedSet,
 } from '@/lib/signals/compute'
@@ -52,8 +53,9 @@ async function computeAllSignals(dismissedItems: DismissedItem[]): Promise<Signa
     dismissedSet,
     today
   )
+  const goalSignals = computeGoalSignals(data.careerGoals, dismissedSet, today)
 
-  return sortSignals([...taskSignals, ...peopleSignals, ...actionSignals, ...followUpSignals, ...sentimentDriftSignals])
+  return sortSignals([...taskSignals, ...peopleSignals, ...actionSignals, ...followUpSignals, ...sentimentDriftSignals, ...goalSignals])
 }
 
 export function useWeeklyReviewSignals(dismissedItems: DismissedItem[]): SignalsData {

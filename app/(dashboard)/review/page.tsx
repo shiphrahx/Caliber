@@ -181,6 +181,13 @@ const ICON_REFLECTION = (
     <path d="M3 13V3a1 1 0 011-1h8a1 1 0 011 1v10l-5-3-5 3z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
   </svg>
 )
+const ICON_GOALS = (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <circle cx="8" cy="8" r="5.5" stroke="currentColor" strokeWidth="1.2" />
+    <circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.2" />
+    <circle cx="8" cy="8" r="0.8" fill="currentColor" />
+  </svg>
+)
 const ICON_COMPLETE = (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
     <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.2" />
@@ -204,6 +211,7 @@ export default function WeeklyReviewPage() {
     people: false,
     actions: false,
     tasks: false,
+    goals: false,
     week: false,
     reflection: false,
   })
@@ -380,18 +388,20 @@ export default function WeeklyReviewPage() {
   const taskSignals = signals.filter(s => s.type === 'overdue_task' || s.type === 'upcoming_deadline')
   const overdueSignals = taskSignals.filter(s => s.type === 'overdue_task')
   const upcomingSignals = taskSignals.filter(s => s.type === 'upcoming_deadline')
+  const goalSignals = signals.filter(s => s.type === 'stale_goal')
 
   // Sections auto-check when all their signals are cleared
   const effectiveSectionState = {
     people:     peopleSignals.length === 0 || sectionState.people,
     actions:    actionSignals.length === 0  || sectionState.actions,
     tasks:      taskSignals.length === 0    || sectionState.tasks,
+    goals:      goalSignals.length === 0    || sectionState.goals,
     week:       sectionState.week,
     reflection: sectionState.reflection,
   }
 
   // Progress = completed sections / 5 (week excluded — no action items)
-  const PROGRESS_SECTIONS = ['people', 'actions', 'tasks', 'reflection'] as const
+  const PROGRESS_SECTIONS = ['people', 'actions', 'tasks', 'goals', 'reflection'] as const
   const reviewedCount = PROGRESS_SECTIONS.filter(k => effectiveSectionState[k]).length
   const progressPct = Math.round((reviewedCount / PROGRESS_SECTIONS.length) * 100)
 
@@ -759,7 +769,61 @@ export default function WeeklyReviewPage() {
             ) : null}
           </ReviewSection>
 
-          {/* Section 4: Week in Review */}
+          {/* Section 4: Career Goal Staleness */}
+          <ReviewSection
+            title="Career Goal Staleness"
+            icon={ICON_GOALS}
+            signalCount={isReadOnly ? 0 : goalSignals.length}
+            criticalCount={isReadOnly ? 0 : goalSignals.filter(s => s.severity === 'critical').length}
+            warningCount={isReadOnly ? 0 : goalSignals.filter(s => s.severity === 'warning').length}
+            infoCount={isReadOnly ? 0 : goalSignals.filter(s => s.severity === 'info').length}
+            isReviewed={effectiveSectionState.goals}
+            onMarkReviewed={() => toggleSection('goals')}
+            emptyMessage="All career goals have recent activity"
+          >
+            {!isReadOnly && goalSignals.length > 0 ? (
+              <>
+                {goalSignals.map((s, i) => {
+                  const daysSince = s.meta?.daysSince as number | undefined
+                  const timePeriod = s.meta?.timePeriod as string | undefined
+                  const periodLabel =
+                    timePeriod === 'short_term' ? 'Short-term'
+                    : timePeriod === 'mid_term' ? 'Mid-term'
+                    : timePeriod === 'long_term' ? 'Long-term'
+                    : null
+                  const subtitle = [
+                    periodLabel,
+                    daysSince != null ? `No activity in ${daysSince} day${daysSince === 1 ? '' : 's'}` : null,
+                  ].filter(Boolean).join(' · ')
+                  const goalTitle = s.message.match(/"([^"]+)"/)?.[1] ?? s.message
+                  return (
+                    <div
+                      key={i}
+                      style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '10px 16px', borderBottom: i < goalSignals.length - 1 ? '1px solid var(--border-1)' : 'none' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--surf-2)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = '')}
+                    >
+                      {severityDot(s.severity)}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '12px', color: 'var(--text-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {goalTitle}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '1px' }}>{subtitle}</div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+                        <Btn variant="primary" onClick={() => router.push('/career-goals')}>
+                          Update goal
+                        </Btn>
+                        <Btn variant="dismiss" onClick={() => setDismissTarget(s)}>Dismiss</Btn>
+                      </div>
+                    </div>
+                  )
+                })}
+              </>
+            ) : null}
+          </ReviewSection>
+
+          {/* Section 5: Week in Review */}
           <ReviewSection
             title="Week in Review"
             icon={ICON_WEEK}
@@ -796,7 +860,7 @@ export default function WeeklyReviewPage() {
             )}
           </ReviewSection>
 
-          {/* Section 5: Reflection */}
+          {/* Section 6: Reflection */}
           <ReviewSection
             title="Reflection"
             icon={ICON_REFLECTION}
@@ -871,7 +935,7 @@ export default function WeeklyReviewPage() {
             </div>
           </ReviewSection>
 
-          {/* Section 6: Complete Review */}
+          {/* Section 7: Complete Review */}
           {isCurrentWeek && (
             <ReviewSection
               title="Complete Review"

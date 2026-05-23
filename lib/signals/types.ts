@@ -13,6 +13,7 @@ export type SignalType =
   | 'action_overload'
   | 'sentiment_drift'
   | 'new_hire_at_risk'
+  | 'stale_goal'
 
 export interface Signal {
   type: SignalType
@@ -21,7 +22,7 @@ export interface Signal {
   personId?: string
   personName?: string
   entityId: string
-  entityType: 'task' | 'person' | 'meeting' | 'follow_up'
+  entityType: 'task' | 'person' | 'meeting' | 'follow_up' | 'goal'
   meta?: Record<string, unknown>
 }
 
@@ -39,6 +40,7 @@ export const SIGNAL_WEIGHTS: Record<SignalType, number> = {
   action_overload: 3,
   sentiment_drift: 4,       // trending negative — notable attention
   new_hire_at_risk: 5,      // new hire triggering 2+ signals — high priority
+  stale_goal: 2,            // goal without activity in 60+ days
 }
 
 /** Critical signals get a bonus weight */
