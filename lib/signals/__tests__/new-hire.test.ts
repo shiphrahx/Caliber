@@ -70,6 +70,7 @@ function makeData(overrides: Partial<SignalData> = {}): SignalData {
     meetingsWithNotes: [],
     openFollowUps: [],
     tasksByPerson: [],
+    careerGoals: [],
     ...overrides,
   }
 }

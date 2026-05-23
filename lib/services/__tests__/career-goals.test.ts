@@ -13,6 +13,7 @@ import {
   deleteCareerGoal,
   getAchievements,
   createAchievement,
+  getGoalsWithLastEvidenceDate,
 } from '../career-goals'
 import { mockSupabaseClient } from '../../../test/mocks/supabase'
 
@@ -479,6 +480,150 @@ describe('Career Goals Service', () => {
       await expect(
         createAchievement({ type: 'Book', description: '', achievementDate: '', keyTakeaway: '' })
       ).rejects.toThrow('Not authenticated')
+    })
+  })
+
+  // ============================================================================
+  // GOALS WITH LAST EVIDENCE DATE (STALENESS)
+  // ============================================================================
+
+  describe('getGoalsWithLastEvidenceDate', () => {
+    it('returns empty array when no non-completed goals exist', async () => {
+      mockSupabaseClient.from = vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          neq: vi.fn().mockReturnValue({
+            order: vi.fn().mockResolvedValue({ data: [], error: null }),
+          }),
+        }),
+      })
+
+      const result = await getGoalsWithLastEvidenceDate()
+      expect(result).toEqual([])
+    })
+
+    it('maps database rows to GoalStalenessRecord shape', async () => {
+      const rows = [
+        {
+          id: 'goal-1',
+          goal: 'Learn system design',
+          time_period: 'short_term',
+          status: 'In progress',
+          updated_at: '2024-01-15T10:00:00Z',
+        },
+      ]
+
+      mockSupabaseClient.from = vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          neq: vi.fn().mockReturnValue({
+            order: vi.fn().mockResolvedValue({ data: rows, error: null }),
+          }),
+        }),
+      })
+
+      const result = await getGoalsWithLastEvidenceDate()
+
+      expect(result).toHaveLength(1)
+      expect(result[0]).toMatchObject({
+        goalId: 'goal-1',
+        goalTitle: 'Learn system design',
+        timePeriod: 'short_term',
+        status: 'In progress',
+        lastUpdatedAt: '2024-01-15',
+      })
+    })
+
+    it('strips time component from updated_at', async () => {
+      const rows = [
+        {
+          id: 'goal-2',
+          goal: 'Get promoted',
+          time_period: 'long_term',
+          status: 'Not started',
+          updated_at: '2024-06-01T23:59:59.999Z',
+        },
+      ]
+
+      mockSupabaseClient.from = vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          neq: vi.fn().mockReturnValue({
+            order: vi.fn().mockResolvedValue({ data: rows, error: null }),
+          }),
+        }),
+      })
+
+      const result = await getGoalsWithLastEvidenceDate()
+      expect(result[0].lastUpdatedAt).toBe('2024-06-01')
+    })
+
+    it('maps multiple goals including different time periods', async () => {
+      const rows = [
+        {
+          id: 'g1',
+          goal: 'Short goal',
+          time_period: 'short_term',
+          status: 'Not started',
+          updated_at: '2024-01-01T00:00:00Z',
+        },
+        {
+          id: 'g2',
+          goal: 'Mid goal',
+          time_period: 'mid_term',
+          status: 'In progress',
+          updated_at: '2024-02-01T00:00:00Z',
+        },
+        {
+          id: 'g3',
+          goal: 'Long goal',
+          time_period: 'long_term',
+          status: 'Not started',
+          updated_at: '2024-03-01T00:00:00Z',
+        },
+      ]
+
+      mockSupabaseClient.from = vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          neq: vi.fn().mockReturnValue({
+            order: vi.fn().mockResolvedValue({ data: rows, error: null }),
+          }),
+        }),
+      })
+
+      const result = await getGoalsWithLastEvidenceDate()
+
+      expect(result).toHaveLength(3)
+      expect(result.map(r => r.timePeriod)).toEqual(['short_term', 'mid_term', 'long_term'])
+      expect(result.map(r => r.goalId)).toEqual(['g1', 'g2', 'g3'])
+    })
+
+    it('throws on database error', async () => {
+      mockSupabaseClient.from = vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          neq: vi.fn().mockReturnValue({
+            order: vi.fn().mockResolvedValue({
+              data: null,
+              error: { code: '42P01', message: 'relation does not exist' },
+            }),
+          }),
+        }),
+      })
+
+      await expect(getGoalsWithLastEvidenceDate()).rejects.toMatchObject({ code: '42P01' })
+    })
+
+    it('excludes Completed goals (query uses neq Completed)', async () => {
+      // The function queries with .neq('status', 'Completed')
+      // We verify the neq call is made with correct arguments
+      const neqMock = vi.fn().mockReturnValue({
+        order: vi.fn().mockResolvedValue({ data: [], error: null }),
+      })
+
+      mockSupabaseClient.from = vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({ neq: neqMock }),
+      })
+
+      await getGoalsWithLastEvidenceDate()
+
+      expect(neqMock).toHaveBeenCalledWith('status', 'Completed')
     })
   })
 })
