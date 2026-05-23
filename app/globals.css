@@ -924,6 +924,55 @@ label { font-size: var(--text-label); color: var(--text-2); }
 .status-chip--overdue { font-weight: 600; color: #ff6b6b; background: #2a0a0a; border: 1px solid #5a2020; }
 .status-chip--open { color: var(--text-2); background: var(--surf-3); border: 1px solid var(--border-2); }
 
+/* ── Review section ── */
+.review-section {
+  background: var(--surf);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.review-section--default { border: 1px solid var(--border-1); }
+.review-section--reviewed { border: 1px solid #1a3a25; }
+.review-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  user-select: none;
+}
+.review-section-header--interactive { cursor: pointer; }
+.review-section-header--interactive:hover { background: var(--surf-2); }
+.review-section-header--static { cursor: default; }
+.review-section-chevron {
+  color: var(--text-3);
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.review-section-icon { opacity: 0.6; flex-shrink: 0; display: flex; align-items: center; }
+.review-section-title { flex: 1; font-size: 13px; font-weight: 500; color: var(--text-1); }
+.review-section-badges { display: flex; gap: 6px; align-items: center; }
+.review-badge {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  padding: 1px 6px;
+  border-radius: 8px;
+}
+.review-badge--crit { background: #1a0a0a; color: #f87171; }
+.review-badge--warn { background: #1e0d00; color: #f97316; }
+.review-badge--info { background: #0a1e28; color: #60a5fa; }
+.review-badge--ok { background: #0a1e0a; color: #00f058; }
+.review-done-label { font-size: 11px; color: #00f058; font-family: var(--font-mono); }
+.review-checkbox {
+  width: 18px; height: 18px; border-radius: 4px;
+  cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.review-checkbox--checked { border: 1.5px solid #00f058; background: #00f058; }
+.review-checkbox--unchecked { border: 1.5px solid var(--border-3); background: transparent; }
+.review-section-body { border-top: 1px solid var(--border-1); }
+.review-section-body--empty { padding: 14px 16px; }
+.review-empty-state { display: flex; align-items: center; gap: 8px; color: #00f058; font-size: 12px; }
+
 /* ── Tone picker (follow-up draft modal) ── */
 .tone-btn {
   padding: 4px 14px;
