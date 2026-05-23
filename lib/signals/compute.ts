@@ -354,7 +354,7 @@ export function computePeopleSignals(
       signals.push({
         type: 'new_hire_at_risk',
         severity: 'critical',
-        message: `${person.full_name} is a new hire with ${firedSignalTypes.length} unresolved onboarding signals`,
+        message: `${person.full_name} is a new hire missing: ${firedSignalTypes.map(t => ({ no_recent_1on1: 'a recent 1:1', no_evidence: 'logged evidence', missing_notes: 'meeting notes' }[t] ?? t)).join(', ')}`,
         personId: person.id,
         personName: person.full_name,
         entityId: person.id,
