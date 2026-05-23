@@ -4,7 +4,6 @@ import {
   NEW_HIRE_WINDOW_DAYS,
   computePeopleSignals,
   buildDismissedSet,
-  daysBetween,
   type SignalData,
 } from '../compute'
 

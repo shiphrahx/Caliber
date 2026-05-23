@@ -320,7 +320,7 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
                     : <Info style={{ width: "11px", height: "11px", color: "var(--text-3)", flexShrink: 0 }} />
                   }
                   <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>{s.message}</span>
-                  {s.meta?.isNewHire && (
+                  {s.meta?.isNewHire === true && (
                     <span style={{ fontSize: "10px", fontWeight: 600, padding: "1px 5px", borderRadius: "3px", background: "rgba(0,240,88,0.12)", color: "#00f058", border: "1px solid rgba(0,240,88,0.3)", whiteSpace: "nowrap", flexShrink: 0 }}>
                       New hire
                     </span>

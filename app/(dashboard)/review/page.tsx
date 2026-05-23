@@ -131,7 +131,7 @@ function SignalRow({
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
           <span style={{ fontSize: '12px', color: 'var(--text-1)' }}>{signal.message}</span>
-          {signal.meta?.isNewHire && (
+          {signal.meta?.isNewHire === true && (
             <span style={{ fontSize: '10px', fontWeight: 600, padding: '1px 5px', borderRadius: '3px', background: 'rgba(0,240,88,0.12)', color: '#00f058', border: '1px solid rgba(0,240,88,0.3)', whiteSpace: 'nowrap' }}>
               New hire
             </span>
