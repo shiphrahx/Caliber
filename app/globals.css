@@ -69,13 +69,13 @@
     --mono: var(--font-mono);
 
     /* ── Type scale ── */
-    --text-page-title:   25px;   /* h1: page headings */
-    --text-section:      15px;   /* h2: widget/section titles */
-    --text-body:         15px;   /* default body text */
-    --text-label:        15px;   /* secondary labels, captions */
-    --text-meta:         13px;   /* table cells, metadata */
-    --text-caption:      13px;   /* tags, badges, tiny labels */
-    --text-overline:     12px;   /* uppercase column/stat headers */
+    --text-page-title:   26px;   /* h1: page headings */
+    --text-section:      16px;   /* h2: widget/section titles */
+    --text-body:         16px;   /* default body text */
+    --text-label:        16px;   /* secondary labels, captions */
+    --text-meta:         14px;   /* table cells, metadata */
+    --text-caption:      14px;   /* tags, badges, tiny labels */
+    --text-overline:     13px;   /* uppercase column/stat headers */
 
     --weight-title:      700;
     --weight-section:    600;
