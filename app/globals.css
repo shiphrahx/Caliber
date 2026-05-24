@@ -143,6 +143,9 @@
   margin-bottom: 4px;
   display: block;
 }
+.form-label--no-margin { margin: 0; }
+.evidence-plus-icon { width: 14px; height: 14px; }
+.evidence-check-icon { width: 13px; height: 13px; }
 
 /* Section/block header inside a form or detail panel (e.g. "Action items") */
 .form-section-header {

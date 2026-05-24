@@ -274,7 +274,7 @@ export function EvidenceSection({
             {/* Row 4: sentiment + linked meeting notice + actions */}
             <div className="evidence-form-footer">
               <div className="evidence-form-footer-left">
-                <label className="form-label" style={{ margin: 0 }}>Sentiment</label>
+                <label className="form-label form-label--no-margin">Sentiment</label>
                 <div className="evidence-sentiment-btns">
                   {SENTIMENTS.map(s => {
                     const cfg = SENTIMENT_CONFIG[s]
@@ -316,7 +316,7 @@ export function EvidenceSection({
           <div className="evidence-empty">
             <p>No evidence logged yet. Start capturing achievements, feedback, and observations throughout the year.</p>
             <Button onClick={() => setShowForm(true)}>
-              <Plus style={{ width: "14px", height: "14px" }} /> Add First Entry
+              <Plus className="evidence-plus-icon" /> Add First Entry
             </Button>
           </div>
         ) : (
@@ -408,7 +408,7 @@ export function EvidenceSection({
                           <div className="evidence-form-footer-right">
                             <Button variant="outline" onClick={() => setEditingId(null)}>Cancel</Button>
                             <Button onClick={() => handleSaveEdit(entry.id)} disabled={saving}>
-                              <Check style={{ width: "13px", height: "13px" }} /> Save
+                              <Check className="evidence-check-icon" /> Save
                             </Button>
                           </div>
                         </div>
