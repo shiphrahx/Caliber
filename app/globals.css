@@ -2282,6 +2282,17 @@ label { font-size: var(--text-label); color: var(--text-2); }
 .task-card-menu-item:hover { background: var(--surf-3); }
 .task-card-menu-item--edit { color: var(--text-1); }
 .task-card-menu-item--delete { color: #f87171; }
+.task-priority-btn {
+  flex: 1;
+  padding: 4px 4px;
+  border-radius: 4px;
+  font-size: var(--text-overline);
+  font-weight: 500;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 120ms;
+}
 .task-title {
   font-size: var(--text-meta);
   font-weight: 400;

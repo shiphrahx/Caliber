@@ -129,19 +129,11 @@ export function TaskModal({ task, isOpen, onClose, onSave, onDelete }: TaskModal
                       key={priority}
                       type="button"
                       onClick={() => setFormData({ ...formData, priority })}
+                      className="task-priority-btn"
                       style={{
-                        flex: 1,
-                        padding: "4px 4px",
-                        borderRadius: "4px",
-                        fontSize: "var(--text-overline)",
-                        fontWeight: 500,
-                        fontFamily: "var(--font-mono)",
                         background: isSelected ? s.bg : "var(--surf-2)",
                         color: isSelected ? s.color : "var(--text-3)",
                         border: `1px solid ${isSelected ? s.color + "33" : "var(--border-2)"}`,
-                        cursor: "pointer",
-                        whiteSpace: "nowrap",
-                        transition: "all 120ms",
                       }}
                     >
                       {priority}
