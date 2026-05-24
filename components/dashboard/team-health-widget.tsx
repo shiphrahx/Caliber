@@ -164,8 +164,8 @@ export function TeamHealthWidget() {
 
       {loading ? (
         <div className="health-skeleton">
-          <div className="health-skeleton__bar" style={{ height: "40px" }} />
-          <div className="health-skeleton__bar" style={{ height: "16px", width: "60%" }} />
+          <div className="health-skeleton__bar health-skeleton__bar--h40" />
+          <div className="health-skeleton__bar health-skeleton__bar--h16" />
         </div>
       ) : health ? (
         <>
@@ -201,12 +201,8 @@ export function TeamHealthWidget() {
             {/* Label + breakdown */}
             <div className="flex-1">
               <span
-                className="inline-block mb-2"
+                className="health-label-badge"
                 style={{
-                  padding: "2px 10px",
-                  borderRadius: "20px",
-                  fontSize: "var(--text-label)",
-                  fontWeight: 600,
                   color: labelStyle.color,
                   background: labelStyle.bg,
                   border: `1px solid ${labelStyle.border}`,
@@ -220,13 +216,10 @@ export function TeamHealthWidget() {
                 {(Object.entries(health.breakdown) as [string, number][]).map(([key, count]) => (
                   <span
                     key={key}
+                    className="health-breakdown-badge"
                     style={{
-                      padding: "2px 8px",
-                      borderRadius: "4px",
-                      fontSize: "var(--text-caption)",
                       background: count > 0 ? "var(--surf-3)" : "var(--surf-2)",
                       color: count > 0 ? "var(--text-1)" : "var(--text-3)",
-                      border: "1px solid var(--border-2)",
                     }}
                   >
                     {BREAKDOWN_LABELS[key]}: {count}
@@ -246,7 +239,7 @@ export function TeamHealthWidget() {
               ) : narrative ? (
                 <>
                   <AIGeneratedBadge onDismiss={() => setNarrative(null)} />
-                  <p className="text-body text-2 m-0 mt-1" style={{ lineHeight: 1.5 }}>
+                  <p className="text-body text-2 m-0 mt-1 health-narrative-text">
                     {narrative}
                   </p>
                 </>

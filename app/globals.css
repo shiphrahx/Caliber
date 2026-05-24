@@ -1551,6 +1551,23 @@ label { font-size: var(--text-label); color: var(--text-2); }
   background: var(--surf-2);
   animation: pulse 1.5s ease-in-out infinite;
 }
+.health-skeleton__bar--h40 { height: 40px; }
+.health-skeleton__bar--h16 { height: 16px; width: 60%; }
+.health-label-badge {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: var(--text-label);
+  font-weight: 600;
+}
+.health-breakdown-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: var(--text-caption);
+  border: 1px solid var(--border-2);
+}
+.health-narrative-text { line-height: 1.5; }
 .health-score-row { display: flex; align-items: center; gap: 16px; }
 .health-score-ring {
   position: relative;
