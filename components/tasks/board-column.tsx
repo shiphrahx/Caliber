@@ -32,11 +32,7 @@ export function BoardColumn({ status, tasks, onEdit, onDelete, onQuickAdd }: Boa
 
   return (
     <div
-      className="flex flex-col h-full max-md:flex-shrink-0 rounded-lg overflow-hidden"
-      style={{
-        background: "var(--surf)",
-        border: "1px solid var(--border-1)",
-      }}
+      className="board-col-outer flex flex-col h-full max-md:flex-shrink-0 rounded-lg overflow-hidden"
     >
       {/* Column header */}
       <div className="board-col-header">
@@ -57,18 +53,12 @@ export function BoardColumn({ status, tasks, onEdit, onDelete, onQuickAdd }: Boa
       <div
         ref={setNodeRef}
         className={cn(
-          "flex-1 flex flex-col min-h-[360px] transition-all duration-200",
+          "board-col-body flex-1 flex flex-col min-h-[360px] transition-all duration-200",
           isOver && "ring-1 ring-inset"
         )}
-        style={{
-          padding: "10px",
-          gap: "6px",
-          display: "flex",
-          flexDirection: "column",
-          ...(isOver ? { boxShadow: "inset 0 0 0 1px var(--border-2)" } : {}),
-        }}
+        style={isOver ? { boxShadow: "inset 0 0 0 1px var(--border-2)" } : undefined}
       >
-        <div className="flex-1" style={{ display: "flex", flexDirection: "column", gap: "6px", minHeight: "100px" }}>
+        <div className="board-col-inner-list flex-1">
           <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
             {tasks.map((task) => (
               <DraggableTaskCard key={task.id} task={task} onEdit={onEdit} onDelete={onDelete} />

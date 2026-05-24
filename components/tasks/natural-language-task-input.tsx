@@ -127,16 +127,7 @@ export function NaturalLanguageTaskInput({
           onKeyDown={handleKeyDown}
           placeholder="Describe a task... (Enter to parse)"
           disabled={isParsing}
-          style={{
-            border: "none",
-            background: "transparent",
-            padding: 0,
-            height: "auto",
-            fontSize: "var(--text-caption)",
-            color: "var(--text-1)",
-            boxShadow: "none",
-            outline: "none",
-          }}
+          className="nl-task-bare-input"
           aria-label="Natural language task input"
         />
         <button
@@ -159,7 +150,7 @@ export function NaturalLanguageTaskInput({
 
       {/* Preview dialog */}
       <Dialog open={isPreviewOpen} onOpenChange={open => !open && handleClose()}>
-        <DialogContent style={{ maxWidth: "480px" }}>
+        <DialogContent className="nl-dialog">
           <DialogHeader>
             <DialogTitle>Review parsed task</DialogTitle>
             <DialogDescription>
@@ -168,7 +159,8 @@ export function NaturalLanguageTaskInput({
                   {ConfidenceIcon && (
                     <ConfidenceIcon
                       size={14}
-                      style={{ color: confidenceConfig?.color, flexShrink: 0 }}
+                      className="nl-confidence-icon"
+                      style={{ color: confidenceConfig?.color }}
                       aria-hidden
                     />
                   )}
