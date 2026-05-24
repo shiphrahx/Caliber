@@ -248,7 +248,7 @@ export function AISettingsCard() {
                   value={apiKey}
                   onChange={e => { setApiKey(e.target.value); setTestResult(null) }}
                   placeholder={`Paste your ${PROVIDER_LABELS[selectedProvider]} API key`}
-                  style={{ paddingRight: "36px" }}
+                  className="ai-key-input"
                 />
                 <button
                   onClick={() => setShowKey(s => !s)}

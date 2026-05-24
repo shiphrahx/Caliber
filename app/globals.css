@@ -624,6 +624,7 @@ label { font-size: var(--text-label); color: var(--text-2); }
   font-size: var(--text-label);
   font-family: var(--font-sans);
 }
+.ai-key-input { padding-right: 36px; }
 .ai-key-toggle {
   position: absolute;
   right: 10px;
