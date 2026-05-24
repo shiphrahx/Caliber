@@ -2555,6 +2555,8 @@ label { font-size: var(--text-label); color: var(--text-2); }
   background: var(--surf-2);
   opacity: 0.5;
 }
+.drag-placeholder-td { padding: 6px 12px; }
+.draggable-row { border-bottom: 1px solid var(--border-1); }
 .drag-placeholder-row {
   height: 32px;
   border: 1px dashed var(--border-2);
