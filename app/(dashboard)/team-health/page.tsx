@@ -40,51 +40,32 @@ function GapBar({ areaName, pctBelowExpected, pctAtExpected, pctAboveExpected, t
   }
 
   return (
-    <div style={{ marginBottom: '10px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-        <span style={{
-          fontSize: 'var(--text-label)',
-          color: 'var(--text-2)',
-          width: '200px',
-          flexShrink: 0,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-        }}>
-          {areaName}
-        </span>
+    <div className="th-gapbar">
+      <div className="th-gapbar-row">
+        <span className="th-gapbar-name">{areaName}</span>
 
         {/* Stacked bar */}
-        <div style={{
-          flex: 1,
-          height: '14px',
-          borderRadius: '3px',
-          overflow: 'hidden',
-          background: 'var(--surf-3)',
-          display: 'flex',
-        }}>
+        <div className="th-gapbar-track">
           {pctBelow > 0 && (
-            <div style={{ width: `${pctBelow}%`, background: barColors.below, transition: 'width 0.3s' }} title={`${pctBelow}% below expected`} />
+            <div className="th-gapbar-segment" style={{ width: `${pctBelow}%`, background: barColors.below }} title={`${pctBelow}% below expected`} />
           )}
           {pctAt > 0 && (
-            <div style={{ width: `${pctAt}%`, background: barColors.at, transition: 'width 0.3s' }} title={`${pctAt}% at expected`} />
+            <div className="th-gapbar-segment" style={{ width: `${pctAt}%`, background: barColors.at }} title={`${pctAt}% at expected`} />
           )}
           {pctAbove > 0 && (
-            <div style={{ width: `${pctAbove}%`, background: barColors.above, transition: 'width 0.3s' }} title={`${pctAbove}% above expected`} />
+            <div className="th-gapbar-segment" style={{ width: `${pctAbove}%`, background: barColors.above }} title={`${pctAbove}% above expected`} />
           )}
         </div>
 
         {/* Labels */}
-        <div style={{ display: 'flex', gap: '8px', width: '200px', flexShrink: 0, justifyContent: 'flex-end' }}>
+        <div className="th-gapbar-labels">
           {pctBelow > 0 && (
-            <span style={{ fontSize: 'var(--text-caption)', color: barColors.below, fontVariantNumeric: 'tabular-nums' }}>
+            <span className="th-gapbar-pct" style={{ color: barColors.below }}>
               {pctBelow}% below ({belowExpected}/{totalAssessed})
             </span>
           )}
           {pctBelow === 0 && (
-            <span style={{ fontSize: 'var(--text-caption)', color: 'var(--text-3)', fontVariantNumeric: 'tabular-nums' }}>
-              ✓ {totalAssessed} assessed
-            </span>
+            <span className="th-gapbar-ok">✓ {totalAssessed} assessed</span>
           )}
         </div>
       </div>
@@ -96,7 +77,7 @@ function GapBar({ areaName, pctBelowExpected, pctAtExpected, pctAboveExpected, t
 
 function ChartLegend() {
   return (
-    <div style={{ display: 'flex', gap: '16px', marginBottom: '16px', flexWrap: 'wrap' }}>
+    <div className="th-legend">
       {[
         { color: '#f87171', label: 'Below expected (≥60%)' },
         { color: '#fbbf24', label: 'Below expected (35–59%)' },
@@ -104,9 +85,9 @@ function ChartLegend() {
         { color: '#4ade80', label: 'At expected' },
         { color: '#34d399', label: 'Above expected' },
       ].map(({ color, label }) => (
-        <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: color, display: 'inline-block', flexShrink: 0 }} />
-          <span style={{ fontSize: 'var(--text-caption)', color: 'var(--text-3)' }}>{label}</span>
+        <div key={label} className="th-legend-item">
+          <span className="th-legend-dot" style={{ background: color }} />
+          <span className="th-legend-label">{label}</span>
         </div>
       ))}
     </div>
@@ -117,13 +98,11 @@ function ChartLegend() {
 
 function AINarrative({ bullets }: { bullets: string[] }) {
   return (
-    <ul style={{ margin: 0, padding: '0 0 0 18px' }}>
-      {bullets.map((b, i) => (
-        <li key={i} style={{ fontSize: 'var(--text-label)', color: 'var(--text-2)', marginBottom: '6px', lineHeight: 1.5 }}>
-          {b}
-        </li>
-      ))}
-    </ul>
+    <div className="th-ai-narrative">
+      <ul>
+        {bullets.map((b, i) => <li key={i}>{b}</li>)}
+      </ul>
+    </div>
   )
 }
 
@@ -131,7 +110,7 @@ function AINarrative({ bullets }: { bullets: string[] }) {
 
 function EmptyState({ assessedPeople, totalPeople }: { assessedPeople: number; totalPeople: number }) {
   return (
-    <div style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--text-3)' }}>
+    <div className="th-empty">
       <Activity style={{ width: '32px', height: '32px', margin: '0 auto 12px', opacity: 0.4 }} />
       {totalPeople === 0 ? (
         <p>No active team members found. Add people first.</p>
@@ -154,18 +133,14 @@ interface TeamFilterProps {
 
 function TeamFilter({ teams, selectedTeamId, onChange }: TeamFilterProps) {
   return (
-    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+    <div className="th-filter-row">
       <button
         onClick={() => onChange(null)}
+        className="th-filter-btn"
         style={{
           background: selectedTeamId === null ? 'var(--surf-3)' : 'var(--surf-2)',
           border: `1px solid ${selectedTeamId === null ? 'var(--border-3)' : 'var(--border-1)'}`,
-          borderRadius: '4px',
           color: selectedTeamId === null ? 'var(--text-1)' : 'var(--text-3)',
-          fontSize: 'var(--text-meta)',
-          padding: '4px 10px',
-          cursor: 'pointer',
-          fontFamily: 'var(--font-sans)',
         }}
       >
         All teams
@@ -174,15 +149,11 @@ function TeamFilter({ teams, selectedTeamId, onChange }: TeamFilterProps) {
         <button
           key={t.id}
           onClick={() => onChange(t.id)}
+          className="th-filter-btn"
           style={{
             background: selectedTeamId === t.id ? 'var(--surf-3)' : 'var(--surf-2)',
             border: `1px solid ${selectedTeamId === t.id ? 'var(--border-3)' : 'var(--border-1)'}`,
-            borderRadius: '4px',
             color: selectedTeamId === t.id ? 'var(--text-1)' : 'var(--text-3)',
-            fontSize: 'var(--text-meta)',
-            padding: '4px 10px',
-            cursor: 'pointer',
-            fontFamily: 'var(--font-sans)',
           }}
         >
           {t.name}
@@ -201,28 +172,28 @@ function StatsStrip({ snapshot }: { snapshot: TeamCompetencySnapshot }) {
     : 0
 
   return (
-    <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
-      <div style={{ background: 'var(--surf)', border: '1px solid var(--border-1)', borderRadius: '6px', padding: '10px 16px', minWidth: '120px' }}>
-        <div style={{ fontSize: 'var(--text-overline)', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '2px' }}>Assessed</div>
-        <div style={{ fontSize: 'var(--text-section)', fontWeight: 700, color: 'var(--text-1)' }}>
+    <div className="th-stats-strip">
+      <div className="th-stat-card">
+        <div className="th-stat-label">Assessed</div>
+        <div className="th-stat-val" style={{ color: 'var(--text-1)' }}>
           {snapshot.assessedPeople}/{snapshot.totalPeople}
         </div>
       </div>
-      <div style={{ background: 'var(--surf)', border: '1px solid var(--border-1)', borderRadius: '6px', padding: '10px 16px', minWidth: '120px' }}>
-        <div style={{ fontSize: 'var(--text-overline)', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '2px' }}>Areas tracked</div>
-        <div style={{ fontSize: 'var(--text-section)', fontWeight: 700, color: 'var(--text-1)' }}>{snapshot.areas.length}</div>
+      <div className="th-stat-card">
+        <div className="th-stat-label">Areas tracked</div>
+        <div className="th-stat-val" style={{ color: 'var(--text-1)' }}>{snapshot.areas.length}</div>
       </div>
-      <div style={{ background: 'var(--surf)', border: '1px solid var(--border-1)', borderRadius: '6px', padding: '10px 16px', minWidth: '160px' }}>
-        <div style={{ fontSize: 'var(--text-overline)', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '2px' }}>Avg % below expected</div>
-        <div style={{ fontSize: 'var(--text-section)', fontWeight: 700, color: avgPctBelow >= 50 ? '#f87171' : avgPctBelow >= 30 ? '#fbbf24' : '#4ade80' }}>
+      <div className="th-stat-card">
+        <div className="th-stat-label">Avg % below expected</div>
+        <div className="th-stat-val" style={{ color: avgPctBelow >= 50 ? '#f87171' : avgPctBelow >= 30 ? '#fbbf24' : '#4ade80' }}>
           {Math.round(avgPctBelow)}%
         </div>
       </div>
       {topGap && (
-        <div style={{ background: 'var(--surf)', border: '1px solid var(--border-1)', borderRadius: '6px', padding: '10px 16px', flex: 1, minWidth: '200px' }}>
-          <div style={{ fontSize: 'var(--text-overline)', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '2px' }}>Top gap area</div>
-          <div style={{ fontSize: 'var(--text-body)', fontWeight: 600, color: '#f87171' }}>
-            {topGap.areaName} <span style={{ fontWeight: 400, color: 'var(--text-3)', fontSize: 'var(--text-meta)' }}>({Math.round(topGap.pctBelowExpected)}% below)</span>
+        <div className="th-stat-card th-stat-card--wide">
+          <div className="th-stat-label">Top gap area</div>
+          <div className="th-stat-top-name">
+            {topGap.areaName} <span className="th-stat-top-pct">({Math.round(topGap.pctBelowExpected)}% below)</span>
           </div>
         </div>
       )}
@@ -245,12 +216,10 @@ export default function TeamHealthPage() {
 
   const aiConfig = useAIConfig()
 
-  // Load teams once
   useEffect(() => {
     getTeams().then(ts => setTeams(ts.filter(t => t.status === 'active'))).catch(() => {})
   }, [])
 
-  // Reload snapshot when filter changes
   const loadSnapshot = useCallback(async (teamId: string | null) => {
     setLoadingData(true)
     setError(null)
@@ -280,17 +249,14 @@ export default function TeamHealthPage() {
     }
   }, [teams])
 
-  // Trigger load when teamId or teams list changes
   useEffect(() => {
-    if (teams.length >= 0) {  // always run, even with 0 teams
+    if (teams.length >= 0) {
       loadSnapshot(selectedTeamId)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTeamId, teams])
 
-  const handleTeamChange = (id: string | null) => {
-    setSelectedTeamId(id)
-  }
+  const handleTeamChange = (id: string | null) => setSelectedTeamId(id)
 
   const handleGenerateSummary = async () => {
     if (!snapshot) return
@@ -298,25 +264,17 @@ export default function TeamHealthPage() {
     try {
       const selectedTeam = teams.find(t => t.id === selectedTeamId)
       const teamName = selectedTeam?.name ?? 'All Teams'
-
-      const userPrompt = buildTeamCompetencySummaryPromptFromSnapshot({
-        teamName,
-        snapshot,
-      })
-
+      const userPrompt = buildTeamCompetencySummaryPromptFromSnapshot({ teamName, snapshot })
       const result = await callAI({
         systemPrompt: TEAM_COMPETENCY_SUMMARY_SYSTEM,
         userPrompt,
         maxTokens: 500,
         temperature: 0.3,
       })
-
-      // Parse bullets from markdown list
       const bullets = result.content
         .split('\n')
         .map(l => l.replace(/^[\s-*•]+/, '').trim())
         .filter(l => l.length > 0)
-
       setNarrative(bullets)
       setNarrativeShown(true)
     } catch (err) {
@@ -336,57 +294,40 @@ export default function TeamHealthPage() {
 
       <div className="page-content">
         {/* Subtitle */}
-        <div style={{ marginBottom: '20px' }}>
-          <p style={{ color: 'var(--text-3)', fontSize: 'var(--text-label)' }}>
+        <div className="th-subtitle">
+          <p className="th-subtitle-text">
             Aggregate view of which competency areas have the most room for growth across your team.
           </p>
         </div>
 
         {/* Team filter */}
         {teams.length > 0 && (
-          <div style={{ marginBottom: '20px' }}>
-            <TeamFilter
-              teams={teams}
-              selectedTeamId={selectedTeamId}
-              onChange={handleTeamChange}
-            />
+          <div className="th-filter-wrap">
+            <TeamFilter teams={teams} selectedTeamId={selectedTeamId} onChange={handleTeamChange} />
           </div>
         )}
 
         {/* Error */}
-        {error && (
-          <div style={{ background: '#2a0a0a', border: '1px solid #5a2020', borderRadius: '6px', padding: '12px 16px', marginBottom: '16px', color: '#f87171', fontSize: 'var(--text-label)' }}>
-            {error}
-          </div>
-        )}
+        {error && <div className="th-error">{error}</div>}
 
         {/* Loading */}
-        {loadingData && (
-          <div style={{ padding: '32px', color: 'var(--text-3)', fontSize: 'var(--text-meta)' }}>
-            Loading competency data…
-          </div>
-        )}
+        {loadingData && <div className="th-loading">Loading competency data…</div>}
 
         {/* Content */}
         {!loadingData && snapshot && (
           <>
-            {/* Stats strip */}
-            {snapshot.assessedPeople > 0 && (
-              <StatsStrip snapshot={snapshot} />
-            )}
+            {snapshot.assessedPeople > 0 && <StatsStrip snapshot={snapshot} />}
 
-            {/* Empty state */}
             {snapshot.areas.length === 0 && (
               <EmptyState assessedPeople={snapshot.assessedPeople} totalPeople={snapshot.totalPeople} />
             )}
 
-            {/* Chart section */}
             {snapshot.areas.length > 0 && (
-              <div style={{ background: 'var(--surf)', border: '1px solid var(--border-1)', borderRadius: '8px', padding: '20px', marginBottom: '20px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div className="th-chart-card">
+                <div className="th-chart-header">
                   <div>
                     <h2 style={{ margin: 0 }}>Areas ranked by gap severity</h2>
-                    <p style={{ fontSize: 'var(--text-caption)', color: 'var(--text-3)', marginTop: '2px' }}>
+                    <p className="th-chart-sub">
                       {selectedTeamName} · {snapshot.assessedPeople} of {snapshot.totalPeople} people assessed
                     </p>
                   </div>
@@ -415,17 +356,14 @@ export default function TeamHealthPage() {
               </div>
             )}
 
-            {/* AI narrative section */}
             {snapshot.areas.length > 0 && (
-              <div style={{ background: 'var(--surf)', border: '1px solid var(--border-1)', borderRadius: '8px', padding: '20px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: narrativeShown ? '14px' : '0' }}>
+              <div className="th-ai-card">
+                <div className="th-ai-header" style={{ marginBottom: narrativeShown ? '14px' : 0 }}>
                   <div>
                     <h2 style={{ margin: 0 }}>AI Summary</h2>
-                    <p style={{ fontSize: 'var(--text-caption)', color: 'var(--text-3)', marginTop: '2px' }}>
-                      Strategic narrative — skip-level ready
-                    </p>
+                    <p className="th-ai-sub">Strategic narrative — skip-level ready</p>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div className="th-ai-header-actions">
                     {narrativeShown && (
                       <AIGeneratedBadge onDismiss={() => { setNarrative([]); setNarrativeShown(false) }} />
                     )}
@@ -441,18 +379,14 @@ export default function TeamHealthPage() {
                   </div>
                 </div>
 
-                {narrativeShown && narrative.length > 0 && (
-                  <AINarrative bullets={narrative} />
-                )}
+                {narrativeShown && narrative.length > 0 && <AINarrative bullets={narrative} />}
 
                 {narrativeShown && narrative.length === 0 && (
-                  <p style={{ fontSize: 'var(--text-label)', color: 'var(--text-3)', marginTop: '8px' }}>
-                    No summary generated. Try again.
-                  </p>
+                  <p className="th-ai-empty">No summary generated. Try again.</p>
                 )}
 
                 {!narrativeShown && !generating && (
-                  <p style={{ fontSize: 'var(--text-caption)', color: 'var(--text-3)', marginTop: '8px' }}>
+                  <p className="th-ai-hint">
                     Generate an AI narrative identifying top gaps, patterns, and suggested focus areas.
                     No individual names are included.
                   </p>
