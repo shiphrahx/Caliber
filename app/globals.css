@@ -3860,3 +3860,14 @@ label { font-size: var(--text-label); color: var(--text-2); }
 .th-gapbar-labels { display: flex; gap: 8px; width: 200px; flex-shrink: 0; justify-content: flex-end; }
 .th-gapbar-pct { font-size: var(--text-caption); font-variant-numeric: tabular-nums; }
 .th-gapbar-ok { font-size: var(--text-caption); color: var(--text-3); font-variant-numeric: tabular-nums; }
+
+/* ─── Legal pages (privacy / terms) ─────────────────────── */
+.legal-page { max-width: 720px; margin: 0 auto; padding: 80px 24px; font-family: system-ui, sans-serif; color: #f4f4f5; background: #0a0a0b; min-height: 100vh; }
+.legal-back { font-size: 13px; color: #a1a1aa; text-decoration: none; margin-bottom: 48px; display: inline-block; }
+.legal-title { font-size: 36px; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 8px; }
+.legal-date { color: #52525b; font-size: 14px; margin-bottom: 48px; }
+.legal-body { line-height: 1.75; font-size: 15px; color: #a1a1aa; }
+.legal-h2 { color: #f4f4f5; font-size: 20px; font-weight: 600; margin-top: 40px; margin-bottom: 12px; }
+.legal-footer { margin-top: 64px; padding-top: 32px; border-top: 1px solid #1e1e22; display: flex; gap: 24px; }
+.legal-footer-link { font-size: 13px; color: #52525b; text-decoration: none; }
+.legal-strong { color: #f4f4f5; }
