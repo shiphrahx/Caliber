@@ -820,8 +820,8 @@ export function CompetencySection({ personId, personLevel, personName = "this en
     return (
       <div className="competency-section">
         <div className="competency-card-wrap">
-          <h2 style={{ marginBottom: "8px" }}>Competencies</h2>
-          <p style={{ color: "var(--text-3)", marginBottom: "12px" }}>
+          <h2 className="competency-no-framework-title">Competencies</h2>
+          <p className="competency-no-framework-text">
             No career framework set up yet. Define competency areas and level expectations to start tracking.
           </p>
           <a href="/framework" className="competency-setup-link">
@@ -850,7 +850,7 @@ export function CompetencySection({ personId, personLevel, personName = "this en
           <>
             <PromotionBanner readiness={readiness} />
             {readiness.nextLevel && (
-              <div style={{ marginBottom: "20px" }}>
+              <div className="competency-promo-readiness">
                 <div className="promo-packet-row">
                   <AIButton
                     configured={aiConfig.configured}

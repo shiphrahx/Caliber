@@ -1807,6 +1807,11 @@ label { font-size: var(--text-label); color: var(--text-2); }
 .promo-banner-sub { font-size: var(--text-caption); color: var(--text-3); margin-left: 10px; }
 .promo-banner-note { font-size: var(--text-caption); color: var(--text-3); }
 
+/* No-framework empty state */
+.competency-no-framework-title { margin-bottom: 8px; }
+.competency-no-framework-text { color: var(--text-3); margin-bottom: 12px; }
+.competency-promo-readiness { margin-bottom: 20px; }
+
 /* Promotion packet */
 .promo-packet-row {
   display: flex;
