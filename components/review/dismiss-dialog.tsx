@@ -13,7 +13,7 @@ export function DismissDialog({ onConfirm, onCancel }: DismissDialogProps) {
 
   return (
     <div className="modal-overlay" onClick={onCancel}>
-      <div className="modal-box" style={{ width: '360px', gap: '12px' }} onClick={e => e.stopPropagation()}>
+      <div className="modal-box modal-box--dismiss" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <span className="modal-title">Dismiss item</span>
           <button onClick={onCancel} className="modal-close-btn">
@@ -30,10 +30,10 @@ export function DismissDialog({ onConfirm, onCancel }: DismissDialogProps) {
         />
 
         <div className="modal-footer">
-          <button onClick={onCancel} className="btn-ghost" style={{ padding: '6px 12px' }}>
+          <button onClick={onCancel} className="btn-ghost btn--padded">
             Cancel
           </button>
-          <button onClick={() => onConfirm(note)} className="btn-primary" style={{ padding: '6px 12px' }}>
+          <button onClick={() => onConfirm(note)} className="btn-primary btn--padded">
             Dismiss
           </button>
         </div>

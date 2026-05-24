@@ -760,6 +760,8 @@ label { font-size: var(--text-label); color: var(--text-2); }
   gap: 14px;
 }
 .modal-box--sm { width: 400px; }
+.modal-box--dismiss { width: 360px; gap: 12px; }
+.btn--padded { padding: 6px 12px; }
 .modal-header {
   display: flex;
   justify-content: space-between;
