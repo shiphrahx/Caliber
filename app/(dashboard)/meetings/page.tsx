@@ -117,7 +117,6 @@ export default function MeetingsPage() {
 
         if (uiMeetings.length > 0) setSelectedMeeting(uiMeetings[0])
 
-        // Open new meeting dialog if navigated with ?new=1
         if (!searchParamsHandled.current && searchParams.get('new') === '1') {
           searchParamsHandled.current = true
           const type = searchParams.get('type') || undefined
@@ -244,7 +243,6 @@ export default function MeetingsPage() {
       setMeetings([uiMeeting, ...meetings])
       setSelectedMeeting(uiMeeting)
 
-      // Offer AI follow-up draft if AI is configured and meeting has notes or action items
       if (aiConfig.configured && (uiMeeting.notes || uiMeeting.actionItems)) {
         setFollowUpDraftMeeting(uiMeeting)
         setShowFollowUpBanner(true)
@@ -403,7 +401,7 @@ export default function MeetingsPage() {
   }, [isResizing])
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <div className="mtg-page">
       {/* Top bar */}
       <div className="page-topbar">
         <span className="page-topbar-title">Meetings</span>
@@ -413,69 +411,30 @@ export default function MeetingsPage() {
       </div>
 
       {/* Split panel */}
-      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+      <div className="mtg-split">
         {/* Left panel */}
-        <div style={{
-          width: `${leftPanelWidth}px`,
-          background: "var(--surf)",
-          borderRight: "1px solid var(--border-1)",
-          overflowY: "auto",
-          display: "flex",
-          flexDirection: "column",
-          flexShrink: 0,
-        }}>
+        <div className="mtg-left" style={{ width: `${leftPanelWidth}px` }}>
           {/* Panel header */}
-          <div style={{
-            padding: "10px 12px",
-            borderBottom: "1px solid var(--border-1)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}>
-            <span style={{ fontSize: "var(--text-meta)", fontWeight: 500, color: "var(--text-1)" }}>All meetings</span>
-            <div style={{ display: "flex", gap: "2px" }}>
-              <button
-                onClick={expandAll}
-                title="Expand all"
-                style={{ background: "none", border: "none", color: "var(--text-3)", cursor: "pointer", padding: "2px" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "var(--text-2)")}
-                onMouseLeave={e => (e.currentTarget.style.color = "var(--text-3)")}
-              >
+          <div className="mtg-left-header">
+            <span className="mtg-left-header-title">All meetings</span>
+            <div className="mtg-left-header-btns">
+              <button onClick={expandAll} title="Expand all" className="mtg-expand-btn">
                 <ChevronsDown style={{ width: "11px", height: "11px" }} />
               </button>
-              <button
-                onClick={collapseAll}
-                title="Collapse all"
-                style={{ background: "none", border: "none", color: "var(--text-3)", cursor: "pointer", padding: "2px" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "var(--text-2)")}
-                onMouseLeave={e => (e.currentTarget.style.color = "var(--text-3)")}
-              >
+              <button onClick={collapseAll} title="Collapse all" className="mtg-expand-btn">
                 <ChevronsRight style={{ width: "11px", height: "11px" }} />
               </button>
             </div>
           </div>
 
           {/* Tree */}
-          <div style={{ padding: "4px 0" }}>
+          <div className="mtg-tree">
             {Object.entries(tree).map(([type, node]) => (
               <div key={type}>
-                {/* Group header */}
+                {/* L1 — meeting type */}
                 <button
                   onClick={() => toggleType(type)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "5px",
-                    padding: "6px 12px",
-                    fontSize: "var(--tree-l1-size)",
-                    fontWeight: "var(--tree-l1-weight)" as React.CSSProperties["fontWeight"],
-                    color: "var(--tree-l1-color)",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    width: "100%",
-                    textAlign: "left",
-                  }}
+                  className="mtg-tree-l1-btn"
                   onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "var(--surf-2)")}
                   onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "none")}
                 >
@@ -493,20 +452,7 @@ export default function MeetingsPage() {
                       <div key={personName}>
                         <button
                           onClick={() => togglePerson(personName)}
-                          style={{
-                            padding: "4px 12px 2px 24px",
-                            fontSize: "var(--tree-l2-size)",
-                            color: "var(--tree-l2-color)",
-                            fontWeight: "var(--tree-l2-weight)" as React.CSSProperties["fontWeight"],
-                            background: "none",
-                            border: "none",
-                            cursor: "pointer",
-                            width: "100%",
-                            textAlign: "left",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                          }}
+                          className="mtg-tree-l2-btn"
                           onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "var(--surf-2)")}
                           onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "none")}
                         >
@@ -522,30 +468,19 @@ export default function MeetingsPage() {
                             <button
                               key={meeting.id}
                               onClick={() => setSelectedMeeting(meeting)}
+                              className="mtg-tree-l3-btn"
                               style={{
-                                padding: "5px 12px 5px 32px",
-                                cursor: "pointer",
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: "1px",
                                 background: isActive ? "var(--surf-3)" : "none",
-                                borderTop: "none",
-                                borderRight: "none",
-                                borderBottom: "none",
                                 borderLeft: `2px solid ${isActive ? "#00f058" : "transparent"}`,
-                                width: "100%",
-                                textAlign: "left",
-                              } as React.CSSProperties}
+                              }}
                               onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "var(--surf-2)" }}
                               onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "none" }}
                             >
-                              <span style={{ fontSize: "var(--tree-l3-size)", fontWeight: 500, color: isActive ? "#00f058" : "var(--tree-l2-color)" }}>
+                              <span className="mtg-tree-l3-date" style={{ color: isActive ? "#00f058" : "var(--tree-l2-color)" }}>
                                 {formatDate(meeting.date)}
                               </span>
                               {meeting.title && (
-                                <span style={{ fontSize: "var(--tree-l3-size)", color: "var(--tree-l3-color)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
-                                  {meeting.title}
-                                </span>
+                                <span className="mtg-tree-l3-title">{meeting.title}</span>
                               )}
                             </button>
                           )
@@ -558,20 +493,7 @@ export default function MeetingsPage() {
                       <div key={teamName}>
                         <button
                           onClick={() => toggleTeam(teamName)}
-                          style={{
-                            padding: "4px 12px 2px 24px",
-                            fontSize: "var(--tree-l2-size)",
-                            color: "var(--tree-l2-color)",
-                            fontWeight: "var(--tree-l2-weight)" as React.CSSProperties["fontWeight"],
-                            background: "none",
-                            border: "none",
-                            cursor: "pointer",
-                            width: "100%",
-                            textAlign: "left",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                          }}
+                          className="mtg-tree-l2-btn"
                           onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "var(--surf-2)")}
                           onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "none")}
                         >
@@ -587,30 +509,19 @@ export default function MeetingsPage() {
                             <button
                               key={meeting.id}
                               onClick={() => setSelectedMeeting(meeting)}
+                              className="mtg-tree-l3-btn"
                               style={{
-                                padding: "5px 12px 5px 32px",
-                                cursor: "pointer",
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: "1px",
                                 background: isActive ? "var(--surf-3)" : "none",
-                                borderTop: "none",
-                                borderRight: "none",
-                                borderBottom: "none",
                                 borderLeft: `2px solid ${isActive ? "#00f058" : "transparent"}`,
-                                width: "100%",
-                                textAlign: "left",
-                              } as React.CSSProperties}
+                              }}
                               onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "var(--surf-2)" }}
                               onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "none" }}
                             >
-                              <span style={{ fontSize: "var(--tree-l3-size)", fontWeight: 500, color: isActive ? "#00f058" : "var(--tree-l2-color)" }}>
+                              <span className="mtg-tree-l3-date" style={{ color: isActive ? "#00f058" : "var(--tree-l2-color)" }}>
                                 {formatDate(meeting.date)}
                               </span>
                               {meeting.title && (
-                                <span style={{ fontSize: "var(--tree-l3-size)", color: "var(--tree-l3-color)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
-                                  {meeting.title}
-                                </span>
+                                <span className="mtg-tree-l3-title">{meeting.title}</span>
                               )}
                             </button>
                           )
@@ -625,30 +536,19 @@ export default function MeetingsPage() {
                         <button
                           key={meeting.id}
                           onClick={() => setSelectedMeeting(meeting)}
+                          className="mtg-tree-flat-btn"
                           style={{
-                            padding: "5px 12px 5px 24px",
-                            cursor: "pointer",
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "1px",
                             background: isActive ? "var(--surf-3)" : "none",
-                            borderTop: "none",
-                            borderRight: "none",
-                            borderBottom: "none",
                             borderLeft: `2px solid ${isActive ? "#00f058" : "transparent"}`,
-                            width: "100%",
-                            textAlign: "left",
-                          } as React.CSSProperties}
+                          }}
                           onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "var(--surf-2)" }}
                           onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "none" }}
                         >
-                          <span style={{ fontSize: "var(--text-meta)", color: isActive ? "#00f058" : "var(--text-2)" }}>
+                          <span className="mtg-tree-flat-date" style={{ color: isActive ? "#00f058" : "var(--text-2)" }}>
                             {formatDate(meeting.date)}
                           </span>
                           {meeting.title && (
-                            <span style={{ fontSize: "var(--text-meta)", color: "var(--text-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
-                              {meeting.title}
-                            </span>
+                            <span className="mtg-tree-flat-title">{meeting.title}</span>
                           )}
                         </button>
                       )
@@ -662,44 +562,26 @@ export default function MeetingsPage() {
 
         {/* Resizable divider */}
         <div
-          style={{
-            width: "4px",
-            background: isResizing ? "var(--accent)" : "var(--border-1)",
-            cursor: "col-resize",
-            flexShrink: 0,
-            transition: "background 150ms",
-          }}
+          className="mtg-divider"
+          style={{ background: isResizing ? "var(--accent)" : undefined }}
           onMouseDown={handleMouseDown}
           onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "var(--border-2)")}
           onMouseLeave={e => { if (!isResizing) (e.currentTarget as HTMLElement).style.background = "var(--border-1)" }}
         />
 
         {/* Right panel — meeting detail */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "22px 24px" }}>
+        <div className="mtg-right">
           {selectedMeeting ? (
             <div>
-              {/* Follow-up draft banner — shown after a new meeting is saved with AI configured */}
+              {/* Follow-up draft banner */}
               {showFollowUpBanner && followUpDraftMeeting?.id === selectedMeeting.id && (
-                <div style={{
-                  display: "flex", alignItems: "center", justifyContent: "space-between",
-                  gap: "12px", padding: "10px 14px", marginBottom: "16px",
-                  borderRadius: "6px", border: "1px solid var(--border-2)",
-                  background: "var(--surf-2)",
-                }}>
-                  <p style={{ fontSize: "var(--text-label)", color: "var(--text-2)", margin: 0 }}>
-                    Meeting saved. Draft a follow-up message?
-                  </p>
-                  <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
-                    <button
-                      onClick={() => setFollowUpDraftOpen(true)}
-                      style={{ padding: "4px 12px", borderRadius: "4px", fontSize: "var(--text-label)", fontFamily: "var(--font-sans)", cursor: "pointer", background: "var(--surf-3)", color: "var(--text-1)", border: "1px solid var(--border-3)", fontWeight: 600 }}
-                    >
+                <div className="mtg-fu-banner">
+                  <p className="mtg-fu-banner-text">Meeting saved. Draft a follow-up message?</p>
+                  <div className="mtg-fu-banner-btns">
+                    <button onClick={() => setFollowUpDraftOpen(true)} className="mtg-fu-draft-btn">
                       Draft message
                     </button>
-                    <button
-                      onClick={() => setShowFollowUpBanner(false)}
-                      style={{ padding: "4px 10px", borderRadius: "4px", fontSize: "var(--text-label)", fontFamily: "var(--font-sans)", cursor: "pointer", background: "transparent", color: "var(--text-3)", border: "1px solid var(--border-2)" }}
-                    >
+                    <button onClick={() => setShowFollowUpBanner(false)} className="mtg-fu-dismiss-btn">
                       Dismiss
                     </button>
                   </div>
@@ -707,21 +589,20 @@ export default function MeetingsPage() {
               )}
 
               {/* Title */}
-              <h1 style={{ marginBottom: "4px" }}>
-                {selectedMeeting.title}
-              </h1>
+              <h1 className="mtg-title-mb">{selectedMeeting.title}</h1>
+
               {/* Meta line */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", marginBottom: "16px" }}>
+              <div className="mtg-meta-row">
                 <p>
                   {formatDate(selectedMeeting.date)}
                   {selectedMeeting.nextMeetingDate && ` · next ${formatDate(selectedMeeting.nextMeetingDate)}`}
                   {selectedMeeting.attendees.length > 0 && ` · ${selectedMeeting.attendees.join(", ")}`}
                 </p>
                 {selectedMeeting.personId && (
-                  <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
+                  <div className="mtg-meta-btns">
                     <button
                       onClick={() => setLogEvidenceOpen(true)}
-                      style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "4px 10px", borderRadius: "4px", fontSize: "var(--text-caption)", fontWeight: 600, color: "var(--text-2)", border: "1px solid var(--border-2)", background: "var(--surf-2)", cursor: "pointer", fontFamily: "var(--font-sans)" }}
+                      className="mtg-action-btn"
                       onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-1)")}
                       onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-2)")}
                     >
@@ -729,7 +610,7 @@ export default function MeetingsPage() {
                     </button>
                     <button
                       onClick={() => setTrackFollowUpOpen(true)}
-                      style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "4px 10px", borderRadius: "4px", fontSize: "var(--text-caption)", fontWeight: 600, color: "var(--text-2)", border: "1px solid var(--border-2)", background: "var(--surf-2)", cursor: "pointer", fontFamily: "var(--font-sans)" }}
+                      className="mtg-action-btn"
                       onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-1)")}
                       onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-2)")}
                     >
@@ -739,64 +620,54 @@ export default function MeetingsPage() {
                 )}
               </div>
 
-              {/* TL;DR — shown in list view when available */}
+              {/* TL;DR */}
               {selectedMeeting.tldr && (
-                <div style={{
-                  padding: "10px 14px",
-                  marginBottom: "16px",
-                  borderRadius: "6px",
-                  background: "var(--surf-2)",
-                  border: "1px solid var(--border-2)",
-                }}>
-                  <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", fontWeight: 600, display: "block", marginBottom: "4px" }}>
-                    AI Summary
-                  </span>
-                  <p style={{ fontSize: "var(--text-label)", color: "var(--text-2)", lineHeight: 1.5, margin: 0 }}>
-                    {selectedMeeting.tldr}
-                  </p>
+                <div className="mtg-tldr-box">
+                  <span className="mtg-tldr-label">AI Summary</span>
+                  <p className="mtg-tldr-text">{selectedMeeting.tldr}</p>
                 </div>
               )}
 
               {/* Meta fields grid */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "16px" }}>
+              <div className="mtg-meta-grid">
                 <div>
                   <div className="form-label">Date</div>
-                  <div style={{ background: "var(--surf-2)", border: "1px solid var(--border-1)", borderRadius: "5px", overflow: "hidden" }}>
+                  <div className="mtg-field-input-wrap">
                     <Input
                       type="date"
                       value={selectedMeeting.date}
                       onChange={(e) => handleUpdateMeeting({ ...selectedMeeting, date: e.target.value })}
-                      style={{ fontSize: "var(--text-meta)", color: "var(--text-1)", background: "transparent", border: "none", padding: "6px 9px" }}
+                      className="mtg-field-input"
                     />
                   </div>
                 </div>
                 {selectedMeeting.type === "1:1" && selectedMeeting.recurrence && selectedMeeting.recurrence !== "none" && selectedMeeting.nextMeetingDate && (
                   <div>
                     <div className="form-label">Next Meeting</div>
-                    <div style={{ background: "var(--surf-2)", border: "1px solid var(--border-1)", borderRadius: "5px", overflow: "hidden" }}>
+                    <div className="mtg-field-input-wrap">
                       <Input
                         type="date"
                         value={selectedMeeting.nextMeetingDate}
                         onChange={(e) => handleUpdateMeeting({ ...selectedMeeting, nextMeetingDate: e.target.value })}
-                        style={{ fontSize: "var(--text-meta)", color: "var(--text-1)", background: "transparent", border: "none", padding: "6px 9px" }}
+                        className="mtg-field-input"
                       />
                     </div>
                   </div>
                 )}
                 <div>
                   <div className="form-label">Title</div>
-                  <div style={{ background: "var(--surf-2)", border: "1px solid var(--border-1)", borderRadius: "5px", overflow: "hidden" }}>
+                  <div className="mtg-field-input-wrap">
                     <Input
                       value={selectedMeeting.title}
                       onChange={(e) => handleUpdateMeeting({ ...selectedMeeting, title: e.target.value })}
                       placeholder="Meeting title"
-                      style={{ fontSize: "var(--text-meta)", color: "var(--text-1)", background: "transparent", border: "none", padding: "6px 9px" }}
+                      className="mtg-field-input"
                     />
                   </div>
                 </div>
                 <div>
                   <div className="form-label">Attendees</div>
-                  <div style={{ background: "var(--surf-2)", border: "1px solid var(--border-1)", borderRadius: "5px", overflow: "hidden" }}>
+                  <div className="mtg-field-input-wrap">
                     <Input
                       value={selectedMeeting.attendees.join(", ")}
                       onChange={(e) => handleUpdateMeeting({
@@ -804,15 +675,15 @@ export default function MeetingsPage() {
                         attendees: e.target.value.split(",").map(a => a.trim()).filter(a => a.length > 0)
                       })}
                       placeholder="Names separated by commas"
-                      style={{ fontSize: "var(--text-meta)", color: "var(--text-1)", background: "transparent", border: "none", padding: "6px 9px" }}
+                      className="mtg-field-input"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Action items */}
-              <div style={{ marginBottom: "16px" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
+              <div className="mtg-actions-section">
+                <div className="mtg-actions-header">
                   <div className="form-section-header" style={{ marginBottom: 0 }}>Action items</div>
                   <AIButton
                     configured={aiConfig.configured}
@@ -824,34 +695,17 @@ export default function MeetingsPage() {
                     showSetupLink={false}
                   />
                 </div>
-                <div style={{
-                  background: "var(--surf-2)",
-                  border: "1px solid var(--border-1)",
-                  borderRadius: "6px",
-                  overflow: "hidden",
-                }}>
+                <div className="mtg-actions-list">
                   {parseActionItems(selectedMeeting.actionItems || "").length > 0 ? (
-                    parseActionItems(selectedMeeting.actionItems || "").map((item, idx, arr) => (
-                      <div key={idx} style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        padding: "7px 12px",
-                        borderBottom: idx < arr.length - 1 ? "1px solid var(--border-1)" : "none",
-                      }}>
-                        <div style={{
-                          width: "13px",
-                          height: "13px",
-                          borderRadius: "50%",
-                          border: "1.5px solid var(--border-3)",
-                          flexShrink: 0,
-                        }} />
-                        <span style={{ fontSize: "var(--text-label)", color: "var(--text-2)" }}>{item}</span>
+                    parseActionItems(selectedMeeting.actionItems || "").map((item, idx) => (
+                      <div key={idx} className="mtg-action-item">
+                        <div className="mtg-action-item-dot" />
+                        <span className="mtg-action-item-text">{item}</span>
                       </div>
                     ))
                   ) : (
-                    <div style={{ padding: "7px 12px" }}>
-                      <span style={{ fontSize: "var(--text-meta)", color: "var(--text-3)" }}>No action items</span>
+                    <div className="mtg-actions-empty">
+                      <span className="mtg-actions-empty-text">No action items</span>
                     </div>
                   )}
                 </div>
@@ -860,25 +714,11 @@ export default function MeetingsPage() {
               {/* Meeting notes */}
               <div>
                 <div className="form-section-header">Meeting notes</div>
-                <div style={{
-                  background: "var(--surf-2)",
-                  border: "1px solid var(--border-1)",
-                  borderRadius: "6px",
-                  overflow: "hidden",
-                }}>
+                <div className="mtg-notes-editor">
                   {/* Toolbar */}
-                  <div style={{ display: "flex", gap: "2px", padding: "6px 8px", borderBottom: "1px solid var(--border-1)" }}>
+                  <div className="mtg-notes-toolbar">
                     {["B", "I", "H1", "H2", "H3", "≡", "</>", "⊞"].map((label) => (
-                      <button key={label} style={{
-                        background: "transparent",
-                        border: "1px solid var(--border-2)",
-                        color: "var(--text-3)",
-                        borderRadius: "3px",
-                        padding: "2px 7px",
-                        fontSize: "var(--text-caption)",
-                        cursor: "pointer",
-                        fontFamily: "var(--font-sans)",
-                      }}
+                      <button key={label} className="mtg-notes-toolbar-btn"
                         onMouseEnter={e => (e.currentTarget.style.color = "var(--text-1)")}
                         onMouseLeave={e => (e.currentTarget.style.color = "var(--text-3)")}
                       >
@@ -887,19 +727,19 @@ export default function MeetingsPage() {
                     ))}
                   </div>
                   {/* Body */}
-                  <div style={{ padding: "12px 14px", fontSize: "var(--text-label)", color: "var(--text-2)", lineHeight: 1.75 }}>
+                  <div className="mtg-notes-body">
                     {selectedMeeting.notes ? (
                       <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(selectedMeeting.notes) }} />
                     ) : (
-                      <span style={{ color: "var(--text-3)" }}>Meeting notes, discussion points, decisions...</span>
+                      <span className="mtg-notes-empty">Meeting notes, discussion points, decisions...</span>
                     )}
                   </div>
                 </div>
               </div>
             </div>
           ) : (
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
-              <p style={{ color: "var(--text-3)" }}>Select a meeting to view details</p>
+            <div className="mtg-right-empty">
+              <p className="mtg-right-empty-text">Select a meeting to view details</p>
             </div>
           )}
         </div>

@@ -297,8 +297,8 @@ export default function FrameworkPage() {
             style={{ maxWidth: "360px", marginBottom: "20px" }}
           />
 
-          <p className="fw-template-label">Start from a template:</p>
-          <div className="fw-template-grid">
+          <p className="fw-setup-templates-label">Start from a template:</p>
+          <div className="fw-setup-templates">
             {FRAMEWORK_TEMPLATES.map((t, i) => (
               <button
                 key={i}
@@ -308,7 +308,7 @@ export default function FrameworkPage() {
                 onMouseLeave={e => ((e.currentTarget as HTMLElement).style.borderColor = "var(--border-2)")}
               >
                 <span className="fw-template-name">{t.name}</span>
-                <span className="fw-template-meta">
+                <span className="fw-template-count">
                   {t.areas.length} competency areas
                 </span>
               </button>
@@ -327,7 +327,7 @@ export default function FrameworkPage() {
 
         {allFrameworks.filter(f => f.status === 'archived').length > 0 && (
           <div>
-            <p className="fw-restore-label">Archived frameworks:</p>
+            <p className="fw-archived-label">Archived frameworks:</p>
             {allFrameworks.filter(f => f.status === 'archived').map(f => (
               <button
                 key={f.id}
@@ -372,7 +372,7 @@ export default function FrameworkPage() {
               : <><RotateCcw style={{ width: "11px", height: "11px" }} /> Restore</>}
           </button>
         </div>
-        <p className="fw-header-meta">
+        <p className="fw-header-sub">
           {areas.length} competency area{areas.length !== 1 ? 's' : ''}. Changes auto-save on blur.
         </p>
       </div>
