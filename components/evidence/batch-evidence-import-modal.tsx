@@ -256,7 +256,7 @@ export function BatchEvidenceImportModal({
 
               {contextPersonName && (
                 <p className="batch-context-hint">
-                  Context: entries will be attributed to <strong style={{ color: "var(--text-2)" }}>{contextPersonName}</strong> unless another name is found.
+                  Context: entries will be attributed to <strong className="batch-context-name">{contextPersonName}</strong> unless another name is found.
                 </p>
               )}
 
@@ -271,8 +271,8 @@ export function BatchEvidenceImportModal({
               <Button variant="outline" onClick={handleClose}>Cancel</Button>
               <Button onClick={handleExtract} disabled={extracting || !text.trim()}>
                 {extracting
-                  ? <><Loader2 size={13} style={{ marginRight: 6, animation: "spin 1s linear infinite" }} /> Extracting…</>
-                  : <><Upload size={13} style={{ marginRight: 6 }} /> Extract Evidence</>
+                  ? <><Loader2 size={13} className="batch-btn-spinner" /> Extracting…</>
+                  : <><Upload size={13} className="batch-btn-icon" /> Extract Evidence</>
                 }
               </Button>
             </DialogFooter>
@@ -320,7 +320,7 @@ export function BatchEvidenceImportModal({
                         <Input
                           value={row.title}
                           onChange={e => updateRow(row._key, { title: e.target.value })}
-                          style={{ fontSize: "var(--text-label)", fontWeight: 600 }}
+                          className="batch-row-title-input"
                           placeholder="Title"
                         />
 
@@ -331,7 +331,7 @@ export function BatchEvidenceImportModal({
                             value={row.category ?? 'general'}
                             onValueChange={val => updateRow(row._key, { category: val as EvidenceCategory })}
                           >
-                            <SelectTrigger style={{ fontSize: "var(--text-caption)" }}>
+                            <SelectTrigger className="batch-row-select-trigger">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -363,7 +363,7 @@ export function BatchEvidenceImportModal({
                             type="date"
                             value={row.occurredAt}
                             onChange={e => updateRow(row._key, { occurredAt: e.target.value })}
-                            style={{ fontSize: "var(--text-caption)" }}
+                            className="batch-row-select-trigger"
                           />
 
                           {/* Person */}
@@ -409,7 +409,7 @@ export function BatchEvidenceImportModal({
               <Button variant="outline" onClick={() => setStep('input')}>← Back</Button>
               <Button onClick={handleSave} disabled={saving || saveable === 0}>
                 {saving
-                  ? <><Loader2 size={13} style={{ marginRight: 6, animation: "spin 1s linear infinite" }} /> Saving…</>
+                  ? <><Loader2 size={13} className="batch-btn-spinner" /> Saving…</>
                   : `Save ${saveable} entr${saveable === 1 ? 'y' : 'ies'}`
                 }
               </Button>

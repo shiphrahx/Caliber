@@ -1006,6 +1006,11 @@ label { font-size: var(--text-label); color: var(--text-2); }
 .batch-row-grid { display: grid; grid-template-columns: 1fr 1fr 140px 1fr; gap: 6px; }
 .batch-row-warn { font-size: var(--text-caption); color: #fbbf24; margin: 0; }
 .batch-row-err { font-size: var(--text-caption); color: #f87171; margin: 0; }
+.batch-context-name { color: var(--text-2); }
+.batch-row-title-input { font-size: var(--text-label); font-weight: 600; }
+.batch-row-select-trigger { font-size: var(--text-caption); }
+.batch-btn-icon { margin-right: 6px; }
+.batch-btn-spinner { margin-right: 6px; }
 
 /* ── Evidence section ── */
 .evidence-section {
