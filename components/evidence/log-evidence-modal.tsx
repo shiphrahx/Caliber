@@ -135,7 +135,7 @@ export function LogEvidenceModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent style={{ maxWidth: "520px" }}>
+      <DialogContent className="log-evidence-dialog">
         <DialogHeader>
           <DialogTitle>Log as Evidence</DialogTitle>
           <DialogDescription>
@@ -168,14 +168,14 @@ export function LogEvidenceModal({
 
           {personName && (
             <p className="log-evidence-person-hint">
-              Evidence will be logged for <strong style={{ color: "var(--text-1)" }}>{personName}</strong>
+              Evidence will be logged for <strong className="log-evidence-person-name">{personName}</strong>
             </p>
           )}
 
           <div className="log-evidence-row-2col">
             <div className="log-evidence-field">
               <div className="log-evidence-cat-row">
-                <label className="form-label" style={{ margin: 0 }}>Category</label>
+                <label className="form-label form-label--no-margin">Category</label>
                 {aiConfig.configured && title.trim().length >= 10 && (
                   <button
                     type="button"
@@ -217,7 +217,7 @@ export function LogEvidenceModal({
           </div>
 
           <div className="log-evidence-sentiment-row">
-            <label className="form-label" style={{ margin: 0 }}>Sentiment</label>
+            <label className="form-label form-label--no-margin">Sentiment</label>
             {SENTIMENTS.map(s => {
               const cfg = SENTIMENT_CONFIG[s]
               const active = sentiment === s

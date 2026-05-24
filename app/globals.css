@@ -1154,6 +1154,8 @@ label { font-size: var(--text-label); color: var(--text-2); }
 .evidence-delete-btn svg { width: 13px; height: 13px; }
 
 /* ── Log evidence modal ── */
+.log-evidence-dialog { max-width: 520px; }
+.log-evidence-person-name { color: var(--text-1); }
 .log-evidence-meeting-link {
   display: inline-flex;
   align-items: center;
