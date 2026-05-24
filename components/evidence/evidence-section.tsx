@@ -330,6 +330,7 @@ export function EvidenceSection({
               <div key={entry.id} className="evidence-entry">
                 {/* Entry row */}
                 <div
+                  data-testid="evidence-entry-row"
                   className="evidence-entry-row"
                   onClick={() => setExpandedId(isExpanded ? null : entry.id)}
                 >
