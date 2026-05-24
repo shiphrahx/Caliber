@@ -77,6 +77,156 @@ interface AchievementRow {
 
 const goalStatuses = ["Not started", "In progress", "Completed"]
 
+function calculateGoalDistribution(goals: Goal[], categories: string[]): { [key: string]: number } {
+  const distribution: { [key: string]: number } = {}
+  categories.forEach(cat => { distribution[cat] = 0 })
+  goals.forEach(goal => { distribution[goal.category] = (distribution[goal.category] || 0) + 1 })
+  return distribution
+}
+
+function GoalsTable({ goals, setter, categories, updateGoal, deleteGoal, stalenessBadge }: {
+  goals: Goal[]
+  term: 'short_term' | 'mid_term' | 'long_term'
+  setter: React.Dispatch<React.SetStateAction<Goal[]>>
+  categories: string[]
+  updateGoal: (setter: React.Dispatch<React.SetStateAction<Goal[]>>, goals: Goal[], id: string, field: keyof Goal, value: string) => void
+  deleteGoal: (setter: React.Dispatch<React.SetStateAction<Goal[]>>, goals: Goal[], id: string) => void
+  stalenessBadge: (updatedAt: string, status: Goal['status']) => React.ReactNode
+}) {
+  return (
+    <div className="cg-table-wrap">
+      <table className="cg-table">
+        <thead>
+          <tr className="cg-table-head-row">
+            <th className="col-header" style={{ padding: "8px 12px", width: "45%" }}>Goal</th>
+            <th className="col-header" style={{ padding: "8px 12px", width: "12%" }}>Type</th>
+            <th className="col-header" style={{ padding: "8px 12px", width: "18%" }}>Category</th>
+            <th className="col-header" style={{ padding: "8px 12px", width: "15%" }}>Status</th>
+            <th style={{ padding: "8px 12px", width: "40px" }}></th>
+          </tr>
+        </thead>
+        <tbody>
+          {goals.map((goal) => (
+            <tr key={goal.id} className="cg-table-body-row">
+              <td className="p-2">
+                <Textarea value={goal.goal} onChange={(e) => updateGoal(setter, goals, goal.id, "goal", e.target.value)} placeholder="Goal description..." className="text-sm min-h-[60px]" rows={2} autoResize />
+                {stalenessBadge(goal.updatedAt, goal.status)}
+              </td>
+              <td className="p-2">
+                <BadgeSelect value={goal.type} onValueChange={(value) => updateGoal(setter, goals, goal.id, "type", value)}
+                  options={[
+                    { value: "Core", label: "Core", className: "", style: { background: "#0d1420", color: "#818cf8", fontSize: "var(--text-overline)", fontFamily: "var(--font-mono)", fontWeight: 500, borderRadius: "3px", padding: "2px 7px" } },
+                    { value: "Stretch", label: "Stretch", className: "", style: { background: "#1a0d0d", color: "#f87171", fontSize: "var(--text-overline)", fontFamily: "var(--font-mono)", fontWeight: 500, borderRadius: "3px", padding: "2px 7px" } },
+                  ]}
+                />
+              </td>
+              <td className="p-2">
+                <BadgeSelect value={goal.category} onValueChange={(value) => updateGoal(setter, goals, goal.id, "category", value)}
+                  options={categories.map((cat) => ({
+                    value: cat,
+                    label: cat.length > 20 ? cat.substring(0, 20) + "..." : cat,
+                    className: "",
+                    style: { background: "var(--surf-3)", color: "var(--text-2)", fontSize: "var(--text-overline)", fontFamily: "var(--font-mono)", fontWeight: 500, borderRadius: "3px", padding: "2px 7px" },
+                  }))}
+                />
+              </td>
+              <td className="p-2">
+                <BadgeSelect value={goal.status} onValueChange={(value) => updateGoal(setter, goals, goal.id, "status", value)}
+                  options={goalStatuses.map((status) => ({
+                    value: status,
+                    label: status,
+                    className: "",
+                    style: {
+                      background: status === "Completed" ? "#0d2015" : status === "In progress" ? "#0c1a3d" : "#1a1a22",
+                      color: status === "Completed" ? "#4ade80" : status === "In progress" ? "#60a5fa" : "#6b7280",
+                      fontSize: "var(--text-overline)", fontFamily: "var(--font-mono)", fontWeight: 500, borderRadius: "3px", padding: "2px 7px",
+                    },
+                  }))}
+                />
+              </td>
+              <td className="p-2">
+                <button onClick={() => deleteGoal(setter, goals, goal.id)} className="cg-goal-delete-btn">
+                  <Trash2 />
+                </button>
+              </td>
+            </tr>
+          ))}
+          {goals.length === 0 && (
+            <tr>
+              <td colSpan={5} className="cg-goals-empty-td">No goals yet. Click &quot;Add Goal&quot; to create one.</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+function FocusTable({ focus, term, setter, updateFocusDistribution }: {
+  focus: FocusDistribution[]
+  term: 'short_term' | 'mid_term' | 'long_term'
+  setter: React.Dispatch<React.SetStateAction<FocusDistribution[]>>
+  updateFocusDistribution: (timePeriod: 'short_term' | 'mid_term' | 'long_term', setter: React.Dispatch<React.SetStateAction<FocusDistribution[]>>, category: string, field: keyof FocusDistribution, value: string | number) => void
+}) {
+  const total = focus.reduce((sum, item) => sum + item.focusPercent, 0)
+  return (
+    <div>
+      <div className="form-section-header">Desired Focus Distribution</div>
+      <div className="cg-focus-table-wrap">
+        <table className="cg-table">
+          <thead>
+            <tr className="cg-table-head-row">
+              <th className="col-header" style={{ padding: "8px 12px", width: "30%" }}>Category</th>
+              <th className="col-header" style={{ padding: "8px 12px", width: "10%" }}>Focus %</th>
+              <th className="col-header" style={{ padding: "8px 12px", width: "60%" }}>Why</th>
+            </tr>
+          </thead>
+          <tbody>
+            {focus.map((item) => (
+              <tr key={item.category} className="cg-table-body-row">
+                <td className="cg-focus-td-name" title={item.category}>{item.category}</td>
+                <td className="p-3">
+                  <Input type="number" value={item.focusPercent === 0 ? "" : item.focusPercent}
+                    onChange={(e) => updateFocusDistribution(term, setter, item.category, "focusPercent", e.target.value === "" ? 0 : parseInt(e.target.value) || 0)}
+                    onBlur={(e) => { if (e.target.value === "") updateFocusDistribution(term, setter, item.category, "focusPercent", 0) }}
+                    className="text-sm w-24" min="0" max="100" />
+                </td>
+                <td className="p-3">
+                  <Input value={item.why} onChange={(e) => updateFocusDistribution(term, setter, item.category, "why", e.target.value)} placeholder="Why this focus percentage..." className="text-sm" />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {total !== 100 && total > 0 && (
+        <div className="cg-warning-box">Warning: Total focus percentage is {total}%. It should equal 100%.</div>
+      )}
+    </div>
+  )
+}
+
+function MismatchBox({ focus, goals, categories }: { focus: FocusDistribution[], goals: Goal[], categories: string[] }) {
+  const currentDist = calculateGoalDistribution(goals, categories)
+  const mismatches: string[] = []
+  focus.forEach((desired) => {
+    const currentCount = currentDist[desired.category] || 0
+    const currentPercent = goals.length > 0 ? Math.round((currentCount / goals.length) * 100) : 0
+    if (desired.focusPercent > 0 && currentPercent !== desired.focusPercent) {
+      mismatches.push(`${desired.category}: ${currentPercent}% (target: ${desired.focusPercent}%)`)
+    }
+  })
+  if (mismatches.length === 0) return null
+  return (
+    <div className="cg-mismatch-box">
+      Note: Current focus differs from desired:
+      <ul className="cg-mismatch-list">
+        {mismatches.map((msg, i) => <li key={i}>{msg}</li>)}
+      </ul>
+    </div>
+  )
+}
+
 export default function CareerGoalsPage() {
   const focusDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -269,13 +419,6 @@ export default function CareerGoalsPage() {
     catch (error) { console.error('Failed to delete achievement:', error); toast.error('Failed to delete achievement') }
   }
 
-  const calculateGoalDistribution = (goals: Goal[]) => {
-    const distribution: { [key: string]: number } = {}
-    categories.forEach(cat => distribution[cat] = 0)
-    goals.forEach(goal => { distribution[goal.category] = (distribution[goal.category] || 0) + 1 })
-    return distribution
-  }
-
   const getGoalStaleness = (updatedAt: string): { daysSince: number; severity: 'info' | 'warning' | 'critical' } | null => {
     const today = new Date()
     const last = new Date(updatedAt + 'T00:00:00')
@@ -306,7 +449,7 @@ export default function CareerGoalsPage() {
   }
 
   const renderPieChart = (goals: Goal[]) => {
-    const distribution = calculateGoalDistribution(goals)
+    const distribution = calculateGoalDistribution(goals, categories)
     const total = goals.length
     if (total === 0) return <div className="cg-pie-empty">No goals yet</div>
 
@@ -352,134 +495,6 @@ export default function CareerGoalsPage() {
             )
           })}
         </div>
-      </div>
-    )
-  }
-
-  const GoalsTable = ({ goals, setter }: { goals: Goal[], term: 'short_term' | 'mid_term' | 'long_term', setter: React.Dispatch<React.SetStateAction<Goal[]>> }) => (
-    <div className="cg-table-wrap">
-      <table className="cg-table">
-        <thead>
-          <tr className="cg-table-head-row">
-            <th className="col-header" style={{ padding: "8px 12px", width: "45%" }}>Goal</th>
-            <th className="col-header" style={{ padding: "8px 12px", width: "12%" }}>Type</th>
-            <th className="col-header" style={{ padding: "8px 12px", width: "18%" }}>Category</th>
-            <th className="col-header" style={{ padding: "8px 12px", width: "15%" }}>Status</th>
-            <th style={{ padding: "8px 12px", width: "40px" }}></th>
-          </tr>
-        </thead>
-        <tbody>
-          {goals.map((goal) => (
-            <tr key={goal.id} className="cg-table-body-row">
-              <td className="p-2">
-                <Textarea value={goal.goal} onChange={(e) => updateGoal(setter, goals, goal.id, "goal", e.target.value)} placeholder="Goal description..." className="text-sm min-h-[60px]" rows={2} autoResize />
-                {stalenessBadge(goal.updatedAt, goal.status)}
-              </td>
-              <td className="p-2">
-                <BadgeSelect value={goal.type} onValueChange={(value) => updateGoal(setter, goals, goal.id, "type", value)}
-                  options={[
-                    { value: "Core", label: "Core", className: "", style: { background: "#0d1420", color: "#818cf8", fontSize: "var(--text-overline)", fontFamily: "var(--font-mono)", fontWeight: 500, borderRadius: "3px", padding: "2px 7px" } },
-                    { value: "Stretch", label: "Stretch", className: "", style: { background: "#1a0d0d", color: "#f87171", fontSize: "var(--text-overline)", fontFamily: "var(--font-mono)", fontWeight: 500, borderRadius: "3px", padding: "2px 7px" } },
-                  ]}
-                />
-              </td>
-              <td className="p-2">
-                <BadgeSelect value={goal.category} onValueChange={(value) => updateGoal(setter, goals, goal.id, "category", value)}
-                  options={categories.map((cat) => ({
-                    value: cat,
-                    label: cat.length > 20 ? cat.substring(0, 20) + "..." : cat,
-                    className: "",
-                    style: { background: "var(--surf-3)", color: "var(--text-2)", fontSize: "var(--text-overline)", fontFamily: "var(--font-mono)", fontWeight: 500, borderRadius: "3px", padding: "2px 7px" },
-                  }))}
-                />
-              </td>
-              <td className="p-2">
-                <BadgeSelect value={goal.status} onValueChange={(value) => updateGoal(setter, goals, goal.id, "status", value)}
-                  options={goalStatuses.map((status) => ({
-                    value: status,
-                    label: status,
-                    className: "",
-                    style: {
-                      background: status === "Completed" ? "#0d2015" : status === "In progress" ? "#0c1a3d" : "#1a1a22",
-                      color: status === "Completed" ? "#4ade80" : status === "In progress" ? "#60a5fa" : "#6b7280",
-                      fontSize: "var(--text-overline)", fontFamily: "var(--font-mono)", fontWeight: 500, borderRadius: "3px", padding: "2px 7px",
-                    },
-                  }))}
-                />
-              </td>
-              <td className="p-2">
-                <button onClick={() => deleteGoal(setter, goals, goal.id)} className="cg-goal-delete-btn">
-                  <Trash2 />
-                </button>
-              </td>
-            </tr>
-          ))}
-          {goals.length === 0 && (
-            <tr>
-              <td colSpan={5} className="cg-goals-empty-td">No goals yet. Click &quot;Add Goal&quot; to create one.</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
-  )
-
-  const FocusTable = ({ focus, term, setter }: { focus: FocusDistribution[], term: 'short_term' | 'mid_term' | 'long_term', setter: React.Dispatch<React.SetStateAction<FocusDistribution[]>> }) => {
-    const total = focus.reduce((sum, item) => sum + item.focusPercent, 0)
-    return (
-      <div>
-        <div className="form-section-header">Desired Focus Distribution</div>
-        <div className="cg-focus-table-wrap">
-          <table className="cg-table">
-            <thead>
-              <tr className="cg-table-head-row">
-                <th className="col-header" style={{ padding: "8px 12px", width: "30%" }}>Category</th>
-                <th className="col-header" style={{ padding: "8px 12px", width: "10%" }}>Focus %</th>
-                <th className="col-header" style={{ padding: "8px 12px", width: "60%" }}>Why</th>
-              </tr>
-            </thead>
-            <tbody>
-              {focus.map((item) => (
-                <tr key={item.category} className="cg-table-body-row">
-                  <td className="cg-focus-td-name" title={item.category}>{item.category}</td>
-                  <td className="p-3">
-                    <Input type="number" value={item.focusPercent === 0 ? "" : item.focusPercent}
-                      onChange={(e) => updateFocusDistribution(term, setter, item.category, "focusPercent", e.target.value === "" ? 0 : parseInt(e.target.value) || 0)}
-                      onBlur={(e) => { if (e.target.value === "") updateFocusDistribution(term, setter, item.category, "focusPercent", 0) }}
-                      className="text-sm w-24" min="0" max="100" />
-                  </td>
-                  <td className="p-3">
-                    <Input value={item.why} onChange={(e) => updateFocusDistribution(term, setter, item.category, "why", e.target.value)} placeholder="Why this focus percentage..." className="text-sm" />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {total !== 100 && total > 0 && (
-          <div className="cg-warning-box">Warning: Total focus percentage is {total}%. It should equal 100%.</div>
-        )}
-      </div>
-    )
-  }
-
-  const MismatchBox = ({ focus, goals }: { focus: FocusDistribution[], goals: Goal[] }) => {
-    const currentDist = calculateGoalDistribution(goals)
-    const mismatches: string[] = []
-    focus.forEach((desired) => {
-      const currentCount = currentDist[desired.category] || 0
-      const currentPercent = goals.length > 0 ? Math.round((currentCount / goals.length) * 100) : 0
-      if (desired.focusPercent > 0 && currentPercent !== desired.focusPercent) {
-        mismatches.push(`${desired.category}: ${currentPercent}% (target: ${desired.focusPercent}%)`)
-      }
-    })
-    if (mismatches.length === 0) return null
-    return (
-      <div className="cg-mismatch-box">
-        Note: Current focus differs from desired:
-        <ul className="cg-mismatch-list">
-          {mismatches.map((msg, i) => <li key={i}>{msg}</li>)}
-        </ul>
       </div>
     )
   }
@@ -579,19 +594,19 @@ export default function CareerGoalsPage() {
           </div>
           <div className="cg-section-body">
             <div className="cg-goals-section">
-              {categories.length > 0 && <FocusTable focus={shortTermFocus} term="short_term" setter={setShortTermFocus} />}
+              {categories.length > 0 && <FocusTable focus={shortTermFocus} term="short_term" setter={setShortTermFocus} updateFocusDistribution={updateFocusDistribution} />}
               <div className="grid grid-cols-[60%_40%] gap-6">
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <span className="form-section-header">Goals</span>
                     <button onClick={() => addGoal('short_term', setShortTermGoals, shortTermGoals)} className="cg-add-goal-btn">+ Add Goal</button>
                   </div>
-                  <GoalsTable goals={shortTermGoals} term="short_term" setter={setShortTermGoals} />
+                  <GoalsTable goals={shortTermGoals} term="short_term" setter={setShortTermGoals} categories={categories} updateGoal={updateGoal} deleteGoal={deleteGoal} stalenessBadge={stalenessBadge} />
                 </div>
                 <div>
                   <div className="form-section-header">Current Focus Distribution</div>
                   {renderPieChart(shortTermGoals)}
-                  <MismatchBox focus={shortTermFocus} goals={shortTermGoals} />
+                  <MismatchBox focus={shortTermFocus} goals={shortTermGoals} categories={categories} />
                 </div>
               </div>
             </div>
@@ -606,19 +621,19 @@ export default function CareerGoalsPage() {
           </div>
           <div className="cg-section-body">
             <div className="cg-goals-section">
-              {categories.length > 0 && <FocusTable focus={midTermFocus} term="mid_term" setter={setMidTermFocus} />}
+              {categories.length > 0 && <FocusTable focus={midTermFocus} term="mid_term" setter={setMidTermFocus} updateFocusDistribution={updateFocusDistribution} />}
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <span className="form-section-header">Goals</span>
                     <button onClick={() => addGoal('mid_term', setMidTermGoals, midTermGoals)} className="cg-add-goal-btn">+ Add Goal</button>
                   </div>
-                  <GoalsTable goals={midTermGoals} term="mid_term" setter={setMidTermGoals} />
+                  <GoalsTable goals={midTermGoals} term="mid_term" setter={setMidTermGoals} categories={categories} updateGoal={updateGoal} deleteGoal={deleteGoal} stalenessBadge={stalenessBadge} />
                 </div>
                 <div>
                   <div className="form-section-header">Current Focus Distribution</div>
                   {renderPieChart(midTermGoals)}
-                  <MismatchBox focus={midTermFocus} goals={midTermGoals} />
+                  <MismatchBox focus={midTermFocus} goals={midTermGoals} categories={categories} />
                 </div>
               </div>
             </div>
@@ -633,19 +648,19 @@ export default function CareerGoalsPage() {
           </div>
           <div className="cg-section-body">
             <div className="cg-goals-section">
-              {categories.length > 0 && <FocusTable focus={longTermFocus} term="long_term" setter={setLongTermFocus} />}
+              {categories.length > 0 && <FocusTable focus={longTermFocus} term="long_term" setter={setLongTermFocus} updateFocusDistribution={updateFocusDistribution} />}
               <div className="grid grid-cols-[60%_40%] gap-6">
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <span className="form-section-header">Goals</span>
                     <button onClick={() => addGoal('long_term', setLongTermGoals, longTermGoals)} className="cg-add-goal-btn">+ Add Goal</button>
                   </div>
-                  <GoalsTable goals={longTermGoals} term="long_term" setter={setLongTermGoals} />
+                  <GoalsTable goals={longTermGoals} term="long_term" setter={setLongTermGoals} categories={categories} updateGoal={updateGoal} deleteGoal={deleteGoal} stalenessBadge={stalenessBadge} />
                 </div>
                 <div>
                   <div className="form-section-header">Current Focus Distribution</div>
                   {renderPieChart(longTermGoals)}
-                  <MismatchBox focus={longTermFocus} goals={longTermGoals} />
+                  <MismatchBox focus={longTermFocus} goals={longTermGoals} categories={categories} />
                 </div>
               </div>
             </div>
