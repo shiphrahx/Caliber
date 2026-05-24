@@ -122,27 +122,18 @@ export default function PeoplePage() {
         </button>
       </div>
 
-      <div style={{ padding: "16px" }}>
+      <div className="page-content">
         {/* Stat cards */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "7px", marginBottom: "14px" }}>
+        <div className="stat-grid">
           {[
             { label: "Active people", value: activePeople.length, sub: `${people.filter(p => p.status === "inactive").length} inactive` },
             { label: "Recent hires", value: getRecentHires(), sub: "In the last 30 days" },
             { label: "Teams", value: activeTeams.length, sub: "Active teams" },
           ].map(({ label, value, sub }) => (
-            <div key={label} style={{
-              background: "var(--surf)",
-              border: "1px solid var(--border-1)",
-              borderRadius: "6px",
-              padding: "10px 12px",
-            }}>
+            <div key={label} className="stat-card">
               <div className="form-label">{label}</div>
-              <div style={{ fontSize: "20px", fontWeight: 500, color: "var(--text-1)", fontFamily: "var(--font-mono)" }}>
-                {value}
-              </div>
-              <div style={{ fontSize: "var(--text-overline)", color: "var(--text-3)", marginTop: "2px" }}>
-                {sub}
-              </div>
+              <div className="stat-card-value">{value}</div>
+              <div className="stat-card-sub">{sub}</div>
             </div>
           ))}
         </div>

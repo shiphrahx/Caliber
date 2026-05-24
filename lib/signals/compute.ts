@@ -245,6 +245,12 @@ export function computePeopleSignals(
     const lastNoteDate = notesDateByPerson[person.id]
     const newHire = isNewHire((person as any).start_date, today)
 
+    // Grace period: suppress all person-level signals for the first 7 days
+    // A person hired today cannot have missed a 1:1, logged evidence, or meeting notes yet
+    const startDate = (person as any).start_date
+    const daysInRole = startDate ? daysBetween(new Date(startDate + 'T00:00:00'), today) : 999
+    if (daysInRole < 7) continue
+
     // Thresholds adjusted for new hires
     const oneOnOneWarnDays = newHire ? 7 : 14
     const oneOnOneCritDays = newHire ? 14 : 21
@@ -354,7 +360,7 @@ export function computePeopleSignals(
       signals.push({
         type: 'new_hire_at_risk',
         severity: 'critical',
-        message: `${person.full_name} is a new hire with ${firedSignalTypes.length} unresolved onboarding signals`,
+        message: `${person.full_name} is a new hire missing: ${firedSignalTypes.map(t => ({ no_recent_1on1: 'a recent 1:1', no_evidence: 'logged evidence', missing_notes: 'meeting notes' }[t] ?? t)).join(', ')}`,
         personId: person.id,
         personName: person.full_name,
         entityId: person.id,

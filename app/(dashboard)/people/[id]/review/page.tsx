@@ -116,7 +116,6 @@ export default function ReviewPrepPage({ params }: { params: Promise<{ id: strin
     }).catch(console.error)
   }, [personId, periodStart, periodEnd])
 
-  // When a review cycle is selected, sync date range
   useEffect(() => {
     if (selectedCycleId === "custom") return
     const cycle = reviewCycles.find(c => c.id === selectedCycleId)
@@ -229,14 +228,12 @@ export default function ReviewPrepPage({ params }: { params: Promise<{ id: strin
     setCollapsedSections(s)
   }
 
-  // Period-filtered meetings
   const periodMeetings = useMemo(() =>
     meetings.filter(m => m.meetingDate >= periodStart && m.meetingDate <= periodEnd)
       .sort((a, b) => new Date(b.meetingDate).getTime() - new Date(a.meetingDate).getTime()),
     [meetings, periodStart, periodEnd]
   )
 
-  // Evidence grouped by section
   const impactEntries = useMemo(() =>
     evidence.filter(e => ["achievement", "delivery"].includes(e.category) && e.includedInReview),
     [evidence])
@@ -272,30 +269,25 @@ export default function ReviewPrepPage({ params }: { params: Promise<{ id: strin
 
   if (!person) {
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
+      <div className="person-not-found">
         <p>Loading...</p>
       </div>
     )
   }
 
   return (
-    <div style={{ padding: "32px", maxWidth: "900px" }} className="review-prep-page">
+    <div className="review-page review-prep-page">
       {/* Header */}
-      <div style={{ marginBottom: "24px" }}>
-        <button
-          onClick={() => router.push(`/people/${personId}`)}
-          style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "none", border: "none", color: "var(--text-2)", cursor: "pointer", fontSize: "var(--text-label)", marginBottom: "16px", padding: "4px 0" }}
-          onMouseEnter={e => (e.currentTarget.style.color = "var(--text-1)")}
-          onMouseLeave={e => (e.currentTarget.style.color = "var(--text-2)")}
-        >
-          <ArrowLeft style={{ width: "14px", height: "14px" }} /> Back to {person.name}
+      <div className="review-header">
+        <button className="review-back-btn" onClick={() => router.push(`/people/${personId}`)}>
+          <ArrowLeft /> Back to {person.name}
         </button>
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+        <div className="review-header-row">
           <div>
             <h1>Review Prep — {person.name}</h1>
-            <p style={{ marginTop: "4px" }}>{person.role}</p>
+            <p className="review-sub">{person.role}</p>
           </div>
-          <div style={{ display: "flex", gap: "8px" }}>
+          <div className="review-header-actions">
             <Button variant="outline" onClick={handlePrint}>
               <Printer style={{ width: "14px", height: "14px" }} /> Export
             </Button>
@@ -304,36 +296,35 @@ export default function ReviewPrepPage({ params }: { params: Promise<{ id: strin
       </div>
 
       {/* Period selector */}
-      <div style={{ background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "8px", padding: "16px 20px", marginBottom: "20px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
-          <div style={{ display: "grid", gap: "4px" }}>
+      <div className="review-period-card">
+        <div className="review-period-row">
+          <div className="review-period-field">
             <label className="form-label">Review Cycle</label>
             <select value={selectedCycleId} onChange={e => handleCycleChange(e.target.value)}
-              style={{ background: "var(--surf-2)", border: "1px solid var(--border-2)", borderRadius: "6px", color: "var(--text-1)", padding: "6px 10px", fontSize: "var(--text-label)", cursor: "pointer" }}>
+              className="review-period-select">
               <option value="custom">Custom range</option>
               {reviewCycles.map(c => (
                 <option key={c.id} value={c.id}>{c.name} ({formatDate(c.startDate)} – {formatDate(c.endDate)})</option>
               ))}
             </select>
           </div>
-          <div style={{ display: "grid", gap: "4px" }}>
+          <div className="review-period-field">
             <label className="form-label">From</label>
             <Input type="date" value={periodStart} onChange={e => { setPeriodStart(e.target.value); setSelectedCycleId("custom") }} style={{ width: "150px" }} />
           </div>
-          <div style={{ display: "grid", gap: "4px" }}>
+          <div className="review-period-field">
             <label className="form-label">To</label>
             <Input type="date" value={periodEnd} onChange={e => { setPeriodEnd(e.target.value); setSelectedCycleId("custom") }} style={{ width: "150px" }} />
           </div>
-          <div style={{ paddingTop: "18px" }}>
-            <button onClick={() => setShowNewCycleForm(!showNewCycleForm)}
-              style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "none", border: "1px solid var(--border-2)", color: "var(--text-2)", padding: "6px 10px", borderRadius: "4px", fontSize: "var(--text-caption)", cursor: "pointer" }}>
-              <Plus style={{ width: "12px", height: "12px" }} /> Save as cycle
+          <div className="review-period-padtop">
+            <button onClick={() => setShowNewCycleForm(!showNewCycleForm)} className="review-period-save-btn">
+              <Plus /> Save as cycle
             </button>
           </div>
         </div>
         {showNewCycleForm && (
-          <div style={{ display: "flex", gap: "8px", alignItems: "flex-end", marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border-1)" }}>
-            <div style={{ display: "grid", gap: "4px", flex: 1 }}>
+          <div className="review-new-cycle-form">
+            <div className="review-new-cycle-field">
               <label className="form-label">Cycle name</label>
               <Input value={newCycleName} onChange={e => setNewCycleName(e.target.value)} placeholder="e.g. H1 2026, Annual 2025" />
             </div>
@@ -343,11 +334,11 @@ export default function ReviewPrepPage({ params }: { params: Promise<{ id: strin
             <Button variant="outline" onClick={() => setShowNewCycleForm(false)}>Cancel</Button>
           </div>
         )}
-        <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border-1)", display: "flex", gap: "24px" }}>
-          <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>
+        <div className="review-period-stats">
+          <span className="review-period-stat">
             {evidence.length} evidence {evidence.length === 1 ? "entry" : "entries"} in period
           </span>
-          <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>
+          <span className="review-period-stat">
             {periodMeetings.length} {periodMeetings.length === 1 ? "meeting" : "meetings"} in period
           </span>
         </div>
@@ -364,12 +355,7 @@ export default function ReviewPrepPage({ params }: { params: Promise<{ id: strin
         headerExtra={
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             {generatingDraft && draftAbort && (
-              <button
-                onClick={() => draftAbort.abort()}
-                style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", background: "none", border: "none", cursor: "pointer", padding: "2px 6px" }}
-              >
-                Cancel
-              </button>
+              <button className="review-cancel-btn" onClick={() => draftAbort.abort()}>Cancel</button>
             )}
             <AIButton
               configured={aiConfig.configured}
@@ -384,7 +370,7 @@ export default function ReviewPrepPage({ params }: { params: Promise<{ id: strin
         }
       >
         {showAIBadge && (
-          <div style={{ marginBottom: "10px" }}>
+          <div className="review-ai-badge-wrap">
             <AIGeneratedBadge onDismiss={() => setShowAIBadge(false)} />
           </div>
         )}
@@ -452,7 +438,7 @@ export default function ReviewPrepPage({ params }: { params: Promise<{ id: strin
         ))}
       </ReviewSection>
 
-      {/* Promotion Evidence — only show if entries exist */}
+      {/* Promotion Evidence */}
       {promotionEntries.length > 0 && (
         <ReviewSection
           title="Promotion Evidence"
@@ -492,25 +478,21 @@ export default function ReviewPrepPage({ params }: { params: Promise<{ id: strin
         emptyMessage="No meetings found in this period."
       >
         {periodMeetings.map(m => (
-          <div key={m.id} style={{ padding: "12px 16px", border: "1px solid var(--border-1)", borderRadius: "6px", marginBottom: "8px", background: "var(--surf-2)" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
+          <div key={m.id} className="review-meeting-item">
+            <div className="review-meeting-item-row">
               <div>
-                <p style={{ fontSize: "var(--text-label)", color: "var(--text-1)", fontWeight: 500 }}>{m.title}</p>
-                <p style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", marginTop: "2px" }}>
-                  {m.meetingType} · {formatDate(m.meetingDate)}
-                </p>
+                <p className="review-meeting-title">{m.title}</p>
+                <p className="review-meeting-meta">{m.meetingType} · {formatDate(m.meetingDate)}</p>
                 {m.notes && (
-                  <p style={{ fontSize: "var(--text-caption)", color: "var(--text-2)", marginTop: "6px", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
-                    {m.notes.replace(/<[^>]*>/g, "")}
-                  </p>
+                  <p className="review-meeting-notes">{m.notes.replace(/<[^>]*>/g, "")}</p>
                 )}
               </div>
               <button
                 onClick={() => handleSaveAsEvidence(m)}
                 disabled={savingEvidenceId === m.id}
-                style={{ flexShrink: 0, display: "inline-flex", alignItems: "center", gap: "4px", padding: "4px 10px", borderRadius: "4px", fontSize: "var(--text-caption)", border: "1px solid var(--border-2)", background: "var(--surf)", color: "var(--text-2)", cursor: savingEvidenceId === m.id ? "not-allowed" : "pointer", opacity: savingEvidenceId === m.id ? 0.6 : 1 }}
+                className="review-save-as-evidence-btn"
               >
-                <Plus style={{ width: "11px", height: "11px" }} />
+                <Plus />
                 {savingEvidenceId === m.id ? "Saving..." : "Save as evidence"}
               </button>
             </div>
@@ -536,7 +518,7 @@ export default function ReviewPrepPage({ params }: { params: Promise<{ id: strin
       </ReviewSection>
 
       {/* Save notes */}
-      <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "24px", paddingTop: "16px", borderTop: "1px solid var(--border-1)" }}>
+      <div className="review-save-footer">
         <Button onClick={handleSaveNotes} disabled={savingNotes}>
           <Save style={{ width: "14px", height: "14px" }} />
           {savingNotes ? "Saving..." : "Save Notes"}
@@ -571,30 +553,23 @@ function ReviewSection({
   children?: React.ReactNode
 }) {
   return (
-    <div style={{ background: "var(--surf)", border: "1px solid var(--border-1)", borderRadius: "8px", overflow: "hidden", marginBottom: "12px" }}>
-      <div style={{ display: "flex", alignItems: "center" }}>
-        <button
-          onClick={onToggle}
-          style={{ flex: 1, padding: "14px 20px", display: "flex", alignItems: "center", gap: "8px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
-          onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "var(--surf-2)")}
-          onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "none")}
-        >
-          {collapsed
-            ? <ChevronRight style={{ width: "14px", height: "14px", color: "var(--text-3)", flexShrink: 0 }} />
-            : <ChevronDown style={{ width: "14px", height: "14px", color: "var(--text-3)", flexShrink: 0 }} />}
-          <h2 style={{ flex: 1 }}>{title}</h2>
-          <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>{count} {count === 1 ? "entry" : "entries"}</span>
+    <div className="review-section-card">
+      <div className="review-section-header-row">
+        <button className="review-section-toggle-btn" onClick={onToggle}>
+          {collapsed ? <ChevronRight /> : <ChevronDown />}
+          <h2 className="review-section-title">{title}</h2>
+          <span className="review-section-count">{count} {count === 1 ? "entry" : "entries"}</span>
         </button>
         {headerExtra && (
-          <div style={{ padding: "0 16px" }} onClick={e => e.stopPropagation()}>
+          <div className="review-section-extra" onClick={e => e.stopPropagation()}>
             {headerExtra}
           </div>
         )}
       </div>
       {!collapsed && (
-        <div style={{ padding: "4px 20px 20px" }}>
+        <div className="review-section-body">
           {count === 0 && emptyMessage ? (
-            <p style={{ fontSize: "var(--text-label)", color: "var(--text-3)", fontStyle: "italic", paddingTop: "8px" }}>{emptyMessage}</p>
+            <p className="review-section-empty">{emptyMessage}</p>
           ) : children}
         </div>
       )}
@@ -607,26 +582,24 @@ function EvidenceCard({ entry, formatDate }: { entry: EvidenceEntry; formatDate:
   const sent = entry.sentiment ? SENTIMENT_CONFIG[entry.sentiment] : null
 
   return (
-    <div style={{ padding: "12px 16px", border: "1px solid var(--border-1)", borderRadius: "6px", marginBottom: "8px", background: "var(--surf-2)" }}>
-      <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
-        <span style={{ padding: "2px 7px", borderRadius: "3px", fontSize: "var(--text-caption)", fontWeight: 600, background: cat.bg, color: cat.color, flexShrink: 0, marginTop: "2px" }}>
+    <div className="review-ev-card">
+      <div className="review-ev-card-inner">
+        <span className="review-ev-cat-badge" style={{ background: cat.bg, color: cat.color }}>
           {CATEGORY_LABELS[entry.category]}
         </span>
-        <div style={{ flex: 1 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: entry.content ? "6px" : 0 }}>
-            <p style={{ fontSize: "var(--text-label)", color: "var(--text-1)", fontWeight: 500, flex: 1 }}>{entry.title}</p>
+        <div className="review-ev-body">
+          <div className="review-ev-header" style={{ marginBottom: entry.content ? "6px" : 0 }}>
+            <p className="review-ev-title">{entry.title}</p>
             {sent && (
-              <span style={{ fontSize: "var(--text-caption)", color: sent.color, flexShrink: 0 }}>{sent.symbol} {sent.label}</span>
+              <span className="review-ev-sentiment" style={{ color: sent.color }}>{sent.symbol} {sent.label}</span>
             )}
-            <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)", flexShrink: 0 }}>{formatDate(entry.occurredAt)}</span>
+            <span className="review-ev-date">{formatDate(entry.occurredAt)}</span>
           </div>
           {entry.content && (
-            <p style={{ fontSize: "var(--text-caption)", color: "var(--text-2)", whiteSpace: "pre-wrap" }}>{entry.content}</p>
+            <p className="review-ev-content">{entry.content}</p>
           )}
           {entry.meetingTitle && (
-            <p style={{ fontSize: "var(--text-caption)", color: "#60a5fa", marginTop: "4px" }}>
-              Meeting: {entry.meetingTitle}
-            </p>
+            <p className="review-ev-meeting">Meeting: {entry.meetingTitle}</p>
           )}
         </div>
       </div>

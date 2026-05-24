@@ -49,126 +49,71 @@ function PrepCard({ meeting }: PrepCardProps) {
   }, [meeting.personId, loading, abortController])
 
   return (
-    <div
-      data-testid="prep-card"
-      style={{
-        background: "var(--surf)",
-        border: "1px solid var(--border-1)",
-        borderRadius: "10px",
-        overflow: "hidden",
-      }}
-    >
+    <div data-testid="prep-card" className="prep-card">
       {/* Card header */}
-      <div style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "10px",
-        padding: "12px 14px",
-      }}>
+      <div className="prep-card-header">
         {/* Date chip */}
-        <span style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "4px",
-          padding: "2px 8px",
-          borderRadius: "4px",
-          background: isToday ? "rgba(0,255,229,0.1)" : "var(--surf-3)",
-          color: isToday ? "#00ffe5" : "var(--text-3)",
-          fontSize: "var(--text-overline)",
-          fontFamily: "var(--font-mono)",
-          fontWeight: 600,
-          flexShrink: 0,
-        }}>
-          <Calendar style={{ width: "10px", height: "10px" }} />
+        <span
+          className="date-chip"
+          style={{
+            background: isToday ? "rgba(0,255,229,0.1)" : "var(--surf-3)",
+            color: isToday ? "#00ffe5" : "var(--text-3)",
+          }}
+        >
+          <Calendar />
           {dateLabel}
         </span>
 
         {/* Person name + title */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{
-            fontSize: "var(--text-body)",
-            fontWeight: 600,
-            color: "var(--text-1)",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}>
+        <div className="prep-card-name-wrap">
+          <div className="prep-card-name">
             {meeting.personName ?? meeting.title}
           </div>
           {meeting.personName && (
-            <div style={{
-              fontSize: "var(--text-caption)",
-              color: "var(--text-3)",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}>
+            <div className="prep-card-subtitle">
               {meeting.title}
             </div>
           )}
         </div>
 
         {/* Actions */}
-        <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
+        <div className="prep-card-actions">
           {/* Link to person page */}
           {meeting.personId && (
             <Link
               href={`/people/${meeting.personId}`}
               onClick={(e) => e.stopPropagation()}
               title="View person"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                padding: "4px",
-                borderRadius: "4px",
-                color: "var(--text-3)",
-                textDecoration: "none",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-1)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-3)")}
+              className="prep-card-person-link"
             >
-              <ExternalLink style={{ width: "12px", height: "12px" }} />
+              <ExternalLink />
             </Link>
           )}
 
           {/* Generate / toggle button */}
           <button
             onClick={brief ? () => setExpanded((v) => !v) : handleGenerate}
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-label font-medium cursor-pointer transition-all"
             style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "5px",
-              padding: "4px 10px",
-              borderRadius: "5px",
               border: "1px solid",
               borderColor: brief ? "var(--border-2)" : "#7C3AED",
               background: brief ? "transparent" : "rgba(124,58,237,0.12)",
               color: brief ? "var(--text-2)" : "#a78bfa",
-              fontSize: "var(--text-label)",
-              fontWeight: 500,
-              cursor: "pointer",
-              transition: "all 0.15s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "var(--text-1)"
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = brief ? "var(--text-2)" : "#a78bfa"
             }}
           >
             {loading ? (
               <>
-                <Sparkles style={{ width: "12px", height: "12px", animation: "pulse 1s infinite" }} />
+                <Sparkles className="w-3 h-3 animate-pulse" />
                 Preparing…
               </>
             ) : brief ? (
               <>
-                {expanded ? <ChevronUp style={{ width: "12px", height: "12px" }} /> : <ChevronDown style={{ width: "12px", height: "12px" }} />}
+                {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                 {expanded ? "Hide" : "View prep"}
               </>
             ) : (
               <>
-                <Sparkles style={{ width: "12px", height: "12px" }} />
+                <Sparkles className="w-3 h-3" />
                 Prep brief
               </>
             )}
@@ -178,46 +123,13 @@ function PrepCard({ meeting }: PrepCardProps) {
 
       {/* Brief content */}
       {brief && expanded && (
-        <div style={{
-          borderTop: "1px solid var(--border-1)",
-          padding: "14px 16px",
-          background: "var(--surf-2)",
-        }}>
-          <div
-            data-testid="brief-content"
-            style={{
-              fontSize: "var(--text-meta)",
-              color: "var(--text-2)",
-              lineHeight: 1.6,
-              whiteSpace: "pre-wrap",
-              maxHeight: "300px",
-              overflowY: "auto",
-            }}
-          >
+        <div className="prep-card-brief-area">
+          <div data-testid="brief-content" className="prep-card-brief-content">
             {brief.content}
           </div>
-          <div style={{
-            marginTop: "10px",
-            fontSize: "var(--text-caption)",
-            color: "var(--text-3)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}>
+          <div className="prep-card-brief-footer">
             <span>Generated at {new Date(brief.generatedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}</span>
-            <button
-              onClick={handleGenerate}
-              style={{
-                background: "none",
-                border: "none",
-                color: "var(--text-3)",
-                fontSize: "var(--text-caption)",
-                cursor: "pointer",
-                padding: 0,
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-1)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-3)")}
-            >
+            <button onClick={handleGenerate} className="prep-card-regen-btn">
               Regenerate
             </button>
           </div>
@@ -245,22 +157,14 @@ export function UpcomingOneOnOnes() {
   if (loading || meetings.length === 0) return null
 
   return (
-    <div
-      data-testid="upcoming-one-on-ones"
-      style={{
-        background: "var(--surf)",
-        border: "1px solid var(--border-1)",
-        borderRadius: "12px",
-        padding: "20px",
-      }}
-    >
+    <div data-testid="upcoming-one-on-ones" className="one-on-ones-widget">
       {/* Header */}
-      <div style={{ marginBottom: "14px" }}>
-        <h2 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <Sparkles style={{ width: "15px", height: "15px", color: "#a78bfa" }} />
+      <div className="one-on-ones-header">
+        <h2 className="one-on-ones-title">
+          <Sparkles />
           Upcoming 1:1s
         </h2>
-        <p style={{ marginTop: "2px", fontSize: "var(--text-meta)", color: "var(--text-3)" }}>
+        <p className="one-on-ones-sub">
           {meetings.length === 1
             ? "You have 1 upcoming 1:1. Generate a prep brief to get ready."
             : `You have ${meetings.length} upcoming 1:1s. Generate prep briefs to get ready.`}
@@ -268,7 +172,7 @@ export function UpcomingOneOnOnes() {
       </div>
 
       {/* Cards */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+      <div className="prep-cards">
         {meetings.map((meeting) => (
           <PrepCard key={meeting.id} meeting={meeting} />
         ))}

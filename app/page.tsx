@@ -106,7 +106,7 @@ export default function LandingPage() {
           display:inline-flex;align-items:center;gap:6px;
           padding:5px 14px 5px 6px;border-radius:20px;
           background:rgba(0,240,88,0.06);border:1px solid rgba(0,240,88,0.12);
-          font-size:12px;font-weight:600;color:var(--green);
+          font-size:13px;font-weight:600;color:var(--green);
           margin-bottom:28px;
           animation:fadeInDown .8s ease;
         }
@@ -168,12 +168,12 @@ export default function LandingPage() {
         }
 
         .trust{padding:100px 0 60px;text-align:center}
-        .trust-label{font-size:12px;text-transform:uppercase;letter-spacing:0.1em;color:var(--t3);font-weight:600;margin-bottom:12px}
+        .trust-label{font-size:13px;text-transform:uppercase;letter-spacing:0.1em;color:var(--t3);font-weight:600;margin-bottom:12px}
         .trust-text{font-size:14px;color:var(--t3);max-width:500px;margin:0 auto}
 
         .section{padding:120px 0}
         .section-label{
-          font-size:12px;text-transform:uppercase;letter-spacing:0.1em;
+          font-size:13px;text-transform:uppercase;letter-spacing:0.1em;
           font-weight:600;margin-bottom:16px;
         }
         .section-label .grad{background:var(--grad-text);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
@@ -212,7 +212,7 @@ export default function LandingPage() {
         .feature-content p{font-size:15px;color:var(--t2);line-height:1.7;margin-bottom:20px}
         .feature-tag{
           display:inline-flex;align-items:center;gap:6px;
-          font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;
+          font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;
           margin-bottom:16px;
         }
         .feature-tag .dot{width:5px;height:5px;border-radius:50%}

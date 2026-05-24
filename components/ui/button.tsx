@@ -9,7 +9,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "text-xs text-gray-900 font-semibold shadow-sm hover:opacity-90 transition-opacity [background:linear-gradient(90deg,hsl(174,100%,50%)_0%,hsl(142,100%,47%)_100%)]",
+          "text-[13px] text-gray-900 font-semibold shadow-sm hover:opacity-90 transition-opacity [background:linear-gradient(90deg,hsl(174,100%,50%)_0%,hsl(142,100%,47%)_100%)]",
         outline:
           "text-sm border border-[#383838] bg-[#212121] hover:bg-[#292929] text-gray-200",
         destructive:

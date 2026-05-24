@@ -76,7 +76,6 @@ function PersonCard({
     try {
       const data = await getFollowUpsForPerson(pa.personId)
       setFollowUps(data)
-      // Mark any open follow-ups as surfaced
       const open = data.filter(f => f.status === 'open')
       if (open.length > 0) {
         await markFollowUpsSurfaced(open.map(f => ({ id: f.id, timesSurfaced: f.timesSurfaced })))
@@ -97,69 +96,42 @@ function PersonCard({
   }
 
   return (
-    <div style={{
-      background: 'var(--surf)',
-      border: '1px solid var(--border-1)',
-      borderRadius: '8px',
-      overflow: 'hidden',
-    }}>
+    <div className="rdr-card">
       {/* Card header */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '12px',
-        padding: '14px 16px',
-        background: 'var(--surf-2)',
-        borderBottom: '1px solid var(--border-1)',
-      }}>
-        <div style={{
-          width: '32px',
-          height: '32px',
-          borderRadius: '50%',
-          background: 'var(--surf-3)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 'var(--text-meta)',
-          fontWeight: 600,
-          color: 'var(--text-2)',
-          flexShrink: 0,
-        }}>
+      <div className="rdr-card-header">
+        <div className="rdr-avatar">
           {pa.personName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
         </div>
 
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Link
-              href={`/people/${pa.personId}`}
-              style={{ fontSize: 'var(--text-body)', fontWeight: 600, color: 'var(--text-1)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
-            >
+        <div className="rdr-card-info">
+          <div className="rdr-card-name-row">
+            <Link href={`/people/${pa.personId}`} className="rdr-card-name">
               {pa.personName}
               <ExternalLink style={{ width: '10px', height: '10px', color: 'var(--text-3)' }} />
             </Link>
             <ScoreBadge score={pa.score} />
           </div>
           {pa.personRole && (
-            <div style={{ fontSize: 'var(--text-meta)', color: 'var(--text-2)', marginTop: '2px' }}>{pa.personRole}</div>
+            <div className="rdr-card-role">{pa.personRole}</div>
           )}
         </div>
 
-        <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+        <div className="rdr-card-btns">
           <button
             onClick={() => router.push(`/meetings?new=1&type=1:1&personId=${pa.personId}`)}
-            style={{ background: 'var(--surf-3)', border: '1px solid var(--border-2)', borderRadius: '4px', color: 'var(--text-2)', fontSize: 'var(--text-caption)', padding: '4px 8px', cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'var(--font-sans)' }}
+            className="rdr-card-btn"
           >
             Schedule 1:1
           </button>
           <button
             onClick={() => router.push(`/evidence?new=1&personId=${pa.personId}`)}
-            style={{ background: 'var(--surf-3)', border: '1px solid var(--border-2)', borderRadius: '4px', color: 'var(--text-2)', fontSize: 'var(--text-caption)', padding: '4px 8px', cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'var(--font-sans)' }}
+            className="rdr-card-btn"
           >
             Log evidence
           </button>
           <button
             onClick={() => setAddingFollowUp(true)}
-            style={{ background: 'var(--surf-3)', border: '1px solid var(--border-2)', borderRadius: '4px', color: 'var(--text-2)', fontSize: 'var(--text-caption)', padding: '4px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px', fontFamily: 'var(--font-sans)' }}
+            className="rdr-card-btn rdr-card-btn-plus"
           >
             <Plus style={{ width: '10px', height: '10px' }} /> Follow-up
           </button>
@@ -170,37 +142,21 @@ function PersonCard({
       {pa.signals.length > 0 && (
         <div>
           {pa.signals.map((signal, i) => (
-            <div
-              key={i}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 16px',
-                borderBottom: '1px solid var(--border-1)',
-                fontSize: 'var(--text-meta)',
-              }}
-            >
+            <div key={i} className="rdr-signal-row">
               <SeverityIcon severity={signal.severity} />
-              <span style={{ flex: 1, color: 'var(--text-2)' }}>{signal.message}</span>
+              <span className="rdr-signal-msg">{signal.message}</span>
               {signal.meta?.isNewHire === true && (
-                <span style={{ fontSize: '10px', fontWeight: 600, padding: '2px 6px', borderRadius: '4px', background: 'rgba(0,240,88,0.12)', color: '#00f058', border: '1px solid rgba(0,240,88,0.3)', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                  New hire
-                </span>
+                <span className="rdr-new-hire-badge">New hire</span>
               )}
-              {/* Quick actions per signal type */}
               {signal.type === 'overdue_task' && (
-                <button
-                  onClick={() => handleMarkTaskDone(signal.entityId)}
-                  style={{ background: 'none', border: '1px solid var(--border-2)', borderRadius: '4px', color: 'var(--text-3)', fontSize: 'var(--text-caption)', padding: '2px 8px', cursor: 'pointer', whiteSpace: 'nowrap' }}
-                >
+                <button onClick={() => handleMarkTaskDone(signal.entityId)} className="rdr-signal-action-btn">
                   Mark done
                 </button>
               )}
               {(signal.type === 'overdue_follow_up' || signal.type === 'ageing_follow_up' || signal.type === 'surfaced_follow_up') && (
                 <button
                   onClick={async () => { await completeFollowUp(signal.entityId); onRefresh() }}
-                  style={{ background: 'none', border: '1px solid var(--border-2)', borderRadius: '4px', color: '#00f058', fontSize: 'var(--text-caption)', padding: '2px 8px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                  className="rdr-signal-complete-btn"
                 >
                   Complete
                 </button>
@@ -213,32 +169,15 @@ function PersonCard({
       {/* Follow-ups section */}
       {pa.openFollowUpCount > 0 && (
         <div style={{ borderTop: pa.signals.length > 0 ? 'none' : '1px solid var(--border-1)' }}>
-          <button
-            onClick={toggleFollowUps}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              width: '100%',
-              padding: '8px 16px',
-              background: 'none',
-              border: 'none',
-              borderTop: '1px solid var(--border-1)',
-              color: 'var(--text-3)',
-              fontSize: 'var(--text-caption)',
-              cursor: 'pointer',
-              fontFamily: 'var(--font-sans)',
-              textAlign: 'left',
-            }}
-          >
+          <button onClick={toggleFollowUps} className="rdr-followups-toggle">
             {showFollowUps ? <ChevronDown style={{ width: '11px', height: '11px' }} /> : <ChevronRight style={{ width: '11px', height: '11px' }} />}
             {pa.openFollowUpCount} open follow-up{pa.openFollowUpCount !== 1 ? 's' : ''}
           </button>
 
           {showFollowUps && (
-            <div style={{ padding: '4px 16px 12px' }}>
+            <div className="rdr-followups-body">
               {loadingFollowUps ? (
-                <p style={{ fontSize: 'var(--text-meta)', color: 'var(--text-3)' }}>Loading...</p>
+                <p className="rdr-followups-loading">Loading...</p>
               ) : (
                 <FollowUpList followUps={followUps} onChanged={() => { loadFollowUps(); onRefresh() }} />
               )}
@@ -326,17 +265,13 @@ export default function RadarPage() {
   const criticalCount = people.filter(p => p.signals.some(s => s.severity === 'critical')).length
 
   if (loading) {
-    return (
-      <div style={{ padding: '32px', color: 'var(--text-2)', fontSize: 'var(--text-meta)' }}>
-        Computing attention signals...
-      </div>
-    )
+    return <div className="rdr-loading">Computing attention signals...</div>
   }
 
   if (error) {
     return (
-      <div style={{ padding: '32px' }}>
-        <p style={{ color: '#ff6b6b', fontSize: 'var(--text-meta)' }}>{error}</p>
+      <div className="rdr-error">
+        <p className="rdr-error-text">{error}</p>
       </div>
     )
   }
@@ -347,168 +282,142 @@ export default function RadarPage() {
         <span className="page-topbar-title">People Radar</span>
       </div>
       <div className="page-content">
-      {/* Header subtitle */}
-      <div style={{ marginBottom: '20px' }}>
-        <p>
-          {needsAttention.length > 0
-            ? `${needsAttention.length} person${needsAttention.length !== 1 ? 's' : ''} need${needsAttention.length === 1 ? 's' : ''} attention`
-            : 'All clear — everyone is on track'}
-        </p>
-      </div>
-
-      {/* Quick stats */}
-      {needsAttention.length > 0 && (
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
-          <div style={{ background: '#2a0a0a', border: '1px solid #5a2020', borderRadius: '6px', padding: '10px 16px', minWidth: '100px' }}>
-            <div style={{ fontSize: 'var(--text-overline)', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '2px' }}>Critical</div>
-            <div style={{ fontSize: 'var(--text-section)', fontWeight: 700, color: '#ff6b6b' }}>{criticalCount}</div>
-          </div>
-          <div style={{ background: 'var(--surf)', border: '1px solid var(--border-1)', borderRadius: '6px', padding: '10px 16px', minWidth: '100px' }}>
-            <div style={{ fontSize: 'var(--text-overline)', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '2px' }}>Needs attention</div>
-            <div style={{ fontSize: 'var(--text-section)', fontWeight: 700, color: 'var(--text-1)' }}>{needsAttention.length}</div>
-          </div>
-          <div style={{ background: '#0d1f14', border: '1px solid #1a3a25', borderRadius: '6px', padding: '10px 16px', minWidth: '100px' }}>
-            <div style={{ fontSize: 'var(--text-overline)', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '2px' }}>All clear</div>
-            <div style={{ fontSize: 'var(--text-section)', fontWeight: 700, color: '#00f058' }}>{allClear.length}</div>
-          </div>
+        {/* Header subtitle */}
+        <div className="rdr-subtitle">
+          <p>
+            {needsAttention.length > 0
+              ? `${needsAttention.length} person${needsAttention.length !== 1 ? 's' : ''} need${needsAttention.length === 1 ? 's' : ''} attention`
+              : 'All clear — everyone is on track'}
+          </p>
         </div>
-      )}
 
-      {/* Filters */}
-      {needsAttention.length > 0 && (
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
-          {(['all', 'critical', 'warning'] as SeverityFilter[]).map(f => (
-            <button
-              key={f}
-              onClick={() => setSeverityFilter(f)}
-              style={{
-                background: severityFilter === f ? 'var(--surf-3)' : 'var(--surf-2)',
-                border: `1px solid ${severityFilter === f ? 'var(--border-3)' : 'var(--border-1)'}`,
-                borderRadius: '4px',
-                color: severityFilter === f ? 'var(--text-1)' : 'var(--text-3)',
-                fontSize: 'var(--text-meta)',
-                padding: '5px 12px',
-                cursor: 'pointer',
-                fontFamily: 'var(--font-sans)',
-                textTransform: 'capitalize',
-              }}
-            >
-              {f === 'all' ? 'All signals' : f}
-            </button>
+        {/* Quick stats */}
+        {needsAttention.length > 0 && (
+          <div className="rdr-stats">
+            <div className="rdr-stat-critical">
+              <div className="rdr-stat-label">Critical</div>
+              <div className="rdr-stat-val" style={{ color: '#ff6b6b' }}>{criticalCount}</div>
+            </div>
+            <div className="rdr-stat-attention">
+              <div className="rdr-stat-label">Needs attention</div>
+              <div className="rdr-stat-val" style={{ color: 'var(--text-1)' }}>{needsAttention.length}</div>
+            </div>
+            <div className="rdr-stat-clear">
+              <div className="rdr-stat-label">All clear</div>
+              <div className="rdr-stat-val" style={{ color: '#00f058' }}>{allClear.length}</div>
+            </div>
+          </div>
+        )}
+
+        {/* Filters */}
+        {needsAttention.length > 0 && (
+          <div className="rdr-filters">
+            {(['all', 'critical', 'warning'] as SeverityFilter[]).map(f => (
+              <button
+                key={f}
+                onClick={() => setSeverityFilter(f)}
+                className="rdr-filter-btn"
+                style={{
+                  background: severityFilter === f ? 'var(--surf-3)' : 'var(--surf-2)',
+                  border: `1px solid ${severityFilter === f ? 'var(--border-3)' : 'var(--border-1)'}`,
+                  color: severityFilter === f ? 'var(--text-1)' : 'var(--text-3)',
+                }}
+              >
+                {f === 'all' ? 'All signals' : f}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Person cards */}
+        {filtered.length === 0 && needsAttention.length > 0 && (
+          <p className="rdr-no-match">No people match this filter.</p>
+        )}
+
+        {people.length === 0 && (
+          <div className="rdr-empty">
+            <p className="rdr-empty-text">No active team members yet.</p>
+            <Link href="/people" className="rdr-empty-link">Add your team →</Link>
+          </div>
+        )}
+
+        <div className="rdr-cards">
+          {filtered.map(pa => (
+            <PersonCard key={pa.personId} pa={pa} onRefresh={refetch} />
           ))}
         </div>
-      )}
 
-      {/* Person cards */}
-      {filtered.length === 0 && needsAttention.length > 0 && (
-        <p style={{ fontSize: 'var(--text-meta)', color: 'var(--text-3)' }}>No people match this filter.</p>
-      )}
+        {/* All clear section */}
+        {allClear.length > 0 && (
+          <div className="rdr-allclear">
+            <button onClick={() => setShowAllClear(s => !s)} className="rdr-allclear-toggle">
+              {showAllClear
+                ? <ChevronDown style={{ width: '13px', height: '13px' }} />
+                : <ChevronRight style={{ width: '13px', height: '13px' }} />}
+              <CheckCircle style={{ width: '13px', height: '13px', color: '#00f058' }} />
+              People with no signals ({allClear.length})
+            </button>
 
-      {people.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '48px 0' }}>
-          <p style={{ color: 'var(--text-2)', marginBottom: '12px' }}>No active team members yet.</p>
-          <Link href="/people" style={{ color: '#00f058', fontSize: 'var(--text-meta)', textDecoration: 'none' }}>
-            Add your team →
-          </Link>
-        </div>
-      )}
+            {showAllClear && (
+              <div className="rdr-allclear-list">
+                {allClear.map(pa => (
+                  <div key={pa.personId} className="rdr-allclear-item">
+                    <div className="rdr-allclear-dot" />
+                    <Link href={`/people/${pa.personId}`} className="rdr-allclear-name">
+                      {pa.personName}
+                    </Link>
+                    {pa.personRole && (
+                      <span className="rdr-allclear-role">{pa.personRole}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {filtered.map(pa => (
-          <PersonCard key={pa.personId} pa={pa} onRefresh={refetch} />
-        ))}
-      </div>
+        {/* Recurring Topics */}
+        <div className="rdr-topics">
+          <div className="rdr-topics-header">
+            <div>
+              <h2 style={{ margin: 0 }}>Recurring Topics</h2>
+              <p className="rdr-topics-sub">Topics that surface across 3+ meeting notes</p>
+            </div>
+            <AIButton
+              configured={aiConfig.configured}
+              loading={aiConfig.loading}
+              generating={detectingTopics}
+              onClick={handleDetectRecurringTopics}
+              label={topicsDetected ? "Re-analyse" : "Detect recurring topics"}
+              tooltip={aiConfig.tooltip}
+              showSetupLink={true}
+            />
+          </div>
 
-      {/* All clear section */}
-      {allClear.length > 0 && (
-        <div style={{ marginTop: '20px', borderTop: '1px solid var(--border-1)', paddingTop: '16px' }}>
-          <button
-            onClick={() => setShowAllClear(s => !s)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: 'none',
-              border: 'none',
-              color: 'var(--text-3)',
-              fontSize: 'var(--text-meta)',
-              cursor: 'pointer',
-              fontFamily: 'var(--font-sans)',
-              padding: 0,
-              marginBottom: '10px',
-            }}
-          >
-            {showAllClear ? <ChevronDown style={{ width: '13px', height: '13px' }} /> : <ChevronRight style={{ width: '13px', height: '13px' }} />}
-            <CheckCircle style={{ width: '13px', height: '13px', color: '#00f058' }} />
-            People with no signals ({allClear.length})
-          </button>
+          {topicsDetected && recurringTopics.length === 0 && (
+            <p className="rdr-topics-empty">No recurring topics found in recent meeting notes.</p>
+          )}
 
-          {showAllClear && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              {allClear.map(pa => (
-                <div key={pa.personId} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 10px', background: 'var(--surf-2)', borderRadius: '5px' }}>
-                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00f058', flexShrink: 0 }} />
-                  <Link href={`/people/${pa.personId}`} style={{ fontSize: 'var(--text-meta)', color: 'var(--text-2)', textDecoration: 'none' }}>
-                    {pa.personName}
-                  </Link>
-                  {pa.personRole && (
-                    <span style={{ fontSize: 'var(--text-caption)', color: 'var(--text-3)' }}>{pa.personRole}</span>
-                  )}
+          {recurringTopics.length > 0 && (
+            <div className="rdr-topics-list">
+              {recurringTopics.map((t, i) => (
+                <div key={i} className="rdr-topic-card" style={{ border: `1px solid ${t.escalating ? '#f87171' : 'var(--border-1)'}` }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <span className="rdr-topic-name">{t.topic}</span>
+                      {t.escalating && (
+                        <span className="rdr-topic-escalating">Escalating</span>
+                      )}
+                    </div>
+                    <span className="rdr-topic-meta">
+                      {t.frequency} meeting{t.frequency !== 1 ? 's' : ''} · first {t.first_seen} · latest {t.latest}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
           )}
         </div>
-      )}
-
-      {/* Recurring Topics */}
-      <div style={{ marginTop: '28px', borderTop: '1px solid var(--border-1)', paddingTop: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-          <div>
-            <h2 style={{ margin: 0 }}>Recurring Topics</h2>
-            <p style={{ fontSize: 'var(--text-caption)', color: 'var(--text-3)', marginTop: '2px' }}>
-              Topics that surface across 3+ meeting notes
-            </p>
-          </div>
-          <AIButton
-            configured={aiConfig.configured}
-            loading={aiConfig.loading}
-            generating={detectingTopics}
-            onClick={handleDetectRecurringTopics}
-            label={topicsDetected ? "Re-analyse" : "Detect recurring topics"}
-            tooltip={aiConfig.tooltip}
-            showSetupLink={true}
-          />
-        </div>
-
-        {topicsDetected && recurringTopics.length === 0 && (
-          <p style={{ fontSize: 'var(--text-meta)', color: 'var(--text-3)' }}>No recurring topics found in recent meeting notes.</p>
-        )}
-
-        {recurringTopics.length > 0 && (
-          <div style={{ display: 'grid', gap: '8px' }}>
-            {recurringTopics.map((t, i) => (
-              <div key={i} style={{
-                display: 'flex', alignItems: 'flex-start', gap: '12px',
-                padding: '12px 16px', background: 'var(--surf)', border: `1px solid ${t.escalating ? '#f87171' : 'var(--border-1)'}`,
-                borderRadius: '6px',
-              }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                    <span style={{ fontWeight: 600, color: 'var(--text-1)', fontSize: 'var(--text-body)' }}>{t.topic}</span>
-                    {t.escalating && (
-                      <span style={{ fontSize: 'var(--text-caption)', color: '#f87171', background: '#2a0a0a', border: '1px solid #f8717140', borderRadius: '3px', padding: '1px 6px' }}>Escalating</span>
-                    )}
-                  </div>
-                  <span style={{ fontSize: 'var(--text-caption)', color: 'var(--text-3)' }}>
-                    {t.frequency} meeting{t.frequency !== 1 ? 's' : ''} · first {t.first_seen} · latest {t.latest}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
       </div>
     </>
   )

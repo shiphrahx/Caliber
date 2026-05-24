@@ -1,19 +1,35 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { User, Check, FileText, Plus, Trash2, ChevronDown, ChevronRight, RotateCcw } from "lucide-react"
+import { User, Check, FileText, Plus, Trash2, ChevronDown, ChevronRight, RotateCcw, Loader2 } from "lucide-react"
 import { useTemplates, type MeetingTemplate } from "@/lib/hooks/use-templates"
 import { AISettingsCard } from "@/components/settings/ai-settings-card"
+import { createClient } from "@/lib/supabase/client"
 
 export default function SettingsPage() {
-  const [preferredName, setPreferredName] = useState("User")
-  const [email] = useState("user@example.com")
+  const [preferredName, setPreferredName] = useState("")
+  const [email, setEmail] = useState("")
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return
+      if (data.user.email) setEmail(data.user.email)
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("name")
+        .eq("id", data.user.id)
+        .single()
+      if (profile?.name) setPreferredName(profile.name)
+    })
+  }, [])
 
   const { templates, deletedTemplates, addTemplate, updateTemplate, deleteTemplate, restoreTemplate } = useTemplates()
   const [expandedTemplate, setExpandedTemplate] = useState<string | null>(null)
@@ -22,9 +38,20 @@ export default function SettingsPage() {
   const [newName, setNewName] = useState("")
   const [newNotes, setNewNotes] = useState("")
 
-  const handleSave = () => {
-    setSaveSuccess(true)
-    setTimeout(() => setSaveSuccess(false), 3000)
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      await supabase
+        .from("user_profiles")
+        .upsert({ id: user.id, name: preferredName, email: user.email }, { onConflict: "id" })
+      setSaveSuccess(true)
+      setTimeout(() => setSaveSuccess(false), 3000)
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleStartEdit = (template: MeetingTemplate) => {
@@ -165,10 +192,10 @@ export default function SettingsPage() {
                       {template.name}
                     </div>
                     <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => isEditing ? handleCancelEdit() : handleStartEdit(template)}>
+                      <Button variant="ghost" size="sm" className="h-7 px-2 text-[13px]" onClick={() => isEditing ? handleCancelEdit() : handleStartEdit(template)}>
                         {isEditing ? "Cancel" : "Edit"}
                       </Button>
-                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-red-400 hover:text-red-300" onClick={() => deleteTemplate(template.id)}>
+                      <Button variant="ghost" size="sm" className="h-7 px-2 text-[13px] text-red-400 hover:text-red-300" onClick={() => deleteTemplate(template.id)}>
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
@@ -192,7 +219,7 @@ export default function SettingsPage() {
                               value={editingTemplate.notes}
                               onChange={(e) => setEditingTemplate({ ...editingTemplate, notes: e.target.value })}
                               rows={8}
-                              className="bg-[#262626] border-[#383838] text-gray-100 resize-none font-mono text-xs"
+                              className="bg-[#262626] border-[#383838] text-gray-100 resize-none font-mono text-[13px]"
                             />
                           </div>
                           <div className="flex gap-2 justify-end">
@@ -201,7 +228,7 @@ export default function SettingsPage() {
                           </div>
                         </>
                       ) : (
-                        <pre className="text-xs text-gray-400 whitespace-pre-wrap font-mono leading-relaxed">
+                        <pre className="text-[13px] text-gray-400 whitespace-pre-wrap font-mono leading-relaxed">
                           {template.notes || <span className="italic">No notes content</span>}
                         </pre>
                       )}
@@ -229,7 +256,7 @@ export default function SettingsPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 px-2 text-xs text-gray-400 hover:text-gray-200"
+                        className="h-7 px-2 text-[13px] text-gray-400 hover:text-gray-200"
                         onClick={() => restoreTemplate(template.id)}
                       >
                         <RotateCcw className="h-3.5 w-3.5 mr-1" />
@@ -248,12 +275,11 @@ export default function SettingsPage() {
 
         <div className="flex items-center justify-between">
           <p className="text-gray-400">Changes will be saved to your account</p>
-          <Button onClick={handleSave} className="min-w-[120px]">
-            {saveSuccess ? (
-              <>
-                <Check className="h-4 w-4 mr-2" />
-                Saved!
-              </>
+          <Button onClick={handleSave} disabled={saving} className="min-w-[120px]">
+            {saving ? (
+              <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving…</>
+            ) : saveSuccess ? (
+              <><Check className="h-4 w-4 mr-2" />Saved!</>
             ) : (
               "Save Changes"
             )}

@@ -46,35 +46,26 @@ function PreviewSection({ title, count, children }: { title: string; count: numb
   const [open, setOpen] = useState(false)
   if (count === 0) return null
   return (
-    <div style={{ borderBottom: '1px solid var(--border-1)' }}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        style={{
-          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '8px 12px', background: 'none', border: 'none', cursor: 'pointer',
-          fontFamily: 'var(--font-sans)',
-        }}
-      >
-        <span style={{ fontSize: 'var(--text-meta)', color: 'var(--text-1)', fontWeight: 500 }}>{title}</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ fontSize: 'var(--text-caption)', color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>{count}</span>
-          {open
-            ? <ChevronDown style={{ width: '11px', height: '11px', color: 'var(--text-3)' }} />
-            : <ChevronRt style={{ width: '11px', height: '11px', color: 'var(--text-3)' }} />
-          }
+    <div className="sum-preview-section">
+      <button onClick={() => setOpen(o => !o)} className="sum-preview-toggle">
+        <span className="sum-preview-toggle-title">{title}</span>
+        <div className="sum-preview-toggle-right">
+          <span className="sum-preview-toggle-count">{count}</span>
+          <span className="sum-preview-toggle-icon">
+            {open
+              ? <ChevronDown style={{ width: '11px', height: '11px', color: 'var(--text-3)' }} />
+              : <ChevronRt style={{ width: '11px', height: '11px', color: 'var(--text-3)' }} />
+            }
+          </span>
         </div>
       </button>
-      {open && <div style={{ padding: '0 12px 10px' }}>{children}</div>}
+      {open && <div className="sum-preview-body">{children}</div>}
     </div>
   )
 }
 
 function PreviewItem({ children }: { children: React.ReactNode }) {
-  return (
-    <div style={{ fontSize: 'var(--text-meta)', color: 'var(--text-2)', padding: '3px 0', borderBottom: '1px solid var(--border-1)' }}>
-      {children}
-    </div>
-  )
+  return <div className="sum-preview-item">{children}</div>
 }
 
 // ── Export button ─────────────────────────────────────────────────────────────
@@ -85,16 +76,7 @@ function ExportBtn({
   return (
     <button
       onClick={onClick}
-      style={{
-        display: 'inline-flex', alignItems: 'center', gap: '5px',
-        padding: primary ? '5px 12px' : '5px 10px',
-        background: primary ? 'linear-gradient(90deg, #00ffe5 0%, #00f058 100%)' : 'none',
-        border: primary ? 'none' : '1px solid var(--border-2)',
-        color: primary ? '#0a1a0a' : 'var(--text-2)',
-        borderRadius: '4px', cursor: 'pointer',
-        fontSize: 'var(--text-caption)', fontWeight: primary ? 600 : 400,
-        fontFamily: 'var(--font-sans)',
-      }}
+      className={`sum-export-btn ${primary ? 'sum-export-btn--primary' : 'sum-export-btn--secondary'}`}
     >
       {icon} {label}
     </button>
@@ -121,7 +103,6 @@ export default function SummaryPage() {
 
   const { data, loading, error, refetch } = useWeeklySummaryData(weekStart)
 
-  // Load existing saved summary on week change
   useEffect(() => {
     setContent('')
     setIsEdited(false)
@@ -139,7 +120,6 @@ export default function SummaryPage() {
     })
   }, [weekStart])
 
-  // Auto-generate when data loads (initial) or after a forced regenerate
   useEffect(() => {
     if (!data || loading) return
     if (!pendingRegenerate.current && content) return
@@ -235,41 +215,31 @@ export default function SummaryPage() {
     <>
       {/* Top bar */}
       <div className="page-topbar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="sum-topbar-left">
           <span className="page-topbar-title">Weekly Summary</span>
-          {saving && (
-            <span style={{ fontSize: 'var(--text-caption)', color: 'var(--text-3)' }}>saving…</span>
-          )}
+          {saving && <span className="sum-saving">saving…</span>}
         </div>
 
         {/* Week nav */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <button onClick={prevWeek} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', padding: '4px', display: 'flex', alignItems: 'center' }}>
+        <div className="sum-nav">
+          <button onClick={prevWeek} className="sum-nav-btn">
             <ChevronLeft style={{ width: '13px', height: '13px' }} />
           </button>
-          <span style={{ fontSize: 'var(--text-caption)', color: 'var(--text-2)', fontFamily: 'var(--font-sans)', minWidth: '140px', textAlign: 'center' }}>
-            {formatWeekRange(weekStart)}
-          </span>
-          <button onClick={nextWeek} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', padding: '4px', display: 'flex', alignItems: 'center' }}>
+          <span className="sum-nav-range">{formatWeekRange(weekStart)}</span>
+          <button onClick={nextWeek} className="sum-nav-btn">
             <ChevronRight style={{ width: '13px', height: '13px' }} />
           </button>
           {!isCurrentWeek && (
-            <button onClick={goToday} style={{ background: 'none', border: '1px solid var(--border-2)', borderRadius: '3px', cursor: 'pointer', color: 'var(--text-3)', padding: '2px 6px', fontSize: 'var(--text-caption)', fontFamily: 'var(--font-sans)' }}>
-              This week
-            </button>
+            <button onClick={goToday} className="sum-nav-today">This week</button>
           )}
         </div>
       </div>
 
-      <div style={{ display: 'flex', height: 'calc(100vh - 40px)', overflow: 'hidden' }}>
+      <div className="sum-layout">
         {/* Left pane — editable summary */}
-        <div style={{ flex: '0 0 60%', display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--border-1)', overflow: 'hidden' }}>
+        <div className="sum-left">
           {/* Toolbar */}
-          <div style={{
-            padding: '8px 16px', borderBottom: '1px solid var(--border-1)',
-            display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0,
-            background: 'var(--surf)',
-          }}>
+          <div className="sum-toolbar">
             <ExportBtn
               label={copyState === 'copied' ? 'Copied ✓' : 'Copy markdown'}
               icon={<Copy style={{ width: '11px', height: '11px' }} />}
@@ -286,29 +256,23 @@ export default function SummaryPage() {
               icon={<Download style={{ width: '11px', height: '11px' }} />}
               onClick={downloadMd}
             />
-            <div style={{ flex: 1 }} />
+            <div className="sum-toolbar-spacer" />
             {generatedAt && (
-              <span style={{ fontSize: 'var(--text-caption)', color: 'var(--text-3)' }}>
+              <span className="sum-generated-at">
                 Generated at {fmtTime(generatedAt)}
-                {isEdited && <span style={{ color: '#ffd43b', marginLeft: '6px' }}>· edited</span>}
+                {isEdited && <span className="sum-edited-mark">· edited</span>}
               </span>
             )}
             <button
               onClick={handleRegenerate}
               disabled={regenerating || loading}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: '4px',
-                background: 'none', border: '1px solid var(--border-2)', borderRadius: '4px',
-                color: 'var(--text-3)', cursor: 'pointer', padding: '3px 8px',
-                fontSize: 'var(--text-caption)', fontFamily: 'var(--font-sans)',
-                opacity: regenerating || loading ? 0.5 : 1,
-              }}
+              className="sum-regen-btn"
             >
               <RefreshCw style={{ width: '10px', height: '10px' }} />
               Regenerate
             </button>
             {/* AI rewrite menu */}
-            <div style={{ position: 'relative' }}>
+            <div className="sum-rewrite-wrap">
               <AIButton
                 configured={aiConfig.configured}
                 loading={aiConfig.loading}
@@ -319,36 +283,17 @@ export default function SummaryPage() {
                 showSetupLink={false}
               />
               {showRewriteMenu && aiConfig.configured && (
-                <div style={{
-                  position: 'absolute', top: 'calc(100% + 4px)', right: 0, zIndex: 50,
-                  background: 'var(--surf)', border: '1px solid var(--border-2)', borderRadius: '6px',
-                  minWidth: '160px', overflow: 'hidden',
-                }}>
+                <div className="sum-rewrite-menu">
                   {Object.keys(SUMMARY_REWRITE_PROMPTS).map(fmt => (
                     <button
                       key={fmt}
                       onClick={() => handleRewrite(fmt)}
-                      style={{
-                        display: 'block', width: '100%', padding: '8px 14px', textAlign: 'left',
-                        background: 'none', border: 'none', cursor: 'pointer',
-                        fontSize: 'var(--text-label)', color: 'var(--text-2)', fontFamily: 'var(--font-sans)',
-                      }}
-                      onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'var(--surf-2)')}
-                      onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'none')}
+                      className="sum-rewrite-item"
                     >
                       {SUMMARY_REWRITE_LABELS[fmt]}
                     </button>
                   ))}
-                  <button
-                    onClick={() => handleRewrite('custom')}
-                    style={{
-                      display: 'block', width: '100%', padding: '8px 14px', textAlign: 'left',
-                      background: 'none', borderTop: '1px solid var(--border-1)', borderRight: 'none', borderBottom: 'none', borderLeft: 'none',
-                      cursor: 'pointer', fontSize: 'var(--text-label)', color: 'var(--text-3)', fontFamily: 'var(--font-sans)',
-                    }}
-                    onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'var(--surf-2)')}
-                    onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'none')}
-                  >
+                  <button onClick={() => handleRewrite('custom')} className="sum-rewrite-custom">
                     {SUMMARY_REWRITE_LABELS['custom']}
                   </button>
                 </div>
@@ -358,24 +303,18 @@ export default function SummaryPage() {
 
           {/* Editor */}
           {loading ? (
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', fontSize: 'var(--text-meta)' }}>
-              Loading…
-            </div>
+            <div className="sum-editor-loading">Loading…</div>
           ) : error ? (
-            <div style={{ flex: 1, padding: '24px', color: '#ff6b6b', fontSize: 'var(--text-meta)', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+            <div className="sum-editor-error">
               <AlertCircle style={{ width: '14px', height: '14px', flexShrink: 0, marginTop: '2px' }} />
               {error}
             </div>
           ) : isEmpty && !content ? (
-            <div style={{ flex: 1, padding: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
-              <div style={{ fontSize: 'var(--text-meta)', color: 'var(--text-3)', textAlign: 'center', maxWidth: '320px' }}>
+            <div className="sum-editor-empty">
+              <div className="sum-editor-empty-text">
                 Your weekly summary will appear here once you start tracking tasks and meetings in Caliber.
               </div>
-              <div style={{
-                background: 'var(--surf-2)', border: '1px solid var(--border-1)', borderRadius: '6px',
-                padding: '16px', fontSize: 'var(--text-caption)', color: 'var(--text-3)',
-                fontFamily: 'var(--font-mono)', maxWidth: '400px', whiteSpace: 'pre-wrap', lineHeight: 1.6,
-              }}>
+              <div className="sum-editor-sample">
                 {`# Week Summary — sample\n\n## Completed\n- Finish sprint planning ⚡\n- Review PR backlog\n\n## Meetings\n3 meetings (2 1:1s, 1 team)\n\n## People\n- 1:1s held with: Alice, Bob`}
               </div>
             </div>
@@ -384,22 +323,15 @@ export default function SummaryPage() {
               value={content}
               onChange={e => handleContentChange(e.target.value)}
               spellCheck={false}
-              style={{
-                flex: 1, padding: '20px 24px', background: 'var(--surf)',
-                color: 'var(--text-1)', border: 'none', outline: 'none',
-                fontFamily: 'var(--font-mono)', fontSize: '13px', lineHeight: 1.7,
-                resize: 'none', overflowY: 'auto',
-              }}
+              className="sum-textarea"
             />
           )}
         </div>
 
         {/* Right pane — data preview */}
-        <div style={{ flex: '0 0 40%', overflowY: 'auto', background: 'var(--surf-2)' }}>
-          <div style={{ padding: '10px 12px 6px', borderBottom: '1px solid var(--border-1)' }}>
-            <span style={{ fontSize: 'var(--text-caption)', color: 'var(--text-3)', fontFamily: 'var(--font-sans)' }}>
-              Source data
-            </span>
+        <div className="sum-right">
+          <div className="sum-right-header">
+            <span className="sum-right-header-label">Source data</span>
           </div>
 
           {data && (
@@ -407,7 +339,7 @@ export default function SummaryPage() {
               <PreviewSection title="Completed tasks" count={data.completedTasks.length}>
                 {data.completedTasks.map(t => (
                   <PreviewItem key={t.id}>
-                    <Link href={`/tasks`} style={{ textDecoration: 'none', color: 'var(--text-2)' }}>
+                    <Link href="/tasks" className="sum-preview-item-link">
                       <span style={{ color: priorityColor(t.priority), marginRight: '5px', fontSize: '10px' }}>●</span>
                       {t.title}
                     </Link>
@@ -446,7 +378,7 @@ export default function SummaryPage() {
               <PreviewSection title="Meetings this week" count={data.meetings.length}>
                 {data.meetings.map(m => (
                   <PreviewItem key={m.id}>
-                    <Link href={`/meetings`} style={{ textDecoration: 'none', color: 'var(--text-2)' }}>
+                    <Link href="/meetings" className="sum-preview-item-link">
                       <span style={{ color: 'var(--text-3)', marginRight: '5px', fontSize: 'var(--text-caption)' }}>{m.type}</span>
                       {m.title}
                       {m.personName && <span style={{ color: 'var(--text-3)', marginLeft: '6px' }}>· {m.personName}</span>}
@@ -459,9 +391,7 @@ export default function SummaryPage() {
               <PreviewSection title="People seen this week" count={data.activePeople.filter(p => p.seenThisWeek).length}>
                 {data.activePeople.filter(p => p.seenThisWeek).map(p => (
                   <PreviewItem key={p.id}>
-                    <Link href={`/people/${p.id}`} style={{ textDecoration: 'none', color: 'var(--text-2)' }}>
-                      {p.name}
-                    </Link>
+                    <Link href={`/people/${p.id}`} className="sum-preview-item-link">{p.name}</Link>
                   </PreviewItem>
                 ))}
               </PreviewSection>
@@ -469,9 +399,7 @@ export default function SummaryPage() {
               <PreviewSection title="People not seen" count={data.activePeople.filter(p => !p.seenThisWeek).length}>
                 {data.activePeople.filter(p => !p.seenThisWeek).map(p => (
                   <PreviewItem key={p.id}>
-                    <Link href={`/people/${p.id}`} style={{ textDecoration: 'none', color: 'var(--text-3)' }}>
-                      {p.name}
-                    </Link>
+                    <Link href={`/people/${p.id}`} style={{ textDecoration: 'none', color: 'var(--text-3)' }}>{p.name}</Link>
                   </PreviewItem>
                 ))}
               </PreviewSection>
@@ -508,9 +436,7 @@ export default function SummaryPage() {
 
               {data.reflectionNotes && (
                 <PreviewSection title="Weekly review notes" count={1}>
-                  <div style={{ fontSize: 'var(--text-meta)', color: 'var(--text-2)', padding: '4px 0', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
-                    {data.reflectionNotes}
-                  </div>
+                  <div className="sum-preview-notes">{data.reflectionNotes}</div>
                 </PreviewSection>
               )}
 

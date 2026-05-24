@@ -21,17 +21,7 @@ interface PeopleTableProps {
 function LevelChip({ level }: { level: string }) {
   const { bg, color: text } = LEVEL_BADGE[level] ?? LEVEL_BADGE.Other
   return (
-    <span style={{
-      display: "inline-flex",
-      alignItems: "center",
-      padding: "2px 7px",
-      borderRadius: "3px",
-      fontSize: "var(--text-overline)",
-      fontWeight: 500,
-      fontFamily: "var(--font-mono)",
-      background: bg,
-      color: text,
-    }}>
+    <span className="level-chip" style={{ background: bg, color: text }}>
       {level}
     </span>
   )
@@ -58,20 +48,7 @@ export function PeopleTable({
       cell: (person) => {
         const isInactive = person.status === "inactive"
         return (
-          <div style={{
-            width: "24px",
-            height: "24px",
-            borderRadius: "50%",
-            background: "var(--surf-3)",
-            color: "var(--text-2)",
-            fontSize: "var(--text-overline)",
-            fontWeight: 500,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-            opacity: isInactive ? 0.4 : 1,
-          }}>
+          <div className="avatar-chip" style={{ opacity: isInactive ? 0.4 : 1 }}>
             {getInitials(person.name)}
           </div>
         )
@@ -85,20 +62,15 @@ export function PeopleTable({
         const isInactive = person.status === "inactive"
         const score = attentionScores[person.id] ?? 0
         return (
-          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <div className="table-name-row">
             {score > 0 && (
               <span
                 title={`Attention score: ${score}`}
-                style={{
-                  width: "7px",
-                  height: "7px",
-                  borderRadius: "50%",
-                  background: scoreToColor(score),
-                  flexShrink: 0,
-                }}
+                className="attention-dot"
+                style={{ background: scoreToColor(score) }}
               />
             )}
-            <span style={{ fontWeight: 500, fontSize: "var(--text-meta)", color: isInactive ? "var(--text-3)" : "var(--text-1)" }}>
+            <span className={`table-name ${isInactive ? "table-name--inactive" : "table-name--active"}`}>
               {person.name}
             </span>
           </div>
@@ -112,7 +84,7 @@ export function PeopleTable({
       cell: (person) => {
         const isInactive = person.status === "inactive"
         return (
-          <span style={{ color: isInactive ? "var(--text-3)" : "var(--text-2)", fontSize: "var(--text-meta)" }}>
+          <span className={`table-role ${isInactive ? "table-role--inactive" : "table-role--active"}`}>
             {person.role}
           </span>
         )
@@ -131,16 +103,9 @@ export function PeopleTable({
       cell: (person) => {
         const isInactive = person.status === "inactive"
         return (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "2px" }}>
+          <div className="table-teams">
             {person.teams.map((team, idx) => (
-              <span key={idx} style={{
-                background: "var(--surf-3)",
-                color: isInactive ? "var(--text-3)" : "var(--text-2)",
-                padding: "1px 5px",
-                borderRadius: "3px",
-                fontSize: "var(--text-overline)",
-                marginRight: "2px",
-              }}>
+              <span key={idx} className="team-chip" style={{ color: isInactive ? "var(--text-3)" : "var(--text-2)" }}>
                 {team}
               </span>
             ))}
@@ -153,10 +118,7 @@ export function PeopleTable({
       header: "Status",
       accessorKey: "status",
       cell: (person) => (
-        <span style={{
-          color: person.status === "active" ? "#00f058" : "var(--text-3)",
-          fontSize: "var(--text-caption)",
-        }}>
+        <span className={`status-badge ${person.status === "active" ? "status-badge--active" : "status-badge--inactive"}`}>
           ● {person.status}
         </span>
       ),
@@ -170,63 +132,24 @@ export function PeopleTable({
         <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 justify-end">
           <button
             onClick={(e) => { e.stopPropagation(); onEdit(person) }}
-            style={{
-              border: "1px solid var(--border-2)",
-              color: "var(--text-3)",
-              borderRadius: "4px",
-              padding: "2px 7px",
-              fontSize: "var(--text-meta)",
-              background: "none",
-              cursor: "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
-            onMouseEnter={e => (e.currentTarget.style.color = "var(--text-1)")}
-            onMouseLeave={e => (e.currentTarget.style.color = "var(--text-3)")}
+            className="table-action-btn"
           >
-            <Pencil style={{ width: "11px", height: "11px" }} /> Edit
+            <Pencil /> Edit
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onToggleStatus(person) }}
-            style={{
-              border: "1px solid var(--border-2)",
-              color: "var(--text-3)",
-              borderRadius: "4px",
-              padding: "2px 7px",
-              fontSize: "var(--text-meta)",
-              background: "none",
-              cursor: "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
-            onMouseEnter={e => (e.currentTarget.style.color = "var(--text-1)")}
-            onMouseLeave={e => (e.currentTarget.style.color = "var(--text-3)")}
+            className="table-action-btn"
           >
             {person.status === "active"
-              ? <><UserX style={{ width: "11px", height: "11px" }} /> Deactivate</>
-              : <><UserCheck style={{ width: "11px", height: "11px" }} /> Activate</>
+              ? <><UserX /> Deactivate</>
+              : <><UserCheck /> Activate</>
             }
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onDelete(person) }}
-            style={{
-              border: "1px solid var(--border-2)",
-              color: "var(--text-3)",
-              borderRadius: "4px",
-              padding: "2px 7px",
-              fontSize: "var(--text-meta)",
-              background: "none",
-              cursor: "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
-            onMouseEnter={e => (e.currentTarget.style.color = "#f87171")}
-            onMouseLeave={e => (e.currentTarget.style.color = "var(--text-3)")}
+            className="table-action-btn table-action-btn--danger"
           >
-            <Trash2 style={{ width: "11px", height: "11px" }} /> Delete
+            <Trash2 /> Delete
           </button>
         </div>
       ),

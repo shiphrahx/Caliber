@@ -123,23 +123,13 @@ export function FollowUpDraftModal({ open, onOpenChange, meetingArgs }: FollowUp
                   type="button"
                   onClick={() => handleToneChange(opt.value)}
                   title={opt.description}
-                  style={{
-                    padding: "4px 14px",
-                    borderRadius: "4px",
-                    fontSize: "var(--text-label)",
-                    fontFamily: "var(--font-sans)",
-                    cursor: "pointer",
-                    background: tone === opt.value ? "var(--surf-3)" : "var(--surf-2)",
-                    color: tone === opt.value ? "var(--text-1)" : "var(--text-2)",
-                    border: `1px solid ${tone === opt.value ? "var(--border-3)" : "var(--border-2)"}`,
-                    transition: "background 0.1s",
-                  }}
+                  className={`tone-btn ${tone === opt.value ? "tone-btn--active" : "tone-btn--inactive"}`}
                 >
                   {opt.label}
                 </button>
               ))}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[13px] text-muted-foreground">
               {TONE_OPTIONS.find((o) => o.value === tone)?.description}
             </p>
           </div>
@@ -172,7 +162,7 @@ export function FollowUpDraftModal({ open, onOpenChange, meetingArgs }: FollowUp
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium">Draft</p>
-                <p className="text-xs text-muted-foreground">Edit before sending</p>
+                <p className="text-[13px] text-muted-foreground">Edit before sending</p>
               </div>
               <Textarea
                 value={draft}

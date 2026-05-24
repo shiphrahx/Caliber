@@ -23,27 +23,12 @@ function Tooltip({ bucket }: { bucket: WeeklySentimentBucket }) {
   const date = new Date(bucket.weekStart + "T00:00:00")
   const label = date.toLocaleDateString("en-GB", { day: "numeric", month: "short" })
   return (
-    <div style={{
-      position: "absolute",
-      bottom: "calc(100% + 6px)",
-      left: "50%",
-      transform: "translateX(-50%)",
-      background: "var(--surf-3)",
-      border: "1px solid var(--border-2)",
-      borderRadius: "4px",
-      padding: "6px 8px",
-      fontSize: "11px",
-      color: "var(--text-1)",
-      whiteSpace: "nowrap",
-      zIndex: 10,
-      pointerEvents: "none",
-      lineHeight: 1.5,
-    }}>
-      <div style={{ fontWeight: 600, marginBottom: "2px" }}>w/c {label}</div>
+    <div className="sentiment-tooltip">
+      <div className="sentiment-tooltip-week">w/c {label}</div>
       <div style={{ color: COLORS.positive }}>↑ {bucket.positive} positive</div>
       <div style={{ color: COLORS.neutral }}>– {bucket.neutral} neutral</div>
       <div style={{ color: COLORS.negative }}>↓ {bucket.negative} negative</div>
-      <div style={{ color: "var(--text-3)", marginTop: "2px" }}>{bucket.total} total</div>
+      <div className="sentiment-tooltip-total">{bucket.total} total</div>
     </div>
   )
 }
@@ -61,35 +46,19 @@ function StackedBar({ bucket, maxTotal }: { bucket: WeeklySentimentBucket; maxTo
 
   return (
     <div
-      style={{
-        position: "relative",
-        width: `${BAR_WIDTH}px`,
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "flex-end",
-        height: `${BAR_HEIGHT}px`,
-        cursor: "default",
-      }}
+      className="sentiment-stacked-bar"
+      style={{ width: `${BAR_WIDTH}px`, height: `${BAR_HEIGHT}px` }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       {hovered && !empty && <Tooltip bucket={bucket} />}
       {empty ? (
-        <div style={{
-          height: "2px",
-          background: "var(--border-2)",
-          borderRadius: "1px",
-          opacity: 0.4,
-        }} />
+        <div className="sentiment-bar-empty" />
       ) : (
-        <div style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "1px",
-          borderRadius: "3px",
-          overflow: "hidden",
-          height: `${totalRendered}px`,
-        }}>
+        <div
+          className="sentiment-bar-stack"
+          style={{ height: `${totalRendered}px` }}
+        >
           {bucket.positive > 0 && (
             <div style={{ height: `${posH}px`, background: COLORS.positive }} />
           )}
@@ -147,16 +116,16 @@ export function SentimentTrendChart({ personId, days = 60 }: SentimentTrendChart
 
   if (loading) {
     return (
-      <div style={{ height: "120px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>Loading sentiment data…</span>
+      <div className="sentiment-chart-loading">
+        <span className="text-caption text-3">Loading sentiment data…</span>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div style={{ height: "80px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <span style={{ fontSize: "var(--text-caption)", color: "#f87171" }}>Could not load sentiment data</span>
+      <div className="sentiment-chart-error">
+        <span className="sentiment-chart-error-text">Could not load sentiment data</span>
       </div>
     )
   }
@@ -170,28 +139,28 @@ export function SentimentTrendChart({ personId, days = 60 }: SentimentTrendChart
     : null
 
   return (
-    <div style={{ background: "var(--surf-2)", border: "1px solid var(--border-1)", borderRadius: "6px", padding: "14px 16px" }}>
+    <div className="sentiment-chart">
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
-        <span style={{ fontSize: "var(--text-label)", fontWeight: 600, color: "var(--text-2)" }}>
+      <div className="sentiment-chart-header">
+        <span className="sentiment-chart-title">
           Sentiment Trend
-          <span style={{ fontWeight: 400, color: "var(--text-3)", marginLeft: "6px" }}>last {days} days</span>
+          <span className="sentiment-chart-period">last {days} days</span>
         </span>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div className="sentiment-chart-meta">
           {trendConfig && (
-            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-              <trendConfig.Icon style={{ width: "12px", height: "12px", color: trendConfig.color }} />
-              <span style={{ fontSize: "var(--text-caption)", color: trendConfig.color, fontWeight: 600 }}>
+            <div className="sentiment-trend-indicator">
+              <trendConfig.Icon className="sentiment-trend-icon" style={{ color: trendConfig.color }} />
+              <span className="sentiment-trend-label" style={{ color: trendConfig.color }}>
                 {trendConfig.label}
               </span>
             </div>
           )}
           {/* Legend */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div className="sentiment-legend">
             {(["positive", "neutral", "negative"] as const).map(s => (
-              <div key={s} style={{ display: "flex", alignItems: "center", gap: "3px" }}>
-                <div style={{ width: "8px", height: "8px", borderRadius: "2px", background: COLORS[s] }} />
-                <span style={{ fontSize: "11px", color: "var(--text-3)", textTransform: "capitalize" }}>{s}</span>
+              <div key={s} className="sentiment-legend-item">
+                <div className="sentiment-legend-dot" style={{ background: COLORS[s] }} />
+                <span className="sentiment-legend-text">{s}</span>
               </div>
             ))}
           </div>
@@ -200,30 +169,18 @@ export function SentimentTrendChart({ personId, days = 60 }: SentimentTrendChart
 
       {/* Chart */}
       {totalEntries === 0 ? (
-        <div style={{ height: `${BAR_HEIGHT}px`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <span style={{ fontSize: "var(--text-caption)", color: "var(--text-3)" }}>
-            No evidence with sentiment tags in this period
-          </span>
+        <div className="sentiment-chart-empty" style={{ height: `${BAR_HEIGHT}px` }}>
+          <span className="text-caption text-3">No evidence with sentiment tags in this period</span>
         </div>
       ) : (
-        <div style={{ overflowX: "auto" }}>
-          <div style={{
-            display: "flex",
-            alignItems: "flex-end",
-            gap: `${BAR_GAP}px`,
-            minWidth: "fit-content",
-            paddingBottom: "4px",
-          }}>
+        <div className="sentiment-chart-body">
+          <div className="sentiment-bars" style={{ gap: `${BAR_GAP}px` }}>
             {buckets.map(b => (
               <StackedBar key={b.weekStart} bucket={b} maxTotal={maxTotal} />
             ))}
           </div>
           {/* X-axis labels — show every other week to avoid crowding */}
-          <div style={{
-            display: "flex",
-            gap: `${BAR_GAP}px`,
-            marginTop: "4px",
-          }}>
+          <div className="sentiment-x-labels" style={{ gap: `${BAR_GAP}px` }}>
             {buckets.map((b, i) => {
               const show = i === 0 || i === buckets.length - 1 || (buckets.length <= 8) || i % 2 === 0
               const label = show
@@ -232,15 +189,8 @@ export function SentimentTrendChart({ personId, days = 60 }: SentimentTrendChart
               return (
                 <div
                   key={b.weekStart}
-                  style={{
-                    width: `${BAR_WIDTH}px`,
-                    fontSize: "10px",
-                    color: "var(--text-3)",
-                    textAlign: "center",
-                    flexShrink: 0,
-                    overflow: "hidden",
-                    whiteSpace: "nowrap",
-                  }}
+                  className="sentiment-x-label"
+                  style={{ width: `${BAR_WIDTH}px` }}
                 >
                   {label}
                 </div>

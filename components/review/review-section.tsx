@@ -46,89 +46,45 @@ export function ReviewSection({
 }: ReviewSectionProps) {
   const [expanded, setExpanded] = useState(defaultExpanded)
 
-  const chevronStyle: React.CSSProperties = {
-    color: 'var(--text-3)',
-    flexShrink: 0,
-    transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)',
-    transition: 'transform 0.2s',
-    opacity: nonInteractiveHeader ? 0 : 1,
-  }
-
   return (
-    <div
-      style={{
-        background: 'var(--surf)',
-        border: `1px solid ${isReviewed ? '#1a3a25' : 'var(--border-1)'}`,
-        borderRadius: '8px',
-        overflow: 'hidden',
-        transition: 'border-color 0.2s',
-      }}
-    >
+    <div className={`review-section ${isReviewed ? "review-section--reviewed" : "review-section--default"}`}>
       {/* Header */}
       <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          padding: '12px 16px',
-          cursor: nonInteractiveHeader ? 'default' : 'pointer',
-          userSelect: 'none',
-        }}
+        className={`review-section-header ${nonInteractiveHeader ? "review-section-header--static" : "review-section-header--interactive"}`}
         onClick={() => { if (!nonInteractiveHeader) setExpanded(e => !e) }}
-        onMouseEnter={e => { if (!nonInteractiveHeader) (e.currentTarget as HTMLElement).style.background = 'var(--surf-2)' }}
-        onMouseLeave={e => { if (!nonInteractiveHeader) (e.currentTarget as HTMLElement).style.background = '' }}
       >
         {/* Chevron SVG */}
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={chevronStyle}>
+        <svg
+          width="12" height="12" viewBox="0 0 12 12" fill="none"
+          className="review-section-chevron"
+          style={{
+            transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)',
+            opacity: nonInteractiveHeader ? 0 : 1,
+          }}
+        >
           <path d="M4 2l4 4-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
 
         {/* Section icon */}
-        <span style={{ opacity: 0.6, flexShrink: 0, display: 'flex', alignItems: 'center' }}>
-          {icon}
-        </span>
+        <span className="review-section-icon">{icon}</span>
 
         {/* Title */}
-        <span style={{ flex: 1, fontSize: '13px', fontWeight: 500, color: 'var(--text-1)' }}>
-          {title}
-        </span>
+        <span className="review-section-title">{title}</span>
 
         {/* Badges */}
         {!isReviewed && (
-          <span style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+          <span className="review-section-badges">
             {criticalCount > 0 && (
-              <span style={{
-                fontSize: '10px', fontFamily: 'var(--font-mono)',
-                padding: '1px 6px', borderRadius: '8px',
-                background: '#1a0a0a', color: '#f87171',
-              }}>
-                {criticalCount} critical
-              </span>
+              <span className="review-badge review-badge--crit">{criticalCount} critical</span>
             )}
             {warningCount > 0 && (
-              <span style={{
-                fontSize: '10px', fontFamily: 'var(--font-mono)',
-                padding: '1px 6px', borderRadius: '8px',
-                background: '#1e0d00', color: '#f97316',
-              }}>
-                {warningCount} {warningCount === 1 ? 'warning' : 'warnings'}
-              </span>
+              <span className="review-badge review-badge--warn">{warningCount} {warningCount === 1 ? 'warning' : 'warnings'}</span>
             )}
             {infoCount > 0 && !criticalCount && !warningCount && (
-              <span style={{
-                fontSize: '10px', fontFamily: 'var(--font-mono)',
-                padding: '1px 6px', borderRadius: '8px',
-                background: '#0a1e28', color: '#60a5fa',
-              }}>
-                {infoCount} info
-              </span>
+              <span className="review-badge review-badge--info">{infoCount} info</span>
             )}
             {badgeLabel && badgeVariant && (
-              <span style={{
-                fontSize: '10px', fontFamily: 'var(--font-mono)',
-                padding: '1px 6px', borderRadius: '8px',
-                ...BADGE_STYLES[badgeVariant],
-              }}>
+              <span className="review-badge" style={BADGE_STYLES[badgeVariant]}>
                 {badgeLabel}
               </span>
             )}
@@ -136,22 +92,14 @@ export function ReviewSection({
         )}
 
         {isReviewed && (
-          <span style={{ fontSize: '11px', color: '#00f058', fontFamily: 'var(--font-mono)' }}>
-            ✓ Reviewed
-          </span>
+          <span className="review-done-label">✓ Reviewed</span>
         )}
 
         {/* Checkbox */}
         {showCheckbox && (
           <div
             onClick={e => { e.stopPropagation(); onMarkReviewed(!isReviewed) }}
-            style={{
-              width: '18px', height: '18px', borderRadius: '4px',
-              border: `1.5px solid ${isReviewed ? '#00f058' : 'var(--border-3)'}`,
-              background: isReviewed ? '#00f058' : 'transparent',
-              cursor: 'pointer', flexShrink: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}
+            className={`review-checkbox ${isReviewed ? "review-checkbox--checked" : "review-checkbox--unchecked"}`}
             title={isReviewed ? 'Unmark as reviewed' : 'Mark as reviewed'}
           >
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ opacity: isReviewed ? 1 : 0 }}>
@@ -163,12 +111,9 @@ export function ReviewSection({
 
       {/* Body */}
       {expanded && (
-        <div style={{
-          borderTop: '1px solid var(--border-1)',
-          padding: signalCount === 0 && !children ? '14px 16px' : '0',
-        }}>
+        <div className={`review-section-body ${signalCount === 0 && !children ? "review-section-body--empty" : ""}`}>
           {signalCount === 0 && !children ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#00f058', fontSize: '12px' }}>
+            <div className="review-empty-state">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.2" />
                 <path d="M4.5 7l2 2 3-4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />

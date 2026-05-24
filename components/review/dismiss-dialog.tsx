@@ -12,37 +12,12 @@ export function DismissDialog({ onConfirm, onCancel }: DismissDialogProps) {
   const [note, setNote] = useState('')
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,0.6)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-      }}
-      onClick={onCancel}
-    >
-      <div
-        style={{
-          background: 'var(--surf-2)',
-          border: '1px solid var(--border-2)',
-          borderRadius: '8px',
-          padding: '20px',
-          width: '360px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '12px',
-        }}
-        onClick={e => e.stopPropagation()}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: 'var(--text-body)', fontWeight: 600, color: 'var(--text-1)' }}>
-            Dismiss item
-          </span>
-          <button onClick={onCancel} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', display: 'flex' }}>
-            <X style={{ width: '14px', height: '14px' }} />
+    <div className="modal-overlay" onClick={onCancel}>
+      <div className="modal-box modal-box--dismiss" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <span className="modal-title">Dismiss item</span>
+          <button onClick={onCancel} className="modal-close-btn">
+            <X />
           </button>
         </div>
 
@@ -51,24 +26,14 @@ export function DismissDialog({ onConfirm, onCancel }: DismissDialogProps) {
           onChange={e => setNote(e.target.value)}
           placeholder="Optional: why are you dismissing this? (e.g. on holiday this week)"
           rows={3}
-          style={{
-            background: 'var(--surf-3)',
-            border: '1px solid var(--border-2)',
-            borderRadius: '4px',
-            color: 'var(--text-1)',
-            fontSize: 'var(--text-meta)',
-            padding: '8px 10px',
-            resize: 'none',
-            fontFamily: 'var(--font-sans)',
-            outline: 'none',
-          }}
+          className="modal-textarea"
         />
 
-        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-          <button onClick={onCancel} className="btn-ghost" style={{ padding: '6px 12px' }}>
+        <div className="modal-footer">
+          <button onClick={onCancel} className="btn-ghost btn--padded">
             Cancel
           </button>
-          <button onClick={() => onConfirm(note)} className="btn-primary" style={{ padding: '6px 12px' }}>
+          <button onClick={() => onConfirm(note)} className="btn-primary btn--padded">
             Dismiss
           </button>
         </div>

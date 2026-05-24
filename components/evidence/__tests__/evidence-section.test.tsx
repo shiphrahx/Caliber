@@ -142,7 +142,7 @@ describe('EvidenceSection', () => {
     render(<EvidenceSection personId="person-1" personName="Alice Smith" />)
     const user = userEvent.setup()
     await waitFor(() => screen.getByText('Shipped new feature'))
-    await user.click(screen.getByText('Shipped new feature').closest('div[style]')!)
+    await user.click(screen.getByTestId('evidence-entry-row'))
     await waitFor(() => {
       expect(screen.getByText('Delivered ahead of schedule')).toBeInTheDocument()
     })
@@ -154,8 +154,10 @@ describe('EvidenceSection', () => {
     const user = userEvent.setup()
     await waitFor(() => screen.getByText('Shipped new feature'))
     // Expand the entry first
-    await user.click(screen.getByText('Shipped new feature').closest('div[style]')!)
-    await waitFor(() => screen.getByRole('button', { name: /Delete/i }))
+    await user.click(screen.getByTestId('evidence-entry-row'))
+    await waitFor(() => {
+      expect(screen.getByText('Delivered ahead of schedule')).toBeInTheDocument()
+    })
     await user.click(screen.getByRole('button', { name: /Delete/i }))
     await waitFor(() => {
       expect(deleteEvidence).toHaveBeenCalledWith('ev-1')
@@ -176,9 +178,7 @@ describe('EvidenceSection', () => {
     vi.mocked(getEvidenceForPerson).mockResolvedValue([entryWithMeeting])
     render(<EvidenceSection personId="person-1" personName="Alice Smith" />)
     await waitFor(() => {
-      // Link2 icon rendered on the row
-      const row = screen.getByText('Shipped new feature').closest('div[style]')!
-      expect(row).toBeInTheDocument()
+      expect(screen.getByTitle('Linked to meeting: 1:1 with Alice')).toBeInTheDocument()
     })
   })
 })

@@ -37,14 +37,8 @@ export function DraggableTableRow({ task, children, onDoubleClick }: DraggableTa
   if (isDragging) {
     return (
       <tr ref={setNodeRef} style={style} {...attributes}>
-        <td colSpan={7} style={{ padding: "6px 12px" }}>
-          <div style={{
-            height: "32px",
-            border: "1px dashed var(--border-2)",
-            borderRadius: "4px",
-            background: "var(--surf-2)",
-            opacity: 0.5,
-          }} />
+        <td colSpan={7} className="drag-placeholder-td">
+          <div className="drag-placeholder-row" />
         </td>
       </tr>
     )
@@ -66,10 +60,10 @@ export function DraggableTableRow({ task, children, onDoubleClick }: DraggableTa
   return (
     <tr
       ref={setNodeRef}
-      style={{ ...style, borderBottom: "1px solid var(--border-1)" }}
+      style={style}
       {...attributes}
       onDoubleClick={onDoubleClick}
-      className="group transition-colors cursor-pointer"
+      className="draggable-row group transition-colors cursor-pointer"
       onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "var(--surf-2)")}
       onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "transparent")}
     >

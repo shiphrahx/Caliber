@@ -36,13 +36,7 @@ export function DraggableTaskCard({ task, onEdit, onDelete }: DraggableTaskCardP
   if (isDragging) {
     return (
       <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-        <div style={{
-          height: "80px",
-          border: "1px dashed var(--border-2)",
-          borderRadius: "6px",
-          background: "var(--surf-2)",
-          opacity: 0.5,
-        }} />
+        <div className="drag-placeholder-card" />
       </div>
     )
   }

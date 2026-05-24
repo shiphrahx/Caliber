@@ -34,10 +34,10 @@ import { REFLECTION_PROMPTS_SYSTEM } from '@/lib/ai/prompts'
 function severityDot(severity: SignalSeverity) {
   const color = severity === 'critical' ? '#f87171' : severity === 'warning' ? '#f97316' : '#60a5fa'
   return (
-    <span style={{
-      width: '7px', height: '7px', borderRadius: '50%',
-      background: color, flexShrink: 0, display: 'inline-block', marginTop: '5px',
-    }} />
+    <span
+      className="wr-severity-dot"
+      style={{ width: '7px', height: '7px', background: color }}
+    />
   )
 }
 
@@ -51,11 +51,7 @@ function priorityBadge(priority: string | undefined | null) {
   }
   const s = styles[priority] ?? styles['Medium']
   return (
-    <span style={{
-      fontSize: '9px', padding: '1px 5px', borderRadius: '3px',
-      background: s.bg, color: s.color, fontFamily: 'var(--font-mono)',
-      flexShrink: 0,
-    }}>
+    <span className="wr-priority-badge" style={{ background: s.bg, color: s.color }}>
       {priority}
     </span>
   )
@@ -88,7 +84,7 @@ function Btn({
 
   let style: React.CSSProperties = { ...base }
   if (variant === 'primary') {
-    style = { ...base, border: `1px solid ${hovered ? '#00f058' : '#00f058'}`, color: '#00f058', background: hovered ? '#0a1e0a' : 'transparent' }
+    style = { ...base, border: `1px solid #00f058`, color: '#00f058', background: hovered ? '#0a1e0a' : 'transparent' }
   } else if (variant === 'dismiss') {
     style = { ...base, border: '1px solid transparent', color: hovered ? 'var(--text-2)' : 'var(--text-3)' }
   } else {
@@ -120,30 +116,23 @@ function SignalRow({
 }) {
   return (
     <div
-      style={{
-        display: 'flex', alignItems: 'flex-start', gap: '10px',
-        padding: '10px 16px', borderBottom: '1px solid var(--border-1)',
-      }}
+      className="wr-signal-row"
       onMouseEnter={e => (e.currentTarget.style.background = 'var(--surf-2)')}
       onMouseLeave={e => (e.currentTarget.style.background = '')}
     >
       {severityDot(signal.severity)}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '12px', color: 'var(--text-1)' }}>{signal.message}</span>
+      <div className="wr-signal-content">
+        <div className="wr-signal-msg-row">
+          <span className="wr-signal-msg">{signal.message}</span>
           {signal.meta?.isNewHire === true && (
-            <span style={{ fontSize: '10px', fontWeight: 600, padding: '1px 5px', borderRadius: '3px', background: 'rgba(0,240,88,0.12)', color: '#00f058', border: '1px solid rgba(0,240,88,0.3)', whiteSpace: 'nowrap' }}>
-              New hire
-            </span>
+            <span className="wr-signal-new-hire">New hire</span>
           )}
         </div>
         {typeof signal.meta?.subtitle === 'string' && signal.meta.subtitle && (
-          <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '1px' }}>
-            {signal.meta.subtitle}
-          </div>
+          <div className="wr-signal-subtitle">{signal.meta.subtitle}</div>
         )}
       </div>
-      <div style={{ display: 'flex', gap: '4px', flexShrink: 0, alignItems: 'flex-start' }}>
+      <div className="wr-signal-btns">
         {actions}
         <Btn variant="dismiss" onClick={() => onDismiss(signal)}>Dismiss</Btn>
       </div>
@@ -390,7 +379,6 @@ export default function WeeklyReviewPage() {
   const upcomingSignals = taskSignals.filter(s => s.type === 'upcoming_deadline')
   const goalSignals = signals.filter(s => s.type === 'stale_goal')
 
-  // Sections auto-check when all their signals are cleared
   const effectiveSectionState = {
     people:     peopleSignals.length === 0 || sectionState.people,
     actions:    actionSignals.length === 0  || sectionState.actions,
@@ -400,7 +388,6 @@ export default function WeeklyReviewPage() {
     reflection: sectionState.reflection,
   }
 
-  // Progress = completed sections / 5 (week excluded — no action items)
   const PROGRESS_SECTIONS = ['people', 'actions', 'tasks', 'goals', 'reflection'] as const
   const reviewedCount = PROGRESS_SECTIONS.filter(k => effectiveSectionState[k]).length
   const progressPct = Math.round((reviewedCount / PROGRESS_SECTIONS.length) * 100)
@@ -411,23 +398,8 @@ export default function WeeklyReviewPage() {
   const warnCount = signals.filter(s => s.severity === 'critical' || s.severity === 'warning').length
 
   const topbar = (
-    /* Sticky topbar — title only, status badge on right */
-    <div style={{
-      background: 'var(--surf)',
-      borderBottom: '1px solid var(--border-1)',
-      height: '40px',
-      padding: '0 16px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      position: 'sticky',
-      top: 0,
-      zIndex: 10,
-      flexShrink: 0,
-    }}>
-      <span style={{ fontSize: 'var(--text-label)', fontWeight: 500, color: 'var(--text-1)', fontFamily: 'var(--font-sans)' }}>
-        Weekly Review
-      </span>
+    <div className="wr-topbar">
+      <span className="wr-topbar-title">Weekly Review</span>
     </div>
   )
 
@@ -435,9 +407,7 @@ export default function WeeklyReviewPage() {
     return (
       <>
         {topbar}
-        <div style={{ padding: '32px', color: 'var(--text-2)', fontSize: '12px' }}>
-          Loading weekly review...
-        </div>
+        <div className="wr-loading">Loading weekly review...</div>
       </>
     )
   }
@@ -445,584 +415,492 @@ export default function WeeklyReviewPage() {
   return (
     <>
       {topbar}
-      <div style={{ padding: '16px' }}>
+      <div className="wr-content">
 
-      {/* h1 + week nav */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: 500, margin: 0, color: 'var(--text-1)' }}>Weekly Review</h1>
-        <div style={{ display: 'flex', gap: '4px' }}>
-          <button
-            onClick={goToPrevWeek}
-            style={{ width: '26px', height: '26px', background: 'transparent', border: '1px solid var(--border-2)', color: 'var(--text-2)', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--border-3)'; e.currentTarget.style.color = 'var(--text-1)' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-2)'; e.currentTarget.style.color = 'var(--text-2)' }}
-          >
-            <ChevronLeft style={{ width: '13px', height: '13px' }} />
-          </button>
-          {!isCurrentWeek && (
-            <button
-              onClick={goToCurrentWeek}
-              style={{ height: '26px', padding: '0 8px', background: 'transparent', border: '1px solid var(--border-2)', color: 'var(--text-2)', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', fontFamily: 'var(--font-sans)' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--border-3)'; e.currentTarget.style.color = 'var(--text-1)' }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-2)'; e.currentTarget.style.color = 'var(--text-2)' }}
-            >
-              This week
+        {/* h1 + week nav */}
+        <div className="wr-title-row">
+          <h1 className="wr-title">Weekly Review</h1>
+          <div className="wr-nav-btns">
+            <button onClick={goToPrevWeek} className="wr-nav-btn">
+              <ChevronLeft style={{ width: '13px', height: '13px' }} />
             </button>
-          )}
-          <button
-            onClick={goToNextWeek}
-            style={{ width: '26px', height: '26px', background: 'transparent', border: '1px solid var(--border-2)', color: 'var(--text-2)', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--border-3)'; e.currentTarget.style.color = 'var(--text-1)' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-2)'; e.currentTarget.style.color = 'var(--text-2)' }}
-          >
-            <ChevronRight style={{ width: '13px', height: '13px' }} />
-          </button>
+            {!isCurrentWeek && (
+              <button onClick={goToCurrentWeek} className="wr-nav-btn-week">
+                This week
+              </button>
+            )}
+            <button onClick={goToNextWeek} className="wr-nav-btn">
+              <ChevronRight style={{ width: '13px', height: '13px' }} />
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Date range + status badge */}
-      <div style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '20px', display: 'flex', alignItems: 'center' }}>
-        {formatWeekRange(weekStart)}
-        <span style={{
-          display: 'inline-flex', alignItems: 'center', gap: '4px',
-          fontSize: '10px', padding: '2px 8px', borderRadius: '10px',
-          marginLeft: '10px', fontFamily: 'var(--font-mono)',
-          ...(isCompleted ? { background: '#0a1e0a', color: '#00f058' } : { background: '#0a1e28', color: '#60a5fa' }),
-        }}>
-          {isCompleted ? '✓ Completed' : '◎ In Progress'}
-        </span>
-        {isCompleted && review?.completedAt && (
-          <span style={{ marginLeft: '12px', fontSize: '11px', color: 'var(--text-3)' }}>
-            {new Date(review.completedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+        {/* Date range + status badge */}
+        <div className="wr-meta-row">
+          {formatWeekRange(weekStart)}
+          <span className={`wr-status-badge ${isCompleted ? 'wr-status-completed' : 'wr-status-progress'}`}>
+            {isCompleted ? '✓ Completed' : '◎ In Progress'}
           </span>
+          {isCompleted && review?.completedAt && (
+            <span className="wr-completed-at">
+              {new Date(review.completedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+            </span>
+          )}
+        </div>
+
+        {/* Progress bar */}
+        {isCurrentWeek && (
+          <div className="wr-progress-bar">
+            <div className="wr-progress-fill" style={{ width: `${progressPct}%` }} />
+          </div>
         )}
-      </div>
 
-      {/* Progress bar */}
-      {isCurrentWeek && (
-        <div style={{ height: '3px', background: 'var(--border-1)', borderRadius: '2px', marginBottom: '24px', overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: `${progressPct}%`, background: 'linear-gradient(90deg, #00ffe5, #00f058)', borderRadius: '2px', transition: 'width 0.4s ease' }} />
-        </div>
-      )}
+        {/* Past week — no review */}
+        {!isCurrentWeek && !review && (
+          <p className="wr-no-review">No review was recorded for this week.</p>
+        )}
 
-      {/* Past week — no review */}
-      {!isCurrentWeek && !review && (
-        <p style={{ fontSize: '12px', color: 'var(--text-3)' }}>
-          No review was recorded for this week.
-        </p>
-      )}
-
-      {/* Snapshot for past completed reviews */}
-      {isReadOnly && review?.snapshot && (
-        <div style={{
-          background: 'var(--surf)', border: '1px solid var(--border-1)',
-          borderRadius: '8px', padding: '16px', marginBottom: '20px',
-          display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px',
-        }}>
-          {[
-            { label: 'Overdue tasks', value: review.snapshot.overdueTasks },
-            { label: 'No recent 1:1', value: review.snapshot.noRecent1on1 },
-            { label: 'Unresolved actions', value: review.snapshot.unresolvedActions },
-            { label: 'No evidence', value: review.snapshot.noEvidence },
-            { label: 'Upcoming deadlines', value: review.snapshot.upcomingDeadlines },
-            { label: 'Missing notes', value: review.snapshot.missingNotes },
-          ].map(stat => (
-            <div key={stat.label}>
-              <div style={{ fontSize: '10px', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '2px' }}>
-                {stat.label}
+        {/* Snapshot for past completed reviews */}
+        {isReadOnly && review?.snapshot && (
+          <div className="wr-snapshot">
+            {[
+              { label: 'Overdue tasks', value: review.snapshot.overdueTasks },
+              { label: 'No recent 1:1', value: review.snapshot.noRecent1on1 },
+              { label: 'Unresolved actions', value: review.snapshot.unresolvedActions },
+              { label: 'No evidence', value: review.snapshot.noEvidence },
+              { label: 'Upcoming deadlines', value: review.snapshot.upcomingDeadlines },
+              { label: 'Missing notes', value: review.snapshot.missingNotes },
+            ].map(stat => (
+              <div key={stat.label}>
+                <div className="wr-snapshot-stat-label">{stat.label}</div>
+                <div className="wr-snapshot-stat-val">{stat.value}</div>
               </div>
-              <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-1)' }}>{stat.value}</div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
 
-      {(review || isCurrentWeek) && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {(review || isCurrentWeek) && (
+          <div className="wr-sections">
 
-          {/* Section 1: People Check */}
-          <ReviewSection
-            title="People Check"
-            icon={ICON_PEOPLE}
-            signalCount={isReadOnly ? 0 : peopleSignals.length}
-            criticalCount={isReadOnly ? 0 : peopleSignals.filter(s => s.severity === 'critical').length}
-            warningCount={isReadOnly ? 0 : peopleSignals.filter(s => s.severity === 'warning').length}
-            infoCount={isReadOnly ? 0 : peopleSignals.filter(s => s.severity === 'info').length}
-            isReviewed={effectiveSectionState.people}
-            onMarkReviewed={() => toggleSection('people')}
-            emptyMessage="All clear — everyone has been seen recently"
-          >
-            {!isReadOnly ? (() => {
-              const byPerson: Record<string, { name: string; id: string; signals: ReviewSignal[] }> = {}
-              for (const s of peopleSignals) {
-                if (!s.personId) continue
-                if (!byPerson[s.personId]) byPerson[s.personId] = { name: s.personName ?? s.personId, id: s.personId, signals: [] }
-                byPerson[s.personId].signals.push(s)
-              }
-              return (
-                <>
-                  {Object.entries(byPerson).map(([personId, { name, signals: pSignals }]) => (
-                    <div key={personId}>
-                      {/* Person sub-header */}
-                      <div style={{
-                        display: 'flex', alignItems: 'center', gap: '8px',
-                        padding: '7px 16px', background: 'var(--surf-2)',
-                        borderBottom: '1px solid var(--border-1)',
-                      }}>
-                        <User style={{ width: '11px', height: '11px', color: 'var(--text-3)', flexShrink: 0 }} />
-                        <Link
-                          href={`/people/${personId}`}
-                          style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-1)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
-                        >
-                          {name}
-                          <ExternalLink style={{ width: '9px', height: '9px', color: 'var(--text-3)' }} />
-                        </Link>
-                      </div>
-                      {/* Per-signal rows with own actions */}
-                      {pSignals.map((s, i) => {
-                        const lastDate = s.meta?.lastDate ? formatDate(s.meta.lastDate as string) : null
-                        const subtitle = s.type === 'no_recent_1on1'
-                          ? [lastDate ? `Last 1:1: ${lastDate}` : 'No 1:1 on record'].filter(Boolean).join(' · ')
-                          : s.type === 'no_evidence'
-                          ? 'No evidence in 90 days'
-                          : s.type === 'missing_notes'
-                          ? 'No meeting notes in 21 days'
-                          : null
-                        const signalWithSubtitle = subtitle ? { ...s, meta: { ...s.meta, subtitle } } : s
-                        return (
-                          <SignalRow
-                            key={i}
-                            signal={signalWithSubtitle}
-                            onDismiss={setDismissTarget}
-                            actions={
-                              <div style={{ display: 'flex', gap: '4px' }}>
-                                {(s.type === 'no_recent_1on1') && (
-                                  <>
-                                    <Btn variant="primary" onClick={() => router.push(`/meetings?new=1&type=1:1&personId=${personId}`)}>
-                                      Schedule 1:1
-                                    </Btn>
-                                    <Btn onClick={() => router.push(`/evidence?new=1&personId=${personId}`)}>
-                                      Log note
-                                    </Btn>
-                                  </>
-                                )}
-                                {s.type === 'no_evidence' && (
-                                  <Btn variant="primary" onClick={() => router.push(`/evidence?new=1&personId=${personId}`)}>
-                                    Log evidence
-                                  </Btn>
-                                )}
-                                {s.type === 'missing_notes' && (
-                                  <Btn variant="primary" onClick={() => router.push(`/evidence?new=1&personId=${personId}`)}>
-                                    Log note
-                                  </Btn>
-                                )}
-                              </div>
-                            }
-                          />
-                        )
-                      })}
-                    </div>
-                  ))}
-                </>
-              )
-            })() : null}
-          </ReviewSection>
-
-          {/* Section 2: Action Items & Follow-ups */}
-          <ReviewSection
-            title="Action Items & Follow-ups"
-            icon={ICON_ACTIONS}
-            signalCount={isReadOnly ? 0 : actionSignals.length}
-            criticalCount={isReadOnly ? 0 : actionSignals.filter(s => s.severity === 'critical').length}
-            warningCount={isReadOnly ? 0 : actionSignals.filter(s => s.severity === 'warning').length}
-            infoCount={isReadOnly ? 0 : actionSignals.filter(s => s.severity === 'info').length}
-            isReviewed={effectiveSectionState.actions}
-            onMarkReviewed={() => toggleSection('actions')}
-            emptyMessage="All action items resolved"
-          >
-            {!isReadOnly ? (
-              <>
-                {actionSignals.map((s, i) => {
-                  const daysAgo = s.meta?.daysAgo as number | undefined
-                  const meetingTitle = s.meta?.meetingTitle as string | undefined
-                  const subtitle = [
-                    meetingTitle ? `From: ${meetingTitle}` : null,
-                    daysAgo != null ? `${daysAgo} days ago` : null,
-                  ].filter(Boolean).join(' · ')
-                  const signalWithSubtitle = { ...s, meta: { ...s.meta, subtitle } }
-                  return (
-                    <SignalRow
-                      key={i}
-                      signal={signalWithSubtitle}
-                      onDismiss={setDismissTarget}
-                      actions={
-                        <div style={{ display: 'flex', gap: '4px' }}>
-                          {Boolean(s.meta?.taskId) && (
-                            <Btn variant="primary" onClick={() => handleMarkTaskDone(s.meta!.taskId as string)}>
-                              Mark done
-                            </Btn>
-                          )}
-                          <Link href={`/meetings/${s.entityId}`} style={{ textDecoration: 'none' }}>
-                            <Btn>View meeting</Btn>
+            {/* Section 1: People Check */}
+            <ReviewSection
+              title="People Check"
+              icon={ICON_PEOPLE}
+              signalCount={isReadOnly ? 0 : peopleSignals.length}
+              criticalCount={isReadOnly ? 0 : peopleSignals.filter(s => s.severity === 'critical').length}
+              warningCount={isReadOnly ? 0 : peopleSignals.filter(s => s.severity === 'warning').length}
+              infoCount={isReadOnly ? 0 : peopleSignals.filter(s => s.severity === 'info').length}
+              isReviewed={effectiveSectionState.people}
+              onMarkReviewed={() => toggleSection('people')}
+              emptyMessage="All clear — everyone has been seen recently"
+            >
+              {!isReadOnly ? (() => {
+                const byPerson: Record<string, { name: string; id: string; signals: ReviewSignal[] }> = {}
+                for (const s of peopleSignals) {
+                  if (!s.personId) continue
+                  if (!byPerson[s.personId]) byPerson[s.personId] = { name: s.personName ?? s.personId, id: s.personId, signals: [] }
+                  byPerson[s.personId].signals.push(s)
+                }
+                return (
+                  <>
+                    {Object.entries(byPerson).map(([personId, { name, signals: pSignals }]) => (
+                      <div key={personId}>
+                        <div className="wr-person-subheader">
+                          <User style={{ width: '11px', height: '11px', color: 'var(--text-3)', flexShrink: 0 }} />
+                          <Link href={`/people/${personId}`} className="wr-person-link">
+                            {name}
+                            <ExternalLink style={{ width: '9px', height: '9px', color: 'var(--text-3)' }} />
                           </Link>
                         </div>
-                      }
-                    />
-                  )
-                })}
-              </>
-            ) : null}
-          </ReviewSection>
-
-          {/* Section 3: Tasks & Deadlines */}
-          <ReviewSection
-            title="Tasks & Deadlines"
-            icon={ICON_TASKS}
-            signalCount={isReadOnly ? 0 : taskSignals.length}
-            criticalCount={isReadOnly ? 0 : overdueSignals.filter(s => s.severity === 'critical').length}
-            warningCount={isReadOnly ? 0 : overdueSignals.filter(s => s.severity === 'warning').length}
-            infoCount={isReadOnly ? 0 : upcomingSignals.length}
-            isReviewed={effectiveSectionState.tasks}
-            onMarkReviewed={() => toggleSection('tasks')}
-            emptyMessage="No overdue tasks and no deadlines this week"
-          >
-            {!isReadOnly ? (
-              <>
-                {/* Overdue label only when both groups exist */}
-                {overdueSignals.length > 0 && upcomingSignals.length > 0 && (
-                  <div style={{ padding: '8px 16px', borderBottom: '1px solid var(--border-1)' }}>
-                    <span style={{ fontSize: '10px', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      Overdue
-                    </span>
-                  </div>
-                )}
-                {overdueSignals.map((s, i) => {
-                  const daysOverdue = s.meta?.daysOverdue as number | undefined
-                  const dueDate = s.meta?.dueDate as string | undefined
-                  const priority = s.meta?.priority as string | undefined
-                  const subtitle = [
-                    dueDate ? `Due ${formatDate(dueDate)}` : null,
-                    daysOverdue != null ? `${daysOverdue} day${daysOverdue === 1 ? '' : 's'} overdue` : null,
-                  ].filter(Boolean).join(' · ')
-                  const taskTitle = (s.meta?.title as string | undefined) ?? s.message.replace(/^"|".*$/g, '').trim()
-                  return (
-                    <div
-                      key={i}
-                      style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '10px 16px', borderBottom: '1px solid var(--border-1)' }}
-                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--surf-2)')}
-                      onMouseLeave={e => (e.currentTarget.style.background = '')}
-                    >
-                      {severityDot(s.severity)}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '12px', color: 'var(--text-1)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          {taskTitle}{priorityBadge(priority)}
-                        </div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '1px' }}>{subtitle}</div>
-                      </div>
-                      <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
-                        <Btn variant="primary" onClick={() => handleMarkTaskDone(s.entityId)}>Mark done</Btn>
-                        <Btn onClick={() => handleMoveTaskNextWeek(s.entityId, s.meta?.dueDate as string)}>+7 days</Btn>
-                        <Btn variant="dismiss" onClick={() => setDismissTarget(s)}>Dismiss</Btn>
-                      </div>
-                    </div>
-                  )
-                })}
-
-                {/* Due this week divider */}
-                {upcomingSignals.length > 0 && (
-                  <div style={{ padding: '8px 16px', borderBottom: '1px solid var(--border-1)' }}>
-                    <span style={{ fontSize: '10px', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      Due this week
-                    </span>
-                  </div>
-                )}
-                {upcomingSignals.map((s, i) => {
-                  const dueDate = s.meta?.dueDate as string | undefined
-                  const priority = s.meta?.priority as string | undefined
-                  const subtitle = [
-                    dueDate ? `Due ${formatDate(dueDate)}` : null,
-                    dueDate ? formatDayName(dueDate) : null,
-                  ].filter(Boolean).join(' · ')
-                  const taskTitle = s.message.match(/"([^"]+)"/)?.[1] ?? s.message
-                  return (
-                    <div
-                      key={i}
-                      style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '10px 16px', borderBottom: i < upcomingSignals.length - 1 ? '1px solid var(--border-1)' : 'none' }}
-                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--surf-2)')}
-                      onMouseLeave={e => (e.currentTarget.style.background = '')}
-                    >
-                      {severityDot('info')}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '12px', color: 'var(--text-1)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          {taskTitle}{priorityBadge(priority)}
-                        </div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '1px' }}>{subtitle}</div>
-                      </div>
-                      <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
-                        <Btn variant="primary" onClick={() => handleMarkTaskDone(s.entityId)}>Mark done</Btn>
-                        <Btn variant="dismiss" onClick={() => setDismissTarget(s)}>Dismiss</Btn>
-                      </div>
-                    </div>
-                  )
-                })}
-              </>
-            ) : null}
-          </ReviewSection>
-
-          {/* Section 4: Career Goal Staleness */}
-          <ReviewSection
-            title="Career Goal Staleness"
-            icon={ICON_GOALS}
-            signalCount={isReadOnly ? 0 : goalSignals.length}
-            criticalCount={isReadOnly ? 0 : goalSignals.filter(s => s.severity === 'critical').length}
-            warningCount={isReadOnly ? 0 : goalSignals.filter(s => s.severity === 'warning').length}
-            infoCount={isReadOnly ? 0 : goalSignals.filter(s => s.severity === 'info').length}
-            isReviewed={effectiveSectionState.goals}
-            onMarkReviewed={() => toggleSection('goals')}
-            emptyMessage="All career goals have recent activity"
-          >
-            {!isReadOnly && goalSignals.length > 0 ? (
-              <>
-                {goalSignals.map((s, i) => {
-                  const daysSince = s.meta?.daysSince as number | undefined
-                  const timePeriod = s.meta?.timePeriod as string | undefined
-                  const periodLabel =
-                    timePeriod === 'short_term' ? 'Short-term'
-                    : timePeriod === 'mid_term' ? 'Mid-term'
-                    : timePeriod === 'long_term' ? 'Long-term'
-                    : null
-                  const subtitle = [
-                    periodLabel,
-                    daysSince != null ? `No activity in ${daysSince} day${daysSince === 1 ? '' : 's'}` : null,
-                  ].filter(Boolean).join(' · ')
-                  const goalTitle = s.message.match(/"([^"]+)"/)?.[1] ?? s.message
-                  return (
-                    <div
-                      key={i}
-                      style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '10px 16px', borderBottom: i < goalSignals.length - 1 ? '1px solid var(--border-1)' : 'none' }}
-                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--surf-2)')}
-                      onMouseLeave={e => (e.currentTarget.style.background = '')}
-                    >
-                      {severityDot(s.severity)}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '12px', color: 'var(--text-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {goalTitle}
-                        </div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '1px' }}>{subtitle}</div>
-                      </div>
-                      <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
-                        <Btn variant="primary" onClick={() => router.push('/career-goals')}>
-                          Update goal
-                        </Btn>
-                        <Btn variant="dismiss" onClick={() => setDismissTarget(s)}>Dismiss</Btn>
-                      </div>
-                    </div>
-                  )
-                })}
-              </>
-            ) : null}
-          </ReviewSection>
-
-          {/* Section 5: Week in Review */}
-          <ReviewSection
-            title="Week in Review"
-            icon={ICON_WEEK}
-            signalCount={1}
-            badgeLabel="Summary"
-            badgeVariant="info"
-            isReviewed={effectiveSectionState.week}
-            onMarkReviewed={() => toggleSection('week')}
-            defaultExpanded={false}
-          >
-            {activitySummary ? (
-              <div style={{
-                display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
-                gap: '1px', background: 'var(--border-1)',
-              }}>
-                {[
-                  { num: activitySummary.meetingsHeld.length, label: 'Meetings held' },
-                  { num: activitySummary.tasksCompleted.length, label: 'Tasks completed' },
-                  { num: activitySummary.evidenceLogged, label: 'Evidence logged' },
-                  { num: activitySummary.actionItemsCreated, label: 'Action items' },
-                ].map(cell => (
-                  <div key={cell.label} style={{ background: 'var(--surf)', padding: '14px 16px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '22px', fontWeight: 500, fontFamily: 'var(--font-mono)', color: 'var(--text-1)' }}>
-                      {cell.num}
-                    </div>
-                    <div style={{ fontSize: '10px', color: 'var(--text-3)', marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      {cell.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div style={{ padding: '16px', fontSize: '12px', color: 'var(--text-3)' }}>Loading…</div>
-            )}
-          </ReviewSection>
-
-          {/* Section 6: Reflection */}
-          <ReviewSection
-            title="Reflection"
-            icon={ICON_REFLECTION}
-            signalCount={1}
-            isReviewed={effectiveSectionState.reflection}
-            onMarkReviewed={() => toggleSection('reflection')}
-          >
-            <div style={{ padding: '16px' }}>
-              {/* AI reflection prompts */}
-              <div style={{ marginBottom: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: reflectionPrompts.length > 0 ? '10px' : 0 }}>
-                  <AIButton
-                    configured={aiConfig.configured}
-                    loading={aiConfig.loading}
-                    generating={generatingPrompts}
-                    onClick={handleGenerateReflectionPrompts}
-                    label="Generate reflection prompts"
-                    tooltip={aiConfig.tooltip}
-                    showSetupLink={true}
-                    disabled={isReadOnly}
-                  />
-                  {reflectionPrompts.length > 0 && (
-                    <button
-                      onClick={() => setReflectionPrompts([])}
-                      style={{ fontSize: '11px', color: 'var(--text-3)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-                    >
-                      ✕ Clear
-                    </button>
-                  )}
-                </div>
-                {reflectionPrompts.length > 0 && (
-                  <div style={{ display: 'grid', gap: '6px', marginBottom: '12px' }}>
-                    {reflectionPrompts.map((prompt, i) => (
-                      <div key={i} style={{
-                        display: 'flex', alignItems: 'flex-start', gap: '8px',
-                        padding: '8px 12px', background: 'var(--surf-2)',
-                        border: '1px solid var(--border-1)', borderRadius: '5px',
-                      }}>
-                        <span style={{ fontSize: '11px', color: '#00f058', flexShrink: 0, marginTop: '1px' }}>✦</span>
-                        <span style={{ fontSize: '12px', color: 'var(--text-2)', lineHeight: 1.5, fontStyle: 'italic' }}>{prompt}</span>
+                        {pSignals.map((s, i) => {
+                          const lastDate = s.meta?.lastDate ? formatDate(s.meta.lastDate as string) : null
+                          const subtitle = s.type === 'no_recent_1on1'
+                            ? [lastDate ? `Last 1:1: ${lastDate}` : 'No 1:1 on record'].filter(Boolean).join(' · ')
+                            : s.type === 'no_evidence'
+                            ? 'No evidence in 90 days'
+                            : s.type === 'missing_notes'
+                            ? 'No meeting notes in 21 days'
+                            : null
+                          const signalWithSubtitle = subtitle ? { ...s, meta: { ...s.meta, subtitle } } : s
+                          return (
+                            <SignalRow
+                              key={i}
+                              signal={signalWithSubtitle}
+                              onDismiss={setDismissTarget}
+                              actions={
+                                <div className="wr-signal-actions">
+                                  {(s.type === 'no_recent_1on1') && (
+                                    <>
+                                      <Btn variant="primary" onClick={() => router.push(`/meetings?new=1&type=1:1&personId=${personId}`)}>
+                                        Schedule 1:1
+                                      </Btn>
+                                      <Btn onClick={() => router.push(`/evidence?new=1&personId=${personId}`)}>
+                                        Log note
+                                      </Btn>
+                                    </>
+                                  )}
+                                  {s.type === 'no_evidence' && (
+                                    <Btn variant="primary" onClick={() => router.push(`/evidence?new=1&personId=${personId}`)}>
+                                      Log evidence
+                                    </Btn>
+                                  )}
+                                  {s.type === 'missing_notes' && (
+                                    <Btn variant="primary" onClick={() => router.push(`/evidence?new=1&personId=${personId}`)}>
+                                      Log note
+                                    </Btn>
+                                  )}
+                                </div>
+                              }
+                            />
+                          )
+                        })}
                       </div>
                     ))}
-                  </div>
-                )}
-                {reflectionPrompts.length === 0 && (
-                  <p style={{ fontSize: '11px', color: 'var(--text-3)', fontStyle: 'italic', marginBottom: '10px', lineHeight: 1.6 }}>
-                    "Take a moment to reflect on your week. What patterns are you noticing?"
-                  </p>
-                )}
-              </div>
-              <textarea
-                value={notes}
-                onChange={e => handleNotesChange(e.target.value)}
-                placeholder="What went well this week? What needs attention next week? Any concerns about the team?"
-                disabled={isReadOnly}
-                style={{
-                  width: '100%', minHeight: '100px',
-                  background: 'var(--surf-2)', border: '1px solid var(--border-2)',
-                  borderRadius: '6px', padding: '10px 12px',
-                  color: 'var(--text-1)', fontFamily: 'var(--font-sans)',
-                  fontSize: '12px', resize: 'vertical', outline: 'none', lineHeight: 1.6,
-                  boxSizing: 'border-box', opacity: isReadOnly ? 0.7 : 1,
-                }}
-                onFocus={e => { e.currentTarget.style.borderColor = 'var(--border-3)' }}
-                onBlur={e => { e.currentTarget.style.borderColor = 'var(--border-2)' }}
-              />
-              {!isReadOnly && (
-                <p style={{ fontSize: '11px', color: 'var(--text-3)', margin: '6px 0 0' }}>
-                  Auto-saves as you type
-                </p>
-              )}
-            </div>
-          </ReviewSection>
+                  </>
+                )
+              })() : null}
+            </ReviewSection>
 
-          {/* Section 7: Complete Review */}
-          {isCurrentWeek && (
+            {/* Section 2: Action Items & Follow-ups */}
             <ReviewSection
-              title="Complete Review"
-              icon={ICON_COMPLETE}
-              signalCount={1}
-              isReviewed={false}
-              onMarkReviewed={() => {}}
-              showCheckbox={false}
-              nonInteractiveHeader={true}
+              title="Action Items & Follow-ups"
+              icon={ICON_ACTIONS}
+              signalCount={isReadOnly ? 0 : actionSignals.length}
+              criticalCount={isReadOnly ? 0 : actionSignals.filter(s => s.severity === 'critical').length}
+              warningCount={isReadOnly ? 0 : actionSignals.filter(s => s.severity === 'warning').length}
+              infoCount={isReadOnly ? 0 : actionSignals.filter(s => s.severity === 'info').length}
+              isReviewed={effectiveSectionState.actions}
+              onMarkReviewed={() => toggleSection('actions')}
+              emptyMessage="All action items resolved"
             >
-              <div style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-                <div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>
-                    <strong style={{ color: 'var(--text-2)', fontWeight: 500 }}>{dismissed.length}</strong> dismissed
-                    {' · '}
-                    <strong style={{ color: signals.filter(s => s.severity === 'critical').length > 0 ? '#f87171' : 'var(--text-2)', fontWeight: 500 }}>
-                      {signals.filter(s => s.severity === 'critical').length}
-                    </strong> critical remaining
-                    {' · '}
-                    <strong style={{ color: 'var(--text-2)', fontWeight: 500 }}>{signals.length}</strong> total remaining
-                  </div>
-                  {!isCompleted && warnCount > 0 && (
-                    <div style={{ fontSize: '11px', color: '#f97316', marginTop: '4px' }}>
-                      ⚠ You have {warnCount} unresolved items. You can still complete the review or address them first.
+              {!isReadOnly ? (
+                <>
+                  {actionSignals.map((s, i) => {
+                    const daysAgo = s.meta?.daysAgo as number | undefined
+                    const meetingTitle = s.meta?.meetingTitle as string | undefined
+                    const subtitle = [
+                      meetingTitle ? `From: ${meetingTitle}` : null,
+                      daysAgo != null ? `${daysAgo} days ago` : null,
+                    ].filter(Boolean).join(' · ')
+                    const signalWithSubtitle = { ...s, meta: { ...s.meta, subtitle } }
+                    return (
+                      <SignalRow
+                        key={i}
+                        signal={signalWithSubtitle}
+                        onDismiss={setDismissTarget}
+                        actions={
+                          <div className="wr-signal-actions">
+                            {Boolean(s.meta?.taskId) && (
+                              <Btn variant="primary" onClick={() => handleMarkTaskDone(s.meta!.taskId as string)}>
+                                Mark done
+                              </Btn>
+                            )}
+                            <Link href={`/meetings/${s.entityId}`} style={{ textDecoration: 'none' }}>
+                              <Btn>View meeting</Btn>
+                            </Link>
+                          </div>
+                        }
+                      />
+                    )
+                  })}
+                </>
+              ) : null}
+            </ReviewSection>
+
+            {/* Section 3: Tasks & Deadlines */}
+            <ReviewSection
+              title="Tasks & Deadlines"
+              icon={ICON_TASKS}
+              signalCount={isReadOnly ? 0 : taskSignals.length}
+              criticalCount={isReadOnly ? 0 : overdueSignals.filter(s => s.severity === 'critical').length}
+              warningCount={isReadOnly ? 0 : overdueSignals.filter(s => s.severity === 'warning').length}
+              infoCount={isReadOnly ? 0 : upcomingSignals.length}
+              isReviewed={effectiveSectionState.tasks}
+              onMarkReviewed={() => toggleSection('tasks')}
+              emptyMessage="No overdue tasks and no deadlines this week"
+            >
+              {!isReadOnly ? (
+                <>
+                  {overdueSignals.length > 0 && upcomingSignals.length > 0 && (
+                    <div className="wr-task-label">
+                      <span className="wr-task-label-text">Overdue</span>
                     </div>
                   )}
-                </div>
+                  {overdueSignals.map((s, i) => {
+                    const daysOverdue = s.meta?.daysOverdue as number | undefined
+                    const dueDate = s.meta?.dueDate as string | undefined
+                    const priority = s.meta?.priority as string | undefined
+                    const subtitle = [
+                      dueDate ? `Due ${formatDate(dueDate)}` : null,
+                      daysOverdue != null ? `${daysOverdue} day${daysOverdue === 1 ? '' : 's'} overdue` : null,
+                    ].filter(Boolean).join(' · ')
+                    const taskTitle = (s.meta?.title as string | undefined) ?? s.message.replace(/^"|".*$/g, '').trim()
+                    return (
+                      <div
+                        key={i}
+                        className="wr-task-row"
+                        onMouseEnter={e => (e.currentTarget.style.background = 'var(--surf-2)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = '')}
+                      >
+                        {severityDot(s.severity)}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div className="wr-task-title-row">
+                            {taskTitle}{priorityBadge(priority)}
+                          </div>
+                          <div className="wr-task-sub">{subtitle}</div>
+                        </div>
+                        <div className="wr-task-actions">
+                          <Btn variant="primary" onClick={() => handleMarkTaskDone(s.entityId)}>Mark done</Btn>
+                          <Btn onClick={() => handleMoveTaskNextWeek(s.entityId, s.meta?.dueDate as string)}>+7 days</Btn>
+                          <Btn variant="dismiss" onClick={() => setDismissTarget(s)}>Dismiss</Btn>
+                        </div>
+                      </div>
+                    )
+                  })}
 
-                {isCompleted ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '13px', color: '#00f058', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <CheckCircle style={{ width: '14px', height: '14px' }} />
-                      Week reviewed
-                    </span>
-                    <Link
-                      href={`/summary?week=${weekStart}`}
-                      style={{
-                        display: 'inline-flex', alignItems: 'center', gap: '5px',
-                        background: 'transparent', border: '1px solid var(--border-2)',
-                        borderRadius: '5px', color: 'var(--text-2)',
-                        fontSize: '11px', padding: '5px 10px',
-                        textDecoration: 'none', fontFamily: 'var(--font-sans)',
-                      }}
-                    >
-                      Generate weekly summary <ArrowRight style={{ width: '11px', height: '11px' }} />
-                    </Link>
-                    <button
-                      onClick={handleReopen}
-                      style={{
-                        background: 'transparent', border: '1px solid var(--border-2)',
-                        borderRadius: '5px', color: 'var(--text-3)',
-                        fontSize: '11px', padding: '5px 10px', cursor: 'pointer',
-                      }}
-                    >
-                      Reopen
-                    </button>
+                  {upcomingSignals.length > 0 && (
+                    <div className="wr-task-label">
+                      <span className="wr-task-label-text">Due this week</span>
+                    </div>
+                  )}
+                  {upcomingSignals.map((s, i) => {
+                    const dueDate = s.meta?.dueDate as string | undefined
+                    const priority = s.meta?.priority as string | undefined
+                    const subtitle = [
+                      dueDate ? `Due ${formatDate(dueDate)}` : null,
+                      dueDate ? formatDayName(dueDate) : null,
+                    ].filter(Boolean).join(' · ')
+                    const taskTitle = s.message.match(/"([^"]+)"/)?.[1] ?? s.message
+                    return (
+                      <div
+                        key={i}
+                        className="wr-task-row"
+                        style={{ borderBottom: i < upcomingSignals.length - 1 ? '1px solid var(--border-1)' : 'none' }}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'var(--surf-2)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = '')}
+                      >
+                        {severityDot('info')}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div className="wr-task-title-row">
+                            {taskTitle}{priorityBadge(priority)}
+                          </div>
+                          <div className="wr-task-sub">{subtitle}</div>
+                        </div>
+                        <div className="wr-task-actions">
+                          <Btn variant="primary" onClick={() => handleMarkTaskDone(s.entityId)}>Mark done</Btn>
+                          <Btn variant="dismiss" onClick={() => setDismissTarget(s)}>Dismiss</Btn>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </>
+              ) : null}
+            </ReviewSection>
+
+            {/* Section 4: Career Goal Staleness */}
+            <ReviewSection
+              title="Career Goal Staleness"
+              icon={ICON_GOALS}
+              signalCount={isReadOnly ? 0 : goalSignals.length}
+              criticalCount={isReadOnly ? 0 : goalSignals.filter(s => s.severity === 'critical').length}
+              warningCount={isReadOnly ? 0 : goalSignals.filter(s => s.severity === 'warning').length}
+              infoCount={isReadOnly ? 0 : goalSignals.filter(s => s.severity === 'info').length}
+              isReviewed={effectiveSectionState.goals}
+              onMarkReviewed={() => toggleSection('goals')}
+              emptyMessage="All career goals have recent activity"
+            >
+              {!isReadOnly && goalSignals.length > 0 ? (
+                <>
+                  {goalSignals.map((s, i) => {
+                    const daysSince = s.meta?.daysSince as number | undefined
+                    const timePeriod = s.meta?.timePeriod as string | undefined
+                    const periodLabel =
+                      timePeriod === 'short_term' ? 'Short-term'
+                      : timePeriod === 'mid_term' ? 'Mid-term'
+                      : timePeriod === 'long_term' ? 'Long-term'
+                      : null
+                    const subtitle = [
+                      periodLabel,
+                      daysSince != null ? `No activity in ${daysSince} day${daysSince === 1 ? '' : 's'}` : null,
+                    ].filter(Boolean).join(' · ')
+                    const goalTitle = s.message.match(/"([^"]+)"/)?.[1] ?? s.message
+                    return (
+                      <div
+                        key={i}
+                        className="wr-goal-row"
+                        style={{ borderBottom: i < goalSignals.length - 1 ? '1px solid var(--border-1)' : 'none' }}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'var(--surf-2)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = '')}
+                      >
+                        {severityDot(s.severity)}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div className="wr-goal-title">{goalTitle}</div>
+                          <div className="wr-goal-sub">{subtitle}</div>
+                        </div>
+                        <div className="wr-goal-actions">
+                          <Btn variant="primary" onClick={() => router.push('/career-goals')}>Update goal</Btn>
+                          <Btn variant="dismiss" onClick={() => setDismissTarget(s)}>Dismiss</Btn>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </>
+              ) : null}
+            </ReviewSection>
+
+            {/* Section 5: Week in Review */}
+            <ReviewSection
+              title="Week in Review"
+              icon={ICON_WEEK}
+              signalCount={1}
+              badgeLabel="Summary"
+              badgeVariant="info"
+              isReviewed={effectiveSectionState.week}
+              onMarkReviewed={() => toggleSection('week')}
+              defaultExpanded={false}
+            >
+              {activitySummary ? (
+                <div className="wr-week-grid">
+                  {[
+                    { num: activitySummary.meetingsHeld.length, label: 'Meetings held' },
+                    { num: activitySummary.tasksCompleted.length, label: 'Tasks completed' },
+                    { num: activitySummary.evidenceLogged, label: 'Evidence logged' },
+                    { num: activitySummary.actionItemsCreated, label: 'Action items' },
+                  ].map(cell => (
+                    <div key={cell.label} className="wr-week-cell">
+                      <div className="wr-week-cell-num">{cell.num}</div>
+                      <div className="wr-week-cell-label">{cell.label}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="wr-week-loading">Loading…</div>
+              )}
+            </ReviewSection>
+
+            {/* Section 6: Reflection */}
+            <ReviewSection
+              title="Reflection"
+              icon={ICON_REFLECTION}
+              signalCount={1}
+              isReviewed={effectiveSectionState.reflection}
+              onMarkReviewed={() => toggleSection('reflection')}
+            >
+              <div className="wr-reflection-body">
+                <div className="wr-reflection-ai-row">
+                  <div className="wr-reflection-ai-header">
+                    <AIButton
+                      configured={aiConfig.configured}
+                      loading={aiConfig.loading}
+                      generating={generatingPrompts}
+                      onClick={handleGenerateReflectionPrompts}
+                      label="Generate reflection prompts"
+                      tooltip={aiConfig.tooltip}
+                      showSetupLink={true}
+                      disabled={isReadOnly}
+                    />
+                    {reflectionPrompts.length > 0 && (
+                      <button onClick={() => setReflectionPrompts([])} className="wr-reflection-clear-btn">
+                        ✕ Clear
+                      </button>
+                    )}
                   </div>
-                ) : (
-                  <button
-                    onClick={handleComplete}
-                    disabled={completing}
-                    style={{
-                      background: 'linear-gradient(90deg, #00ffe5, #00f058)',
-                      border: 'none', borderRadius: '5px',
-                      color: '#0a1a0a', fontSize: '12px', fontWeight: 600,
-                      padding: '5px 13px', cursor: completing ? 'not-allowed' : 'pointer',
-                      opacity: completing ? 0.7 : 1, fontFamily: 'var(--font-sans)',
-                    }}
-                  >
-                    {completing ? 'Saving…' : '✓ Mark Week as Reviewed'}
-                  </button>
+                  {reflectionPrompts.length > 0 && (
+                    <div className="wr-reflection-prompts">
+                      {reflectionPrompts.map((prompt, i) => (
+                        <div key={i} className="wr-reflection-prompt">
+                          <span className="wr-reflection-prompt-icon">✦</span>
+                          <span className="wr-reflection-prompt-text">{prompt}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {reflectionPrompts.length === 0 && (
+                    <p className="wr-reflection-placeholder">
+                      "Take a moment to reflect on your week. What patterns are you noticing?"
+                    </p>
+                  )}
+                </div>
+                <textarea
+                  value={notes}
+                  onChange={e => handleNotesChange(e.target.value)}
+                  placeholder="What went well this week? What needs attention next week? Any concerns about the team?"
+                  disabled={isReadOnly}
+                  className="wr-reflection-textarea"
+                  style={{ opacity: isReadOnly ? 0.7 : 1 }}
+                  onFocus={e => { e.currentTarget.style.borderColor = 'var(--border-3)' }}
+                  onBlur={e => { e.currentTarget.style.borderColor = 'var(--border-2)' }}
+                />
+                {!isReadOnly && (
+                  <p className="wr-reflection-autosave">Auto-saves as you type</p>
                 )}
               </div>
             </ReviewSection>
-          )}
 
-        </div>
-      )}
+            {/* Section 7: Complete Review */}
+            {isCurrentWeek && (
+              <ReviewSection
+                title="Complete Review"
+                icon={ICON_COMPLETE}
+                signalCount={1}
+                isReviewed={false}
+                onMarkReviewed={() => {}}
+                showCheckbox={false}
+                nonInteractiveHeader={true}
+              >
+                <div className="wr-complete-body">
+                  <div>
+                    <div className="wr-complete-stats">
+                      <strong style={{ color: 'var(--text-2)', fontWeight: 500 }}>{dismissed.length}</strong> dismissed
+                      {' · '}
+                      <strong style={{ color: signals.filter(s => s.severity === 'critical').length > 0 ? '#f87171' : 'var(--text-2)', fontWeight: 500 }}>
+                        {signals.filter(s => s.severity === 'critical').length}
+                      </strong> critical remaining
+                      {' · '}
+                      <strong style={{ color: 'var(--text-2)', fontWeight: 500 }}>{signals.length}</strong> total remaining
+                    </div>
+                    {!isCompleted && warnCount > 0 && (
+                      <div className="wr-complete-warn">
+                        ⚠ You have {warnCount} unresolved items. You can still complete the review or address them first.
+                      </div>
+                    )}
+                  </div>
 
-      {/* Dismiss dialog */}
-      {dismissTarget && (
-        <DismissDialog
-          onConfirm={(note) => handleDismiss(dismissTarget, note)}
-          onCancel={() => setDismissTarget(null)}
-        />
-      )}
-    </div>
+                  {isCompleted ? (
+                    <div className="wr-completed-row">
+                      <span className="wr-completed-label">
+                        <CheckCircle style={{ width: '14px', height: '14px' }} />
+                        Week reviewed
+                      </span>
+                      <Link href={`/summary?week=${weekStart}`} className="wr-summary-link">
+                        Generate weekly summary <ArrowRight style={{ width: '11px', height: '11px' }} />
+                      </Link>
+                      <button onClick={handleReopen} className="wr-reopen-btn">Reopen</button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleComplete}
+                      disabled={completing}
+                      className="wr-complete-btn"
+                    >
+                      {completing ? 'Saving…' : '✓ Mark Week as Reviewed'}
+                    </button>
+                  )}
+                </div>
+              </ReviewSection>
+            )}
+
+          </div>
+        )}
+
+        {/* Dismiss dialog */}
+        {dismissTarget && (
+          <DismissDialog
+            onConfirm={(note) => handleDismiss(dismissTarget, note)}
+            onCancel={() => setDismissTarget(null)}
+          />
+        )}
+      </div>
     </>
   )
 }

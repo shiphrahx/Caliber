@@ -352,7 +352,7 @@ export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availab
                   {/* Person Field for 1:1 */}
                   <div className="grid gap-2">
                     <Label htmlFor="person">Person *</Label>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-[13px] text-muted-foreground">
                       Select from your team or type a new name
                     </p>
                     <div className="relative">
@@ -365,19 +365,17 @@ export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availab
                         required
                       />
                       {showSuggestions && (
-                        <div style={{ position: "absolute", zIndex: 50, width: "100%", marginTop: "4px", background: "var(--surf-2)", border: "1px solid var(--border-2)", borderRadius: "4px", boxShadow: "0 4px 16px rgba(0,0,0,0.4)", maxHeight: "192px", overflowY: "auto" }}>
+                        <div className="meeting-suggestion-dropdown">
                           {filteredPeople.map((person, index) => (
-                            <div key={index} onClick={() => handlePersonSelect(person)}
-                              style={{ padding: "6px 12px", fontSize: "var(--text-label)", cursor: "pointer", color: "var(--text-2)" }}
-                              onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-3)")}
-                              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-                            >{person}</div>
+                            <div key={index} onClick={() => handlePersonSelect(person)} className="meeting-suggestion-item">
+                              {person}
+                            </div>
                           ))}
                         </div>
                       )}
                       {personInput.length >= 2 && availablePeople.length > 0 && filteredPeople.length === 0 && !showSuggestions && (
-                        <div style={{ position: "absolute", right: "8px", top: "50%", transform: "translateY(-50%)" }}>
-                          <span style={{ fontSize: "var(--text-overline)", background: "var(--surf-3)", color: "var(--text-2)", border: "1px solid var(--border-2)", borderRadius: "3px", padding: "2px 6px" }}>New person</span>
+                        <div className="meeting-new-person-badge">
+                          <span className="meeting-new-person-label">New person</span>
                         </div>
                       )}
                     </div>
@@ -474,18 +472,16 @@ export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availab
                         required
                       />
                       {showTeamSuggestions && (
-                        <div style={{ position: "absolute", zIndex: 50, width: "100%", marginTop: "4px", background: "var(--surf-2)", border: "1px solid var(--border-2)", borderRadius: "4px", boxShadow: "0 4px 16px rgba(0,0,0,0.4)", maxHeight: "192px", overflowY: "auto" }}>
+                        <div className="meeting-suggestion-dropdown">
                           {filteredTeams.map((team, index) => (
-                            <div key={index} onClick={() => handleTeamSelect(team)}
-                              style={{ padding: "6px 12px", fontSize: "var(--text-label)", cursor: "pointer", color: "var(--text-2)" }}
-                              onMouseEnter={e => (e.currentTarget.style.background = "var(--surf-3)")}
-                              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-                            >{team}</div>
+                            <div key={index} onClick={() => handleTeamSelect(team)} className="meeting-suggestion-item">
+                              {team}
+                            </div>
                           ))}
                         </div>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-[13px] text-muted-foreground">
                       Select from your teams or type a new name
                     </p>
                   </div>
@@ -632,7 +628,7 @@ export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availab
               {is1on1 && (
                 <div className="grid gap-2">
                   <Label>Templates</Label>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-[13px] text-muted-foreground">
                     Select a template to load pre-formatted notes
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -645,8 +641,8 @@ export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availab
                           const html = DOMPurify.sanitize(marked.parse(template.notes) as string)
                           setFormData(prev => ({ ...prev, notes: html }))
                         }}
+                        className="meeting-template-btn"
                         style={{
-                          padding: "3px 10px", borderRadius: "4px", fontSize: "var(--text-label)", fontFamily: "var(--font-sans)", cursor: "pointer",
                           background: selectedTemplate === template.id ? "var(--surf-3)" : "var(--surf-2)",
                           color: selectedTemplate === template.id ? "var(--text-1)" : "var(--text-2)",
                           border: `1px solid ${selectedTemplate === template.id ? "var(--border-3)" : "var(--border-2)"}`,
@@ -672,28 +668,14 @@ export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availab
 
               {/* TL;DR — shown when editing an existing meeting */}
               {isEditing && serviceMeeting && (
-                <div
-                  style={{
-                    borderRadius: 8,
-                    padding: "10px 12px",
-                    background: "var(--surf-2)",
-                    border: "1px solid var(--border-2)",
-                  }}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span style={{ fontSize: "var(--text-label)", color: "var(--text-2)", fontWeight: 600 }}>
-                      AI Summary
-                    </span>
+                <div className="meeting-tldr-box">
+                  <div className="meeting-tldr-header">
+                    <span className="meeting-tldr-title">AI Summary</span>
                     <button
                       type="button"
                       onClick={handleRegenerateTldr}
                       disabled={tldrLoading}
-                      style={{
-                        display: "flex", alignItems: "center", gap: 4,
-                        fontSize: "var(--text-label)", color: "var(--text-3)",
-                        background: "none", border: "none", cursor: tldrLoading ? "not-allowed" : "pointer",
-                        padding: "2px 6px", borderRadius: 4,
-                      }}
+                      className="meeting-tldr-regen-btn"
                       title="Regenerate summary"
                     >
                       <RefreshCw size={11} style={{ animation: tldrLoading ? "spin 1s linear infinite" : "none" }} />
@@ -701,15 +683,11 @@ export function MeetingFormDialog({ open, onOpenChange, meeting, onSave, availab
                     </button>
                   </div>
                   {tldrLoading ? (
-                    <p style={{ fontSize: "var(--text-body)", color: "var(--text-3)", fontStyle: "italic" }}>
-                      Generating summary…
-                    </p>
+                    <p className="meeting-tldr-pending">Generating summary…</p>
                   ) : tldrText ? (
-                    <p style={{ fontSize: "var(--text-body)", color: "var(--text-2)", lineHeight: 1.5 }}>
-                      {tldrText}
-                    </p>
+                    <p className="meeting-tldr-text">{tldrText}</p>
                   ) : (
-                    <p style={{ fontSize: "var(--text-body)", color: "var(--text-3)", fontStyle: "italic" }}>
+                    <p className="meeting-tldr-pending">
                       No summary yet. Save meeting notes (&gt;100 chars) to generate one.
                     </p>
                   )}

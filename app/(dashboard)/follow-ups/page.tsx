@@ -26,10 +26,10 @@ function formatDate(dateStr: string): string {
 }
 
 function StatusBadge({ fu }: { fu: FollowUp }) {
-  if (fu.status === 'completed') return <span style={{ fontSize: 'var(--text-caption)', fontWeight: 600, color: '#00f058', background: '#0d1f14', border: '1px solid #1a3a25', borderRadius: '4px', padding: '2px 6px' }}>Done</span>
-  if (fu.status === 'cancelled') return <span style={{ fontSize: 'var(--text-caption)', color: 'var(--text-3)', background: 'var(--surf-3)', border: '1px solid var(--border-2)', borderRadius: '4px', padding: '2px 6px' }}>Cancelled</span>
-  if (isOverdue(fu)) return <span style={{ fontSize: 'var(--text-caption)', fontWeight: 600, color: '#ff6b6b', background: '#2a0a0a', border: '1px solid #5a2020', borderRadius: '4px', padding: '2px 6px' }}>Overdue</span>
-  return <span style={{ fontSize: 'var(--text-caption)', color: 'var(--text-2)', background: 'var(--surf-3)', border: '1px solid var(--border-2)', borderRadius: '4px', padding: '2px 6px' }}>Open</span>
+  if (fu.status === 'completed') return <span className="fu-badge fu-badge--done">Done</span>
+  if (fu.status === 'cancelled') return <span className="fu-badge fu-badge--cancelled">Cancelled</span>
+  if (isOverdue(fu)) return <span className="fu-badge fu-badge--overdue">Overdue</span>
+  return <span className="fu-badge fu-badge--open">Open</span>
 }
 
 export default function FollowUpsPage() {
@@ -80,7 +80,6 @@ export default function FollowUpsPage() {
     ? Math.round(resolutionTimes.reduce((a, b) => a + b, 0) / resolutionTimes.length)
     : null
 
-
   return (
     <>
       <div className="page-topbar">
@@ -91,185 +90,156 @@ export default function FollowUpsPage() {
       </div>
       <div className="page-content">
 
-      {/* Stats bar */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '20px' }}>
-        {[
-          { label: 'Open', value: openCount, color: 'var(--text-1)' },
-          { label: 'Overdue', value: overdueCount, color: overdueCount > 0 ? '#ff6b6b' : 'var(--text-1)' },
-          { label: 'Done this month', value: completedThisMonth, color: '#00f058' },
-          { label: 'Avg resolution', value: avgResolution !== null ? `${avgResolution}d` : '—', color: 'var(--text-2)' },
-        ].map(stat => (
-          <div key={stat.label} style={{ background: 'var(--surf)', border: '1px solid var(--border-1)', borderRadius: '6px', padding: '12px 14px' }}>
-            <div className="form-label">{stat.label}</div>
-            <div style={{ fontSize: 'var(--text-section)', fontWeight: 700, color: stat.color }}>{stat.value}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* View + filters */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-        {(['active', 'completed', 'all'] as ViewMode[]).map(v => (
-          <button
-            key={v}
-            onClick={() => setViewMode(v)}
-            style={{
-              background: viewMode === v ? 'var(--surf-3)' : 'var(--surf-2)',
-              border: `1px solid ${viewMode === v ? 'var(--border-3)' : 'var(--border-1)'}`,
-              borderRadius: '4px',
-              color: viewMode === v ? 'var(--text-1)' : 'var(--text-3)',
-              fontSize: 'var(--text-meta)',
-              padding: '5px 12px',
-              cursor: 'pointer',
-              fontFamily: 'var(--font-sans)',
-              textTransform: 'capitalize',
-            }}
-          >
-            {v}
-          </button>
-        ))}
-
-        <select
-          value={personFilter}
-          onChange={e => setPersonFilter(e.target.value)}
-          style={{
-            background: 'var(--surf-2)',
-            border: '1px solid var(--border-1)',
-            borderRadius: '4px',
-            color: 'var(--text-2)',
-            fontSize: 'var(--text-meta)',
-            padding: '5px 10px',
-            cursor: 'pointer',
-            fontFamily: 'var(--font-sans)',
-          }}
-        >
-          <option value="all">All people</option>
-          {people.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-        </select>
-
-        {viewMode === 'active' && (
-          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: 'var(--text-meta)', color: 'var(--text-2)', cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={showOverdueOnly}
-              onChange={e => setShowOverdueOnly(e.target.checked)}
-            />
-            Overdue only
-          </label>
-        )}
-      </div>
-
-      {/* Follow-up rows */}
-      {loading ? (
-        <p style={{ fontSize: 'var(--text-meta)', color: 'var(--text-3)' }}>Loading...</p>
-      ) : visible.length === 0 ? (
-        <div style={{ padding: '32px 0', textAlign: 'center' }}>
-          <p style={{ color: 'var(--text-3)', fontSize: 'var(--text-meta)' }}>
-            {viewMode === 'active' ? 'No open follow-ups. Nice work.' : 'Nothing to show.'}
-          </p>
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-          {/* Column headers */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px 120px 100px 120px', gap: '12px', padding: '6px 12px' }}>
-            <span className="col-header">Title</span>
-            <span className="col-header">Person</span>
-            <span className="col-header">Due / Age</span>
-            <span className="col-header">Status</span>
-            <span className="col-header">Source</span>
-          </div>
-
-          {visible.map(fu => (
-            <div
-              key={fu.id}
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 140px 120px 100px 120px',
-                gap: '12px',
-                alignItems: 'center',
-                padding: '10px 12px',
-                background: isOverdue(fu) ? '#1a0a0a' : 'var(--surf)',
-                border: `1px solid ${isOverdue(fu) ? '#3a1515' : 'var(--border-1)'}`,
-                borderRadius: '5px',
-              }}
-            >
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 'var(--text-meta)', color: 'var(--text-1)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {fu.title}
-                </div>
-                {fu.description && (
-                  <div style={{ fontSize: 'var(--text-caption)', color: 'var(--text-3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
-                    {fu.description}
-                  </div>
-                )}
-              </div>
-
-              <div>
-                {fu.personName ? (
-                  <Link href={`/people/${fu.personId}`} style={{ fontSize: 'var(--text-meta)', color: 'var(--text-2)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                    {fu.personName} <ExternalLink style={{ width: '9px', height: '9px' }} />
-                  </Link>
-                ) : (
-                  <span style={{ fontSize: 'var(--text-meta)', color: 'var(--text-3)' }}>—</span>
-                )}
-              </div>
-
-              <div style={{ fontSize: 'var(--text-meta)', color: 'var(--text-3)' }}>
-                {fu.dueDate ? formatDate(fu.dueDate) : `${ageDays(fu.createdAt)}d old`}
-              </div>
-
-              <div><StatusBadge fu={fu} /></div>
-
-              <div style={{ fontSize: 'var(--text-caption)', color: 'var(--text-3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {fu.sourceName ?? (fu.sourceType ?? '—')}
-              </div>
+        {/* Stats bar */}
+        <div className="fu-stats-grid">
+          {[
+            { label: 'Open', value: openCount, color: 'var(--text-1)' },
+            { label: 'Overdue', value: overdueCount, color: overdueCount > 0 ? '#ff6b6b' : 'var(--text-1)' },
+            { label: 'Done this month', value: completedThisMonth, color: '#00f058' },
+            { label: 'Avg resolution', value: avgResolution !== null ? `${avgResolution}d` : '—', color: 'var(--text-2)' },
+          ].map(stat => (
+            <div key={stat.label} className="fu-stat-card">
+              <div className="form-label">{stat.label}</div>
+              <div className="fu-stat-value" style={{ color: stat.color }}>{stat.value}</div>
             </div>
           ))}
         </div>
-      )}
 
-      {/* Person picker for new follow-up */}
-      {showPersonPicker && (
-        <div
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}
-          onClick={() => setShowPersonPicker(false)}
-        >
-          <div
-            style={{ background: 'var(--surf-2)', border: '1px solid var(--border-2)', borderRadius: '8px', padding: '20px', width: '320px', display: 'flex', flexDirection: 'column', gap: '12px' }}
-            onClick={e => e.stopPropagation()}
+        {/* View + filters */}
+        <div className="fu-filters-row">
+          {(['active', 'completed', 'all'] as ViewMode[]).map(v => (
+            <button
+              key={v}
+              onClick={() => setViewMode(v)}
+              className="fu-view-btn"
+              style={{
+                background: viewMode === v ? 'var(--surf-3)' : 'var(--surf-2)',
+                border: `1px solid ${viewMode === v ? 'var(--border-3)' : 'var(--border-1)'}`,
+                color: viewMode === v ? 'var(--text-1)' : 'var(--text-3)',
+              }}
+            >
+              {v}
+            </button>
+          ))}
+
+          <select
+            value={personFilter}
+            onChange={e => setPersonFilter(e.target.value)}
+            className="fu-filter-select"
           >
-            <div>
-              <span style={{ fontSize: 'var(--text-body)', fontWeight: 600, color: 'var(--text-1)' }}>Who is this follow-up for?</span>
-              <p style={{ fontSize: 'var(--text-meta)', color: 'var(--text-3)', marginTop: '4px' }}>Select a person to continue</p>
+            <option value="all">All people</option>
+            {people.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+
+          {viewMode === 'active' && (
+            <label className="fu-overdue-label">
+              <input
+                type="checkbox"
+                checked={showOverdueOnly}
+                onChange={e => setShowOverdueOnly(e.target.checked)}
+              />
+              Overdue only
+            </label>
+          )}
+        </div>
+
+        {/* Follow-up rows */}
+        {loading ? (
+          <p className="fu-loading">Loading...</p>
+        ) : visible.length === 0 ? (
+          <div className="fu-empty">
+            <p className="fu-empty-text">
+              {viewMode === 'active' ? 'No open follow-ups. Nice work.' : 'Nothing to show.'}
+            </p>
+          </div>
+        ) : (
+          <div className="fu-list">
+            {/* Column headers */}
+            <div className="fu-col-headers">
+              <span className="col-header">Title</span>
+              <span className="col-header">Person</span>
+              <span className="col-header">Due / Age</span>
+              <span className="col-header">Status</span>
+              <span className="col-header">Source</span>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxHeight: '300px', overflowY: 'auto' }}>
-              {loading ? (
-                <p style={{ fontSize: 'var(--text-meta)', color: 'var(--text-3)', padding: '8px 0' }}>Loading...</p>
-              ) : people.length === 0 ? (
-                <p style={{ fontSize: 'var(--text-meta)', color: 'var(--text-3)', padding: '8px 0' }}>No active people found.</p>
-              ) : people.map(p => (
-                <button
-                  key={p.id}
-                  onClick={() => { setAddingFor(p); setShowPersonPicker(false) }}
-                  style={{ background: 'var(--surf-3)', border: '1px solid var(--border-2)', borderRadius: '4px', color: 'var(--text-1)', fontSize: 'var(--text-meta)', padding: '8px 12px', cursor: 'pointer', textAlign: 'left', fontFamily: 'var(--font-sans)' }}
-                >
-                  {p.name} {p.role && <span style={{ color: 'var(--text-3)' }}>· {p.role}</span>}
-                </button>
-              ))}
+
+            {visible.map(fu => (
+              <div
+                key={fu.id}
+                className="fu-row"
+                style={{
+                  background: isOverdue(fu) ? '#1a0a0a' : 'var(--surf)',
+                  border: `1px solid ${isOverdue(fu) ? '#3a1515' : 'var(--border-1)'}`,
+                }}
+              >
+                <div className="fu-row-title">
+                  <div className="fu-title-text">{fu.title}</div>
+                  {fu.description && (
+                    <div className="fu-desc-text">{fu.description}</div>
+                  )}
+                </div>
+
+                <div>
+                  {fu.personName ? (
+                    <Link href={`/people/${fu.personId}`} className="fu-person-link">
+                      {fu.personName} <ExternalLink />
+                    </Link>
+                  ) : (
+                    <span className="fu-person-none">—</span>
+                  )}
+                </div>
+
+                <div className="fu-date-cell">
+                  {fu.dueDate ? formatDate(fu.dueDate) : `${ageDays(fu.createdAt)}d old`}
+                </div>
+
+                <div><StatusBadge fu={fu} /></div>
+
+                <div className="fu-source-cell">
+                  {fu.sourceName ?? (fu.sourceType ?? '—')}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Person picker for new follow-up */}
+        {showPersonPicker && (
+          <div className="fu-picker-overlay" onClick={() => setShowPersonPicker(false)}>
+            <div className="fu-picker-card" onClick={e => e.stopPropagation()}>
+              <div>
+                <span className="fu-picker-title">Who is this follow-up for?</span>
+                <p className="fu-picker-sub">Select a person to continue</p>
+              </div>
+              <div className="fu-picker-list">
+                {loading ? (
+                  <p className="fu-picker-loading">Loading...</p>
+                ) : people.length === 0 ? (
+                  <p className="fu-picker-empty">No active people found.</p>
+                ) : people.map(p => (
+                  <button
+                    key={p.id}
+                    onClick={() => { setAddingFor(p); setShowPersonPicker(false) }}
+                    className="fu-picker-btn"
+                  >
+                    {p.name} {p.role && <span className="fu-picker-btn-role">· {p.role}</span>}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {addingFor && (
-        <FollowUpForm
-          personId={addingFor.id}
-          personName={addingFor.name}
-          sourceType="manual"
-          onSaved={() => { setAddingFor(null); load() }}
-          onCancel={() => setAddingFor(null)}
-        />
-      )}
-    </div>
+        {addingFor && (
+          <FollowUpForm
+            personId={addingFor.id}
+            personName={addingFor.name}
+            sourceType="manual"
+            onSaved={() => { setAddingFor(null); load() }}
+            onCancel={() => setAddingFor(null)}
+          />
+        )}
+      </div>
     </>
   )
 }

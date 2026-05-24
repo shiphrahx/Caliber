@@ -3,7 +3,7 @@
 // The client NEVER sees the decrypted API key.
 //
 // Encryption: pgcrypto pgp_sym_encrypt/pgp_sym_decrypt.
-// Set SUPABASE_AI_ENCRYPTION_KEY in Edge Function secrets (supabase secrets set).
+// Set AI_ENCRYPTION_KEY in Edge Function secrets (supabase secrets set).
 
 import { createClient } from "jsr:@supabase/supabase-js@2"
 
@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
     }
 
     // ── Decrypt API key via DB function ───────────────────────────────────────
-    const encryptionKey = Deno.env.get("SUPABASE_AI_ENCRYPTION_KEY")
+    const encryptionKey = Deno.env.get("AI_ENCRYPTION_KEY")
     if (!encryptionKey) {
       return new Response(JSON.stringify({ error: "Server configuration error." }), { status: 500, headers: corsHeaders })
     }

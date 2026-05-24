@@ -38,7 +38,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload?.length) return null
   const total = payload.reduce((sum: number, entry: any) => sum + (entry.value ?? 0), 0)
   return (
-    <div className="bg-[#1e1e1e] border border-[#383838] rounded-lg p-3 shadow-xl text-xs">
+    <div className="bg-[#1e1e1e] border border-[#383838] rounded-lg p-3 shadow-xl text-[13px]">
       <p className="text-gray-300 font-semibold mb-2">Week of {label}</p>
       {payload.map((entry: any) =>
         entry.value > 0 ? (
@@ -70,12 +70,12 @@ export function TasksBarChart({ data }: TasksBarChartProps) {
         <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" vertical={false} />
         <XAxis
           dataKey="week"
-          tick={{ fill: "#9ca3af", fontSize: 11 }}
+          tick={{ fill: "#9ca3af", fontSize: 13 }}
           axisLine={false}
           tickLine={false}
         />
         <YAxis
-          tick={{ fill: "#9ca3af", fontSize: 11 }}
+          tick={{ fill: "#9ca3af", fontSize: 13 }}
           axisLine={false}
           tickLine={false}
           allowDecimals={false}
