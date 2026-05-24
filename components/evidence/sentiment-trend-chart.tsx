@@ -46,15 +46,8 @@ function StackedBar({ bucket, maxTotal }: { bucket: WeeklySentimentBucket; maxTo
 
   return (
     <div
-      style={{
-        position: "relative",
-        width: `${BAR_WIDTH}px`,
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "flex-end",
-        height: `${BAR_HEIGHT}px`,
-        cursor: "default",
-      }}
+      className="sentiment-stacked-bar"
+      style={{ width: `${BAR_WIDTH}px`, height: `${BAR_HEIGHT}px` }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -132,7 +125,7 @@ export function SentimentTrendChart({ personId, days = 60 }: SentimentTrendChart
   if (error) {
     return (
       <div className="sentiment-chart-error">
-        <span style={{ fontSize: "var(--text-caption)", color: "#f87171" }}>Could not load sentiment data</span>
+        <span className="sentiment-chart-error-text">Could not load sentiment data</span>
       </div>
     )
   }
@@ -156,7 +149,7 @@ export function SentimentTrendChart({ personId, days = 60 }: SentimentTrendChart
         <div className="sentiment-chart-meta">
           {trendConfig && (
             <div className="sentiment-trend-indicator">
-              <trendConfig.Icon style={{ width: "12px", height: "12px", color: trendConfig.color }} />
+              <trendConfig.Icon className="sentiment-trend-icon" style={{ color: trendConfig.color }} />
               <span className="sentiment-trend-label" style={{ color: trendConfig.color }}>
                 {trendConfig.label}
               </span>

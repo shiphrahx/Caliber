@@ -1234,6 +1234,15 @@ label { font-size: var(--text-label); color: var(--text-2); }
   align-items: center;
   justify-content: center;
 }
+.sentiment-chart-error-text { font-size: var(--text-caption); color: #f87171; }
+.sentiment-stacked-bar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  cursor: default;
+}
+.sentiment-trend-icon { width: 12px; height: 12px; }
 .sentiment-chart-empty {
   display: flex;
   align-items: center;
@@ -2491,6 +2500,14 @@ label { font-size: var(--text-label); color: var(--text-2); }
 }
 .backlog-action-btn:hover { color: var(--text-1); }
 .backlog-action-btn--danger:hover { color: #f87171; }
+.backlog-table-wrap {
+  background: var(--surf);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.backlog-thead-tr { border-bottom: 1px solid var(--border-1); }
+.backlog-grip-icon { width: 14px; height: 14px; color: var(--text-3); }
+.backlog-ai-banner strong { color: #c4b5fd; }
 
 /* ── Draggable placeholders ──────────────────────────────────────────────────── */
 .drag-placeholder-card {

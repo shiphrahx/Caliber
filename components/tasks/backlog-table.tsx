@@ -242,7 +242,7 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
       {aiRankings && (
         <div className="backlog-ai-banner">
           <Sparkles />
-          <span>Backlog ranked by AI priority. Hover the rank number to see the reason. <strong style={{ color: "#c4b5fd" }}>Drag to reorder manually.</strong></span>
+          <span>Backlog ranked by AI priority. Hover the rank number to see the reason. <strong>Drag to reorder manually.</strong></span>
         </div>
       )}
 
@@ -274,13 +274,8 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
       {/* Table */}
       <div
         ref={setNodeRef}
-        style={{
-          background: "var(--surf)",
-          border: isOver ? "1px solid var(--border-2)" : "1px solid var(--border-1)",
-          borderRadius: "8px",
-          overflow: "hidden",
-        }}
-        className="max-md:overflow-x-auto"
+        className="backlog-table-wrap max-md:overflow-x-auto"
+        style={{ border: isOver ? "1px solid var(--border-2)" : "1px solid var(--border-1)" }}
       >
         <table className="w-full border-collapse">
           <colgroup>
@@ -294,7 +289,7 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
             <col style={{ width: "80px" }} />
           </colgroup>
           <thead>
-            <tr style={{ borderBottom: "1px solid var(--border-1)" }}>
+            <tr className="backlog-thead-tr">
               {/* Drag handle col */}
               <th className="backlog-th-handle" />
               {/* AI rank col header */}
@@ -342,7 +337,7 @@ export function BacklogTable({ tasks, onUpdateTask, onQuickAdd, onEdit, onDelete
                     onDoubleClick={(e) => e.stopPropagation()}
                   >
                     <div className="active:cursor-grabbing drag-handle cursor-grab inline-flex">
-                      <GripVertical style={{ width: "14px", height: "14px", color: "var(--text-3)" }} />
+                      <GripVertical className="backlog-grip-icon" />
                     </div>
                   </td>
 
