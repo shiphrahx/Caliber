@@ -28,7 +28,7 @@ It replaces your notes with a simple system built around how management work act
 - Log evidence per person for performance conversations
 
 **Meetings**
-- Have more structured meetings with built in templates: 1:1, Team Sync, Retro, Planning, Review, Standup, Other
+- Have more structured meetings with built in templates: 1:1, Team Sync, Retro, Planning, Review, Standup, other
 - Extract action items from meeting notes; auto-create tasks
 
 **Tasks & Follow-ups**
