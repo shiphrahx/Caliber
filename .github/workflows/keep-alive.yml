@@ -13,7 +13,7 @@ jobs:
       - name: Ping Supabase REST API
         run: |
           response=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/?select=*" \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/achievements?select=id&limit=1" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
           http_code=$(echo "$response" | grep "HTTP_STATUS" | cut -d: -f2)
