@@ -12,12 +12,15 @@ jobs:
     steps:
       - name: Ping Supabase REST API
         run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" \
+          response=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
             "${{ secrets.SUPABASE_URL }}/rest/v1/?select=*" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
-          echo "Supabase responded with HTTP $response"
-          if [ "$response" -ge 400 ]; then
+          http_code=$(echo "$response" | grep "HTTP_STATUS" | cut -d: -f2)
+          body=$(echo "$response" | sed '$d')
+          echo "Supabase responded with HTTP $http_code"
+          echo "Response body: $body"
+          if [ "$http_code" -ge 400 ]; then
             echo "Ping failed"
             exit 1
           fi
