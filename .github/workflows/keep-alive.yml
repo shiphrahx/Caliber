@@ -2,25 +2,111 @@ name: Keep Supabase Alive
 
 on:
   schedule:
-    # Runs every 3 days at midnight UTC — safely under Supabase's 7-day pause window
+    # Every 3 days at midnight UTC — safely under Supabase's 7-day pause window
     - cron: '0 0 */3 * *'
-  workflow_dispatch: # lets you trigger it manually from the Actions tab to test
+  workflow_dispatch: # manual trigger from the Actions tab
+
+# Allow the failure step to open an issue as a notification
+permissions:
+  issues: write
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase REST API
+      - name: Validate secrets are present
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          response=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/achievements?select=id&limit=1" \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
-          http_code=$(echo "$response" | grep "HTTP_STATUS" | cut -d: -f2)
-          body=$(echo "$response" | sed '$d')
-          echo "Supabase responded with HTTP $http_code"
-          echo "Response body: $body"
-          if [ "$http_code" -ge 400 ]; then
-            echo "Ping failed"
+          missing=0
+          if [ -z "$SUPABASE_URL" ]; then
+            echo "::error::SUPABASE_URL secret is empty or not set"
+            missing=1
+          fi
+          if [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::SUPABASE_ANON_KEY secret is empty or not set"
+            missing=1
+          fi
+          if [ "$missing" -eq 1 ]; then
+            echo "Fix the missing secret(s) in Settings > Secrets and variables > Actions."
             exit 1
           fi
+          echo "Secrets present."
+
+      - name: Ping Supabase REST API
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          # Strip any trailing slash so the URL is always well-formed
+          base="${SUPABASE_URL%/}"
+          echo "Pinging: ${base}/rest/v1/achievements"
+
+          # Capture curl's own exit code separately from the HTTP status.
+          # --max-time guards against hangs; we do NOT let curl's exit abort
+          # the script so we can print a clear diagnostic first.
+          http_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 \
+            "${base}/rest/v1/achievements?select=id&limit=1" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}") || curl_exit=$?
+          curl_exit=${curl_exit:-0}
+
+          if [ "$curl_exit" -ne 0 ]; then
+            echo "::error::curl failed (exit $curl_exit) — could not reach Supabase."
+            case "$curl_exit" in
+              6)  echo "Exit 6 = could not resolve host. Check that SUPABASE_URL is a valid https://<ref>.supabase.co URL and the project is not already paused/deleted." ;;
+              7)  echo "Exit 7 = connection refused. The host resolved but rejected the connection." ;;
+              28) echo "Exit 28 = timed out after 30s." ;;
+              *)  echo "See https://curl.se/libcurl/c/libcurl-errors.html for exit code meaning." ;;
+            esac
+            exit 1
+          fi
+
+          echo "Supabase responded with HTTP $http_code"
+          if [ "$http_code" -ge 400 ]; then
+            echo "::error::Ping failed with HTTP $http_code"
+            exit 1
+          fi
+          echo "Keep-alive succeeded."
+
+      - name: Open an issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = "Keep Supabase Alive failed";
+            const body = [
+              "The scheduled keep-alive workflow failed.",
+              "",
+              `Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              "",
+              "If this keeps failing, the project may pause after 7 days of inactivity.",
+              "Check the run logs, verify the SUPABASE_URL / SUPABASE_ANON_KEY secrets,",
+              "and confirm the project is active in the Supabase dashboard."
+            ].join("\n");
+
+            // Avoid duplicate issues: reuse an existing open one if present.
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              labels: "keep-alive-failure"
+            });
+
+            if (existing.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ["keep-alive-failure"]
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.data[0].number,
+                body
+              });
+            }
