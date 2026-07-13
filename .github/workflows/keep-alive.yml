@@ -3,7 +3,7 @@ name: Keep Supabase Alive
 on:
   schedule:
     # Every 3 days at midnight UTC — safely under Supabase's 7-day pause window
-    - cron: '0 0 */3 * *'
+    - cron: '0 0 * * *'
   workflow_dispatch: # manual trigger from the Actions tab
 
 # Allow the failure step to open an issue as a notification
