@@ -1,516 +1,534 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
+import { JetBrains_Mono } from "next/font/google"
+
+/**
+ * The utility face. Inter comes from the root layout and carries the prose;
+ * this one is only ever used for things that behave like readings off an
+ * instrument: section labels, scores, the numbers on the rule.
+ */
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--f-mono",
+})
+
+/**
+ * The people on the rule.
+ *
+ * A mock of the product's own People Radar, the same way the screenshots
+ * further down are. Score is the attention score: how much of your week this
+ * person has a claim on, from 1:1 gaps, ageing follow-ups and stale evidence.
+ */
+const RADAR = [
+  { name: "Marcus", score: 12 },
+  { name: "Ana", score: 31 },
+  { name: "Ravi", score: 58 },
+  { name: "Priya", score: 86 },
+]
+
+const FEATURES = [
+  {
+    label: "Weekly review",
+    title: "Start the week knowing what slipped",
+    body:
+      "Caliber reads your people, tasks and meetings, then hands you a checklist of what needs attention. Overdue follow-ups, missed 1:1s, ageing action items. Mark the week reviewed when it's clear.",
+    shot: "/landing/weekly-review.png",
+    alt: "Weekly review showing people check, action items and tasks",
+  },
+  {
+    label: "People radar",
+    title: "Know who needs you before they ask",
+    body:
+      "Every person gets an attention score built from real signals: gaps between 1:1s, stale evidence, open follow-ups, topics that keep coming back. Whoever needs you most sits at the top.",
+    shot: "/landing/people-radar.png",
+    alt: "People radar showing attention scores and signals per team member",
+  },
+  {
+    label: "Evidence bank",
+    title: "Reviews that aren't written from memory",
+    body:
+      "Log achievements, feedback, concerns and growth moments as they happen. Come review season it is already there, categorised, timestamped and grouped by person.",
+    shot: "/landing/evidence-bank.png",
+    alt: "Evidence bank showing categorised entries across team members",
+  },
+  {
+    label: "Tasks",
+    title: "A board for your week, not your team's sprint",
+    body:
+      "Drag work between not started, in progress, blocked and done. The backlog keeps everything else out of sight until the week you need it.",
+    shot: "/landing/tasks.png",
+    alt: "Kanban board showing tasks by status with priority badges",
+  },
+  {
+    label: "Career framework",
+    title: "A ladder people are actually measured against",
+    body:
+      "Define your own competencies. Assess each person against them over time. See who is at level, who is climbing and where the gaps sit, per person and across the team.",
+    shot: "/landing/skills-matrix.png",
+    alt: "Skills matrix showing competency assessments and gap analysis",
+  },
+]
+
+const GRID = [
+  {
+    title: "Free, forever",
+    body: "No per-seat pricing and no trial that runs out. Your data, your tool.",
+  },
+  {
+    title: "Weekly summary",
+    body: "One click turns the week's data into a status update you can paste into Slack or send to your skip-level.",
+  },
+  {
+    title: "Bring your own key",
+    body: "Point Caliber at your own API key and it drafts reviews, preps 1:1s and pulls action items out of meeting notes. You pay pennies a month.",
+  },
+  {
+    title: "Calendar view",
+    body: "Tasks, deadlines and meetings on one month grid, so what is coming is visible without leaving.",
+  },
+  {
+    title: "Follow-up engine",
+    body: "Every commitment you make is tracked. The ones ageing quietly get surfaced before your team notices you forgot.",
+  },
+  {
+    title: "Nobody else logs in",
+    body: "Your team never sees Caliber. It is a private instrument, not a process you have to roll out.",
+  },
+]
 
 export default function LandingPage() {
+  // The rule draws itself once, on load. Held behind a state flag rather than
+  // a keyframe animation so every pin travels out from the same origin.
+  const [armed, setArmed] = useState(false)
+
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add("visible")
-            observer.unobserve(e.target)
-          }
-        })
-      },
-      { threshold: 0.1, rootMargin: "0px 0px -60px 0px" }
-    )
-    document.querySelectorAll(".reveal").forEach((el) => observer.observe(el))
-    return () => observer.disconnect()
+    const raf = requestAnimationFrame(() => setArmed(true))
+    return () => cancelAnimationFrame(raf)
   }, [])
 
+  useEffect(() => {
+    const seen = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return
+          entry.target.classList.add("is-in")
+          seen.unobserve(entry.target)
+        })
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -80px 0px" }
+    )
+    document.querySelectorAll(".rise").forEach((node) => seen.observe(node))
+    return () => seen.disconnect()
+  }, [])
+
+  const hottest = RADAR[RADAR.length - 1]
+
   return (
-    <>
+    <div className={mono.variable}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        /* Tokens.
+           Near black, hairlines, one accent. The accent is Caliber's own
+           primary rather than anything borrowed, so the landing page and the
+           product agree with each other. */
+        .lp {
+          --ink:      #08090a;
+          --raise:    #0e0f12;
+          --line:     rgba(255,255,255,0.07);
+          --line-2:   rgba(255,255,255,0.13);
+          --fg:       #f7f8f8;
+          --fg-2:     #8a8f98;
+          --fg-3:     #5c6068;
+          --iris:     #aea6fd;
+          --iris-dim: rgba(174,166,253,0.11);
 
-        *{box-sizing:border-box;margin:0;padding:0}
+          --measure: 1080px;
+          --pad: 24px;
 
-        :root{
-          --bg:#0a0a0b;
-          --surf:#111113;
-          --surf2:#18181b;
-          --b1:#1e1e22;
-          --b2:#27272b;
-          --t1:#f4f4f5;
-          --t2:#a1a1aa;
-          --t3:#52525b;
-          --green:#00f058;
-          --teal:#00ffe5;
-          --grad:linear-gradient(135deg,#00ffe5 0%,#00f058 50%,#00c846 100%);
-          --grad-text:linear-gradient(135deg,#00ffe5,#00f058);
-          --glow:0 0 80px rgba(0,240,88,0.08);
-          --font:'Plus Jakarta Sans',system-ui,sans-serif;
-          --mono:'JetBrains Mono',monospace;
-        }
-
-        html{scroll-behavior:smooth;overflow-x:hidden}
-        body{background:var(--bg);color:var(--t1);font-family:var(--font);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-
-        body::before{
-          content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
-          background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-          opacity:0.025;
+          background: var(--ink);
+          color: var(--fg);
+          font-family: var(--font-inter), system-ui, sans-serif;
+          font-size: 16px;
+          line-height: 1.6;
+          -webkit-font-smoothing: antialiased;
+          overflow-x: hidden;
         }
 
-        .container{max-width:1200px;margin:0 auto;padding:0 24px}
-        .container-wide{max-width:1400px;margin:0 auto;padding:0 24px}
+        .lp *, .lp *::before, .lp *::after { box-sizing: border-box; }
+        .lp h1, .lp h2, .lp h3, .lp h4, .lp p, .lp figure { margin: 0; }
 
-        nav{
-          position:fixed;top:0;left:0;right:0;z-index:100;
-          padding:14px 0;
-          background:rgba(10,10,11,0.7);
-          backdrop-filter:blur(20px) saturate(1.2);
-          -webkit-backdrop-filter:blur(20px) saturate(1.2);
-          border-bottom:1px solid rgba(255,255,255,0.04);
-        }
-        .nav-inner{
-          max-width:1200px;margin:0 auto;padding:0 24px;
-          display:flex;align-items:center;justify-content:space-between;
-        }
-        .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-        .nav-logo-mark{
-          width:30px;height:30px;border-radius:8px;
-          background:var(--grad);
-          display:flex;align-items:center;justify-content:center;
-        }
-        .nav-logo-name{font-size:17px;font-weight:700;color:var(--t1);letter-spacing:-0.02em}
-        .nav-links{display:flex;align-items:center;gap:32px}
-        .nav-links a{color:var(--t2);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s}
-        .nav-links a:hover{color:var(--t1)}
-        .nav-actions{display:flex;align-items:center;gap:12px}
-        .btn-ghost{
-          padding:7px 16px;border-radius:6px;font-size:13px;font-weight:600;font-family:var(--font);
-          background:transparent;border:1px solid var(--b2);color:var(--t2);cursor:pointer;
-          transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;
-        }
-        .btn-ghost:hover{border-color:var(--t3);color:var(--t1)}
-        .btn-primary{
-          padding:7px 18px;border-radius:6px;font-size:13px;font-weight:600;font-family:var(--font);
-          background:var(--t1);border:none;color:var(--bg);cursor:pointer;
-          transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;
-        }
-        .btn-primary:hover{background:#e4e4e7;transform:translateY(-1px)}
+        .wrap { max-width: var(--measure); margin: 0 auto; padding: 0 var(--pad); }
 
-        .hero{
-          padding:160px 0 80px;text-align:center;position:relative;
-        }
-        .hero::before{
-          content:'';position:absolute;top:60px;left:50%;transform:translateX(-50%);
-          width:800px;height:500px;
-          background:radial-gradient(ellipse at center,rgba(0,255,229,0.06) 0%,rgba(0,240,88,0.03) 40%,transparent 70%);
-          pointer-events:none;
-        }
-        .hero-badge{
-          display:inline-flex;align-items:center;gap:6px;
-          padding:5px 14px 5px 6px;border-radius:20px;
-          background:rgba(0,240,88,0.06);border:1px solid rgba(0,240,88,0.12);
-          font-size:13px;font-weight:600;color:var(--green);
-          margin-bottom:28px;
-          animation:fadeInDown .8s ease;
-        }
-        .hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--green);margin:0 4px;animation:pulse 2s infinite}
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-
-        .hero h1{
-          font-size:clamp(48px,6.5vw,80px);font-weight:700;
-          letter-spacing:-0.035em;line-height:1.05;
-          margin-bottom:20px;
-          animation:fadeInDown .8s ease .1s both;
-        }
-        .hero h1 .grad{
-          background:var(--grad-text);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
-          background-clip:text;
-        }
-        .hero-sub{
-          font-size:clamp(16px,2vw,19px);color:var(--t2);
-          max-width:560px;margin:0 auto 40px;line-height:1.6;font-weight:400;
-          animation:fadeInDown .8s ease .2s both;
-        }
-        .hero-actions{
-          display:flex;justify-content:center;gap:12px;
-          animation:fadeInDown .8s ease .3s both;
-        }
-        .btn-hero{
-          padding:12px 28px;border-radius:8px;font-size:15px;font-weight:600;font-family:var(--font);
-          cursor:pointer;transition:all .25s;text-decoration:none;display:inline-flex;align-items:center;gap:8px;
-        }
-        .btn-hero-primary{
-          background:var(--t1);border:none;color:var(--bg);
-        }
-        .btn-hero-primary:hover{background:#e4e4e7;transform:translateY(-2px);box-shadow:0 8px 30px rgba(244,244,245,0.15)}
-        .btn-hero-secondary{
-          background:transparent;border:1px solid var(--b2);color:var(--t2);
-        }
-        .btn-hero-secondary:hover{border-color:var(--t3);color:var(--t1)}
-
-        .hero-screenshot{
-          margin-top:64px;position:relative;
-          animation:fadeInUp 1s ease .4s both;
-        }
-        .hero-screenshot::before{
-          content:'';position:absolute;inset:-2px;border-radius:14px;
-          background:linear-gradient(180deg,rgba(255,255,255,0.06) 0%,rgba(255,255,255,0.01) 100%);
-          z-index:0;
-        }
-        .hero-screenshot::after{
-          content:'';position:absolute;bottom:-120px;left:50%;transform:translateX(-50%);
-          width:80%;height:200px;
-          background:radial-gradient(ellipse,rgba(0,240,88,0.08) 0%,transparent 70%);
-          pointer-events:none;filter:blur(40px);
-        }
-        .hero-screenshot img{
-          width:100%;max-width:1100px;border-radius:12px;
-          border:1px solid rgba(255,255,255,0.06);
-          box-shadow:0 20px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.03);
-          position:relative;z-index:1;
+        /* Tight, low-contrast display setting. The size does the shouting,
+           never the weight and never a gradient. */
+        .lp h1, .lp h2, .lp h3 {
+          font-weight: 590;
+          letter-spacing: -0.035em;
+          line-height: 1.06;
         }
 
-        .trust{padding:100px 0 60px;text-align:center}
-        .trust-label{font-size:13px;text-transform:uppercase;letter-spacing:0.1em;color:var(--t3);font-weight:600;margin-bottom:12px}
-        .trust-text{font-size:14px;color:var(--t3);max-width:500px;margin:0 auto}
+        .eyebrow {
+          font-family: var(--f-mono), ui-monospace, monospace;
+          font-size: 11px;
+          font-weight: 500;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: var(--fg-3);
+        }
 
-        .section{padding:120px 0}
-        .section-label{
-          font-size:13px;text-transform:uppercase;letter-spacing:0.1em;
-          font-weight:600;margin-bottom:16px;
+        .lp a { color: inherit; text-decoration: none; }
+        .lp a:focus-visible {
+          outline: 2px solid var(--iris);
+          outline-offset: 3px;
+          border-radius: 4px;
         }
-        .section-label .grad{background:var(--grad-text);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-        .section h2{
-          font-size:clamp(32px,4.5vw,52px);font-weight:700;
-          letter-spacing:-0.03em;line-height:1.1;margin-bottom:16px;
-        }
-        .section-desc{font-size:17px;color:var(--t2);max-width:520px;line-height:1.65}
 
-        .feature-block{
-          display:flex;flex-direction:column;gap:48px;
-          padding:80px 0;
+        /* Nav */
+        .nav {
+          position: sticky; top: 0; z-index: 50;
+          height: 56px;
+          border-bottom: 1px solid var(--line);
+          background: rgba(8,9,10,0.72);
+          backdrop-filter: blur(12px);
         }
-        .feature-text-row{
-          display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;
+        .nav-in {
+          max-width: var(--measure); margin: 0 auto; padding: 0 var(--pad);
+          height: 100%; display: flex; align-items: center; gap: 32px;
         }
-        .feature-visual{position:relative}
-        .feature-visual img{
-          width:100%;border-radius:12px;
-          border:1px solid rgba(255,255,255,0.05);
-          box-shadow:0 20px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.03);
-        }
-        .feature-visual::before{
-          content:'';position:absolute;inset:-1px;border-radius:13px;
-          background:linear-gradient(180deg,rgba(255,255,255,0.06) 0%,rgba(255,255,255,0.01) 100%);
-          z-index:0;pointer-events:none;
-        }
-        .feature-visual::after{
-          content:'';position:absolute;bottom:-80px;left:50%;transform:translateX(-50%);
-          width:70%;height:160px;
-          background:radial-gradient(ellipse,rgba(0,240,88,0.06) 0%,transparent 70%);
-          pointer-events:none;filter:blur(30px);
-        }
-        .feature-visual img{position:relative;z-index:1}
-        .feature-content h3{font-size:28px;font-weight:700;letter-spacing:-0.02em;margin-bottom:12px;line-height:1.2}
-        .feature-content p{font-size:15px;color:var(--t2);line-height:1.7;margin-bottom:20px}
-        .feature-tag{
-          display:inline-flex;align-items:center;gap:6px;
-          font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;
-          margin-bottom:16px;
-        }
-        .feature-tag .dot{width:5px;height:5px;border-radius:50%}
-        .ft-green .dot{background:var(--green)}
-        .ft-teal .dot{background:var(--teal)}
-        .ft-blue .dot{background:#60a5fa}
-        .ft-purple .dot{background:#c084fc}
-        .ft-orange .dot{background:#f97316}
-        .ft-green{color:var(--green)}
-        .ft-teal{color:var(--teal)}
-        .ft-blue{color:#60a5fa}
-        .ft-purple{color:#c084fc}
-        .ft-orange{color:#f97316}
+        .nav-mark { display: flex; align-items: center; gap: 9px; font-weight: 560; letter-spacing: -0.02em; }
+        .nav-mark img { height: 26px; width: auto; }
+        .nav-links { display: flex; gap: 26px; }
+        .nav-links a { font-size: 14px; color: var(--fg-2); transition: color .15s; }
+        .nav-links a:hover { color: var(--fg); }
+        .nav-end { margin-left: auto; display: flex; align-items: center; gap: 14px; }
 
-        .bento{
-          display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
-          background:var(--b1);border-radius:16px;overflow:hidden;
-          margin-top:64px;
+        /* Every button rule is scoped to .lp so it outranks the .lp a rule
+           above, which would otherwise force colour: inherit and draw the
+           solid button white on white. */
+        .lp .btn {
+          display: inline-flex; align-items: center; justify-content: center;
+          height: 34px; padding: 0 15px; border-radius: 7px;
+          font-size: 14px; font-weight: 500; letter-spacing: -0.01em;
+          border: 1px solid transparent; white-space: nowrap;
+          transition: background .15s, border-color .15s, color .15s;
         }
-        .bento-card{background:var(--surf);padding:36px 32px}
-        .bento-card h4{font-size:17px;font-weight:600;margin-bottom:8px;letter-spacing:-0.01em}
-        .bento-card p{font-size:14px;color:var(--t2);line-height:1.6}
-        .bento-icon{
-          width:36px;height:36px;border-radius:8px;
-          display:flex;align-items:center;justify-content:center;
-          margin-bottom:16px;
-        }
-        .bi-green{background:rgba(0,240,88,0.08);color:var(--green)}
-        .bi-teal{background:rgba(0,255,229,0.08);color:var(--teal)}
-        .bi-blue{background:rgba(96,165,250,0.08);color:#60a5fa}
-        .bi-purple{background:rgba(192,132,252,0.08);color:#c084fc}
-        .bi-orange{background:rgba(249,115,22,0.08);color:#f97316}
-        .bi-red{background:rgba(248,113,113,0.08);color:#f87171}
+        .lp .btn-quiet { color: var(--fg-2); }
+        .lp .btn-quiet:hover { color: var(--fg); }
+        .lp .btn-solid { background: var(--fg); color: #08090a; }
+        .lp .btn-solid:hover { background: #ffffff; }
+        .lp .btn-line { border-color: var(--line-2); color: var(--fg); }
+        .lp .btn-line:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.22); }
+        .lp .btn-lg { height: 42px; padding: 0 20px; font-size: 15px; border-radius: 8px; }
 
-        .divider{height:1px;background:linear-gradient(90deg,transparent,var(--b1) 20%,var(--b1) 80%,transparent);margin:0 auto;max-width:1000px}
+        /* Hero */
+        .hero { position: relative; padding: 108px 0 0; text-align: center; }
+        /* One soft light source, well behind everything. There is no second glow. */
+        .hero::before {
+          content: ""; position: absolute; inset: -20% 0 auto 50%;
+          width: 900px; height: 620px; transform: translateX(-50%);
+          background: radial-gradient(50% 50% at 50% 50%, rgba(174,166,253,0.13), transparent 72%);
+          pointer-events: none;
+        }
+        .hero > * { position: relative; }
+        .hero h1 {
+          margin: 22px auto 0;
+          max-width: 15ch;
+          font-size: clamp(2.6rem, 6.4vw, 4.35rem);
+        }
+        .hero-sub {
+          margin: 20px auto 0; max-width: 46ch; text-wrap: balance;
+          font-size: 17px; color: var(--fg-2); letter-spacing: -0.01em;
+        }
+        .hero-acts { margin-top: 30px; display: flex; gap: 11px; justify-content: center; flex-wrap: wrap; }
 
-        .cta-section{
-          padding:140px 0;text-align:center;position:relative;
+        /* The rule.
+           The signature. A caliper scale with the team set along it by
+           attention score, drawn once on load. It is the People Radar with
+           the table taken away. */
+        .rule { margin: 64px auto 0; max-width: 820px; text-align: left; }
+        .rule-head {
+          display: flex; align-items: baseline; justify-content: space-between;
+          gap: 16px; margin-bottom: 34px;
         }
-        .cta-section::before{
-          content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-          width:700px;height:400px;
-          background:radial-gradient(ellipse,rgba(0,240,88,0.06) 0%,transparent 65%);
-          pointer-events:none;
-        }
-        .cta-section h2{
-          font-size:clamp(36px,5vw,56px);font-weight:700;
-          letter-spacing:-0.03em;line-height:1.1;margin-bottom:16px;
-        }
-        .cta-section p{font-size:17px;color:var(--t2);max-width:440px;margin:0 auto 36px;line-height:1.6}
-        .cta-actions{display:flex;justify-content:center;gap:12px}
+        .rule-when { font-family: var(--f-mono), monospace; font-size: 11px; color: var(--fg-3); }
 
-        footer{
-          border-top:1px solid var(--b1);padding:48px 0;
+        .scale { position: relative; height: 124px; }
+        .scale-line { position: absolute; left: 0; right: 0; top: 84px; height: 1px; background: var(--line-2); }
+        .grad { position: absolute; top: 84px; width: 1px; }
+        .grad.major { height: 9px; background: var(--line-2); }
+        .grad.minor { height: 5px; background: var(--line); }
+        .scale-end {
+          position: absolute; top: 100px;
+          font-family: var(--f-mono), monospace; font-size: 10px; color: var(--fg-3);
         }
-        .footer-inner{
-          display:flex;align-items:center;justify-content:space-between;
+
+        .pin {
+          position: absolute; top: 8px;
+          transform: translateX(-50%);
+          text-align: center;
+          transition: left .9s cubic-bezier(.22,1,.36,1), opacity .5s ease;
+          opacity: 0;
         }
-        .footer-left{display:flex;align-items:center;gap:10px}
-        .footer-left span{font-size:13px;color:var(--t3)}
-        .footer-links{display:flex;gap:24px}
-        .footer-links a{font-size:13px;color:var(--t3);text-decoration:none;transition:color .2s}
-        .footer-links a:hover{color:var(--t2)}
+        .pin.set { opacity: 1; }
+        .pin-name { font-size: 13px; font-weight: 500; letter-spacing: -0.01em; white-space: nowrap; color: var(--fg-2); }
+        .pin-score { font-family: var(--f-mono), monospace; font-size: 11px; color: var(--fg-3); }
+        .pin-stem { width: 1px; height: 22px; margin: 6px auto 0; background: var(--line-2); }
+        /* Only the person at the top of the scale is drawn in the accent.
+           Highlight everyone and you have highlighted nobody. */
+        .pin.hot .pin-name { color: var(--fg); }
+        .pin.hot .pin-score { color: var(--iris); }
+        .pin.hot .pin-stem { background: linear-gradient(to bottom, var(--iris), var(--line-2)); }
 
-        @keyframes fadeInDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes fadeInUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
-
-        .reveal{opacity:0;transform:translateY(30px);transition:all .7s cubic-bezier(0.16,1,0.3,1)}
-        .reveal.visible{opacity:1;transform:translateY(0)}
-        .reveal-delay-1{transition-delay:.1s}
-        .reveal-delay-2{transition-delay:.2s}
-        .reveal-delay-3{transition-delay:.3s}
-
-        @media(max-width:900px){
-          .feature-text-row{grid-template-columns:1fr;gap:20px}
-          .bento{grid-template-columns:1fr}
-          .nav-links{display:none}
+        .verdict {
+          margin-top: 28px; display: inline-flex; align-items: center; gap: 10px;
+          padding: 9px 14px; border: 1px solid var(--line); border-radius: 8px;
+          background: var(--raise); font-size: 13.5px; color: var(--fg-2);
         }
-        @media(max-width:600px){
-          .hero h1{font-size:36px}
-          .hero-actions{flex-direction:column;align-items:center}
-          .footer-inner{flex-direction:column;gap:20px;text-align:center}
-          .cta-actions{flex-direction:column;align-items:center}
+        .verdict b { color: var(--fg); font-weight: 560; }
+        .verdict i {
+          width: 5px; height: 5px; border-radius: 50%; background: var(--iris);
+          box-shadow: 0 0 0 3px var(--iris-dim); flex: none;
+        }
+
+        /* Framed screenshots */
+        .frame {
+          border: 1px solid var(--line); border-radius: 11px;
+          background: var(--raise); overflow: hidden;
+        }
+        .frame img { display: block; width: 100%; height: auto; }
+        .row .frame { aspect-ratio: 16 / 10; }
+        .row .frame img { height: 100%; object-fit: cover; object-position: top left; }
+        .hero-shot { margin: 88px auto 0; max-width: 1180px; padding: 0 var(--pad); }
+        .hero-shot .frame { box-shadow: 0 40px 90px -40px rgba(0,0,0,0.9); }
+
+        /* Sections */
+        .band { padding: 116px 0; }
+        .hr { height: 1px; background: var(--line); border: 0; margin: 0; }
+
+        .band-head { max-width: 46ch; }
+        .band-head h2 { margin-top: 18px; font-size: clamp(1.9rem, 3.6vw, 2.6rem); }
+        .band-head p { margin-top: 16px; color: var(--fg-2); font-size: 16.5px; }
+
+        /* Feature rows */
+        .rows { margin-top: 76px; display: flex; flex-direction: column; gap: 96px; }
+        .row { display: grid; grid-template-columns: minmax(0,0.85fr) minmax(0,1.15fr); gap: 56px; align-items: center; }
+        .row:nth-child(even) .row-copy { order: 2; }
+        .row-copy h3 { margin-top: 16px; font-size: 1.6rem; }
+        .row-copy p { margin-top: 14px; color: var(--fg-2); font-size: 15.5px; }
+        /* The label sits on the same tick mark used on the rule above. Same
+           instrument, read at a different scale. */
+        .row-label { display: flex; align-items: center; gap: 10px; }
+        .row-label::before { content: ""; width: 14px; height: 1px; background: var(--iris); flex: none; }
+
+        /* Grid. One hairline does the work of twelve borders. */
+        .cells {
+          margin-top: 62px;
+          display: grid; grid-template-columns: repeat(3, 1fr);
+          border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+          background: var(--line); gap: 1px;
+        }
+        .cell { background: var(--ink); padding: 30px 26px 34px; transition: background .18s; }
+        .cell:hover { background: var(--raise); }
+        .cell h4 { font-size: 15.5px; font-weight: 560; letter-spacing: -0.015em; }
+        .cell p { margin-top: 10px; color: var(--fg-2); font-size: 14px; line-height: 1.62; }
+
+        /* Close */
+        .close { padding: 128px 0; text-align: center; }
+        .close h2 { font-size: clamp(2rem, 4.4vw, 3rem); max-width: 24ch; margin: 0 auto; text-wrap: balance; }
+        .close p { margin: 18px auto 0; max-width: 46ch; color: var(--fg-2); }
+        .close-acts { margin-top: 30px; display: flex; gap: 11px; justify-content: center; flex-wrap: wrap; }
+
+        .foot { border-top: 1px solid var(--line); padding: 30px 0 44px; }
+        .foot-in { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+        .foot-mark { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--fg-3); }
+        .foot-mark img { height: 18px; width: auto; opacity: .5; }
+        .foot-links { margin-left: auto; display: flex; gap: 22px; font-size: 13px; color: var(--fg-3); }
+        .foot-links a:hover { color: var(--fg-2); }
+
+        /* Reveal */
+        .rise { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s cubic-bezier(.22,1,.36,1); }
+        .rise.is-in { opacity: 1; transform: none; }
+
+        @media (max-width: 860px) {
+          .nav-links { display: none; }
+          .row { grid-template-columns: 1fr; gap: 28px; }
+          .row:nth-child(even) .row-copy { order: 0; }
+          .cells { grid-template-columns: 1fr; }
+          .band { padding: 84px 0; }
+          .hero { padding-top: 72px; }
+          .rule { margin-top: 60px; }
+          .pin-name { font-size: 11.5px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .lp *, .lp *::before, .lp *::after {
+            transition-duration: 0.01ms !important;
+            animation-duration: 0.01ms !important;
+          }
+          .rise { opacity: 1; transform: none; }
         }
       `}</style>
 
-      {/* NAVIGATION */}
-      <nav>
-        <div className="nav-inner">
-          <a href="#" className="nav-logo">
-            <img src="/logo_transparent.png" alt="Caliber" style={{height:"32px",width:"auto"}} />
-          </a>
-          <div className="nav-links">
-            <a href="#features">Features</a>
-            <a href="#workflow">Workflow</a>
-            <a href="#ai">AI</a>
+      <div className="lp">
+        <nav className="nav">
+          <div className="nav-in">
+            <a href="#top" className="nav-mark" aria-label="Caliber, back to top">
+              <img src="/logo_transparent.png" alt="" />
+            </a>
+            <div className="nav-links">
+              <a href="#work">How it works</a>
+              <a href="#built">What you get</a>
+            </div>
+            <div className="nav-end">
+              <Link href="/login" className="btn btn-quiet">Log in</Link>
+              <Link href="/login" className="btn btn-solid">Get started</Link>
+            </div>
           </div>
-          <div className="nav-actions">
-            <Link href="/login" className="btn-ghost">Log in</Link>
-            <Link href="/login" className="btn-primary">Sign up</Link>
-          </div>
-        </div>
-      </nav>
+        </nav>
 
-      {/* HERO */}
-      <section className="hero">
-        <div className="container">
-          <div className="hero-badge"><span className="hero-badge-dot"></span> Now with AI-powered review drafts</div>
-          <h1>The operating system<br />for <span className="grad">engineering managers</span></h1>
-          <p className="hero-sub">Track your team, run your 1:1s, write better reviews, and never lose a follow-up. One tool, no spreadsheets, no juggling.</p>
-          <div className="hero-actions">
-            <Link href="/login" className="btn-hero btn-hero-primary">Get started — it&apos;s free</Link>
-            <a href="#features" className="btn-hero btn-hero-secondary">See how it works</a>
-          </div>
-        </div>
-        <div className="container-wide">
-          <div className="hero-screenshot">
-            <img src="/landing/dashboard.png" alt="Caliber dashboard showing meetings, tasks due, and calendar view" />
-          </div>
-        </div>
-      </section>
+        <header className="hero" id="top">
+          <div className="wrap">
+            <p className="eyebrow">Engineering management, measured</p>
+            <h1>Know who needs you before they ask</h1>
+            <p className="hero-sub">
+              Caliber scores your team on signals you already generate, so attention goes where
+              it is needed rather than where it is loudest.
+            </p>
+            <div className="hero-acts">
+              <Link href="/login" className="btn btn-solid btn-lg">Get started, it is free</Link>
+              <a href="#work" className="btn btn-line btn-lg">See how it works</a>
+            </div>
 
-      {/* TRUST BAR */}
-      <section className="trust">
-        <div className="container">
-          <div className="trust-label">Built for ICs turned managers</div>
-          <p className="trust-text">Caliber replaces the Notion templates, Jira workarounds, and spreadsheets you&apos;re already using. Everything in one place, private to you.</p>
-        </div>
-      </section>
-
-      <div className="divider"></div>
-
-      {/* FEATURES SECTION */}
-      <section className="section" id="features">
-        <div className="container">
-          <div className="section-label"><span className="grad">Features</span></div>
-          <h2>Everything an EM needs.</h2>
-          <p className="section-desc">Purpose-built surfaces for the work engineering managers actually do — from Monday review to Friday summary.</p>
-        </div>
-      </section>
-
-      {/* Feature 1: Weekly Review */}
-      <div className="container-wide">
-        <div className="feature-block reveal">
-          <div className="feature-content" style={{maxWidth:"600px"}}>
-            <div className="feature-tag ft-green"><span className="dot"></span> Weekly Review</div>
-            <h3>Start every week with clarity</h3>
-            <p>Caliber scans your people, tasks, and meetings and surfaces what needs attention. Overdue follow-ups, missed 1:1s, ageing action items — all in one guided checklist. Mark the week as reviewed when you&apos;re done.</p>
-          </div>
-          <div className="feature-visual">
-            <img src="/landing/weekly-review.png" alt="Weekly Review page showing people check, action items, and tasks sections" />
-          </div>
-        </div>
-      </div>
-
-      {/* Feature 2: People Radar */}
-      <div className="container-wide">
-        <div className="feature-block reveal">
-          <div className="feature-content" style={{maxWidth:"600px"}}>
-            <div className="feature-tag ft-teal"><span className="dot"></span> People Radar</div>
-            <h3>Know who needs you before they ask</h3>
-            <p>Every team member gets an attention score based on real signals: 1:1 gaps, stale evidence, open follow-ups, recurring topics. People who need attention float to the top.</p>
-          </div>
-          <div className="feature-visual">
-            <img src="/landing/people-radar.png" alt="People Radar showing attention scores and signals for each team member" />
-          </div>
-        </div>
-      </div>
-
-      {/* Feature 3: Evidence Bank */}
-      <div className="container-wide">
-        <div className="feature-block reveal">
-          <div className="feature-content" style={{maxWidth:"600px"}}>
-            <div className="feature-tag ft-purple"><span className="dot"></span> Evidence Bank</div>
-            <h3>Reviews without recency bias</h3>
-            <p>Log achievements, feedback, concerns, and growth moments throughout the year. When review season comes, everything is already there — categorised, timestamped, and grouped by person.</p>
-          </div>
-          <div className="feature-visual">
-            <img src="/landing/evidence-bank.png" alt="Evidence Bank showing categorised entries across team members" />
-          </div>
-        </div>
-      </div>
-
-      {/* Feature 4: Tasks */}
-      <div className="container-wide" id="workflow">
-        <div className="feature-block reveal">
-          <div className="feature-content" style={{maxWidth:"600px"}}>
-            <div className="feature-tag ft-orange"><span className="dot"></span> Tasks &amp; Kanban</div>
-            <h3>Your work, your week, your board</h3>
-            <p>A kanban board built for your week — not your team&apos;s sprint. Drag tasks between Not Started, In Progress, Blocked, and Done. A separate backlog keeps future work out of sight until you need it.</p>
-          </div>
-          <div className="feature-visual">
-            <img src="/landing/tasks.png" alt="Kanban board showing tasks organised by status with priority badges" />
-          </div>
-        </div>
-      </div>
-
-      {/* Feature 5: Career Framework */}
-      <div className="container-wide">
-        <div className="feature-block reveal">
-          <div className="feature-content" style={{maxWidth:"600px"}}>
-            <div className="feature-tag ft-blue"><span className="dot"></span> Career Framework</div>
-            <h3>Competencies that actually get used</h3>
-            <p>Define your own engineering ladder. Assess each person against it over time. See who&apos;s at level, who&apos;s growing, and where the gaps are — per person and across the team.</p>
-          </div>
-          <div className="feature-visual">
-            <img src="/landing/skills-matrix.png" alt="Skills matrix showing team competency assessments with gap analysis" />
-          </div>
-        </div>
-      </div>
-
-      <div className="divider"></div>
-
-      {/* BENTO GRID */}
-      <section className="section" id="ai">
-        <div className="container">
-          <div className="section-label"><span className="grad">Built different</span></div>
-          <h2>Designed for how<br />EMs actually work</h2>
-          <p className="section-desc">Not another HR tool that needs team-wide adoption. Caliber is your private control centre.</p>
-
-          <div className="bento reveal">
-            <div className="bento-card">
-              <div className="bento-icon bi-green">
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4L15 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <section className="rule" aria-label="Example attention scale">
+              <div className="rule-head">
+                <span className="eyebrow">Attention scale</span>
+                <span className="rule-when">this week</span>
               </div>
-              <h4>Free, forever</h4>
-              <p>No per-seat pricing. No trial that expires. Your data, your tool, no strings attached.</p>
-            </div>
-            <div className="bento-card">
-              <div className="bento-icon bi-teal">
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" strokeWidth="1.5"/><path d="M9 5v4l3 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+
+              <div className="scale">
+                {Array.from({ length: 21 }, (_, tick) => (
+                  <span
+                    key={tick}
+                    className={`grad ${tick % 5 === 0 ? "major" : "minor"}`}
+                    style={{ left: `${tick * 5}%` }}
+                  />
+                ))}
+                <span className="scale-line" />
+                <span className="scale-end" style={{ left: 0 }}>0</span>
+                <span className="scale-end" style={{ right: 0 }}>100</span>
+
+                {RADAR.map((person, index) => (
+                  <div
+                    key={person.name}
+                    className={`pin${armed ? " set" : ""}${person === hottest ? " hot" : ""}`}
+                    style={{
+                      left: armed ? `${person.score}%` : "0%",
+                      transitionDelay: `${140 + index * 90}ms`,
+                    }}
+                  >
+                    <div className="pin-name">{person.name}</div>
+                    <div className="pin-score">{person.score}</div>
+                    <div className="pin-stem" />
+                  </div>
+                ))}
               </div>
-              <h4>Weekly Summary</h4>
-              <p>One click generates a copy-pasteable status update from your week&apos;s data. Slack, email, skip-level — done.</p>
+
+              <p className="verdict">
+                <i />
+                <span><b>{hottest.name}</b> is top of the scale. No 1:1 in five weeks.</span>
+              </p>
+            </section>
+          </div>
+
+          <div className="hero-shot rise">
+            <figure className="frame">
+              <img src="/landing/dashboard.png" alt="Caliber dashboard showing meetings, tasks due and the month view" />
+            </figure>
+          </div>
+        </header>
+
+        <section className="band" id="work">
+          <div className="wrap">
+            <div className="band-head">
+              <p className="eyebrow">How it works</p>
+              <h2>Five surfaces, one week</h2>
+              <p>
+                Caliber is not a place to file things. Each surface answers a question you already
+                ask yourself somewhere between Monday and Friday.
+              </p>
             </div>
-            <div className="bento-card">
-              <div className="bento-icon bi-purple">
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2l2.5 5H16l-4 3.5 1.5 5.5L9 13l-4.5 3 1.5-5.5L2 7h4.5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/></svg>
-              </div>
-              <h4>BYOK AI</h4>
-              <p>Bring your own API key. AI drafts reviews, preps 1:1s, extracts action items, and suggests growth plans. You pay pennies, not subscriptions.</p>
-            </div>
-            <div className="bento-card">
-              <div className="bento-icon bi-blue">
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="3" width="14" height="12" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M6 1v3M12 1v3M2 7h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
-              </div>
-              <h4>Calendar View</h4>
-              <p>See your tasks, deadlines, and meetings on a monthly calendar. Know what&apos;s coming without leaving Caliber.</p>
-            </div>
-            <div className="bento-card">
-              <div className="bento-icon bi-orange">
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 15V7l6-4 6 4v8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M7 15v-4h4v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              </div>
-              <h4>Follow-up Engine</h4>
-              <p>Track every commitment you make. Caliber surfaces unresolved promises that keep ageing — before your team notices you forgot.</p>
-            </div>
-            <div className="bento-card">
-              <div className="bento-icon bi-red">
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M15 3L3 15M3 3l12 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
-              </div>
-              <h4>No team adoption needed</h4>
-              <p>Your team doesn&apos;t log in. They don&apos;t even know it exists. Caliber is your private manager toolkit.</p>
+
+            <div className="rows">
+              {FEATURES.map((feature) => (
+                <article className="row rise" key={feature.label}>
+                  <div className="row-copy">
+                    <p className="eyebrow row-label">{feature.label}</p>
+                    <h3>{feature.title}</h3>
+                    <p>{feature.body}</p>
+                  </div>
+                  <figure className="frame">
+                    <img src={feature.shot} alt={feature.alt} />
+                  </figure>
+                </article>
+              ))}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <div className="divider"></div>
+        <hr className="hr" />
 
-      {/* CTA */}
-      <section className="cta-section">
-        <div className="container">
-          <h2>Stop juggling.<br /><span style={{background:"var(--grad-text)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>Start managing.</span></h2>
-          <p>Set up in 2 minutes. No credit card. No team rollout. Just you and a better way to lead.</p>
-          <div className="cta-actions">
-            <Link href="/login" className="btn-hero btn-hero-primary">Get started — it&apos;s free</Link>
-            <Link href="/login" className="btn-hero btn-hero-secondary">Log in</Link>
-          </div>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer>
-        <div className="container">
-          <div className="footer-inner">
-            <div className="footer-left">
-              <img src="/logo_transparent.png" alt="Caliber" style={{height:"24px",width:"auto",opacity:0.6}} />
-              <span>© 2026 Caliber</span>
+        <section className="band" id="built">
+          <div className="wrap">
+            <div className="band-head">
+              <p className="eyebrow">What you get</p>
+              <h2>A private instrument, not a rollout</h2>
+              <p>
+                Nothing here needs your team to adopt it, your director to approve it, or a
+                procurement conversation to happen first.
+              </p>
             </div>
-            <div className="footer-links">
+
+            <div className="cells rise">
+              {GRID.map((cell) => (
+                <div className="cell" key={cell.title}>
+                  <h4>{cell.title}</h4>
+                  <p>{cell.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <hr className="hr" />
+
+        <section className="close">
+          <div className="wrap">
+            <h2>Set it up before your next 1:1</h2>
+            <p>Two minutes, no card, no rollout. Add your team and the scale fills itself in.</p>
+            <div className="close-acts">
+              <Link href="/login" className="btn btn-solid btn-lg">Get started, it is free</Link>
+              <Link href="/login" className="btn btn-line btn-lg">Log in</Link>
+            </div>
+          </div>
+        </section>
+
+        <footer className="foot">
+          <div className="wrap foot-in">
+            <span className="foot-mark">
+              <img src="/logo_transparent.png" alt="" />
+              © 2026
+            </span>
+            <div className="foot-links">
               <Link href="/login">Log in</Link>
-              <Link href="/login">Sign up</Link>
               <Link href="/privacy">Privacy</Link>
               <Link href="/terms">Terms</Link>
+              <a href="https://github.com/shiphrahx/Caliber">GitHub</a>
             </div>
           </div>
-        </div>
-      </footer>
-    </>
+        </footer>
+      </div>
+    </div>
   )
 }
