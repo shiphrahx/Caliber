@@ -1,5 +1,5 @@
 -- =============================================================================
--- CADENCE SEED DATA
+-- CALIBER SEED DATA
 -- Run in Supabase SQL Editor.
 -- Replace YOUR_USER_ID with your actual auth.users id (find it in Auth > Users).
 -- =============================================================================

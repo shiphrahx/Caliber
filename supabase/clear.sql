@@ -1,5 +1,5 @@
 -- =============================================================================
--- CADENCE CLEAR SCRIPT
+-- CALIBER CLEAR SCRIPT
 -- Deletes all data for a specific user. Schema, RLS policies, and auth.users
 -- are left untouched. Safe to run before re-seeding.
 --
