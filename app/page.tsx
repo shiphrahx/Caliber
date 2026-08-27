@@ -22,6 +22,15 @@ const mono = JetBrains_Mono({
  * further down are. Score is the attention score: how much of your week this
  * person has a claim on, from 1:1 gaps, ageing follow-ups and stale evidence.
  */
+/**
+ * Where this build is served from.
+ *
+ * Empty in the app, "/Caliber" in the GitHub Pages export. basePath handles
+ * next/link and next/image on its own but leaves a plain <img src> alone, and
+ * every screenshot on this page is a plain img.
+ */
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
+
 const RADAR = [
   { name: "Marcus", score: 12 },
   { name: "Ana", score: 31 },
@@ -35,7 +44,7 @@ const FEATURES = [
     title: "Start the week knowing what slipped",
     body:
       "Caliber reads your people, tasks and meetings, then hands you a checklist of what needs attention. Overdue follow-ups, missed 1:1s, ageing action items. Mark the week reviewed when it's clear.",
-    shot: "/landing/weekly-review.png",
+    shot: BASE + "/landing/weekly-review.png",
     alt: "Weekly review showing people check, action items and tasks",
   },
   {
@@ -43,7 +52,7 @@ const FEATURES = [
     title: "Know who needs you before they ask",
     body:
       "Every person gets an attention score built from real signals: gaps between 1:1s, stale evidence, open follow-ups, topics that keep coming back. Whoever needs you most sits at the top.",
-    shot: "/landing/people-radar.png",
+    shot: BASE + "/landing/people-radar.png",
     alt: "People radar showing attention scores and signals per team member",
   },
   {
@@ -51,7 +60,7 @@ const FEATURES = [
     title: "Reviews that aren't written from memory",
     body:
       "Log achievements, feedback, concerns and growth moments as they happen. Come review season it is already there, categorised, timestamped and grouped by person.",
-    shot: "/landing/evidence-bank.png",
+    shot: BASE + "/landing/evidence-bank.png",
     alt: "Evidence bank showing categorised entries across team members",
   },
   {
@@ -59,7 +68,7 @@ const FEATURES = [
     title: "A board for your week, not your team's sprint",
     body:
       "Drag work between not started, in progress, blocked and done. The backlog keeps everything else out of sight until the week you need it.",
-    shot: "/landing/tasks.png",
+    shot: BASE + "/landing/tasks.png",
     alt: "Kanban board showing tasks by status with priority badges",
   },
   {
@@ -67,7 +76,7 @@ const FEATURES = [
     title: "A ladder people are actually measured against",
     body:
       "Define your own competencies. Assess each person against them over time. See who is at level, who is climbing and where the gaps sit, per person and across the team.",
-    shot: "/landing/skills-matrix.png",
+    shot: BASE + "/landing/skills-matrix.png",
     alt: "Skills matrix showing competency assessments and gap analysis",
   },
 ]
@@ -378,7 +387,7 @@ export default function LandingPage() {
         <nav className="nav">
           <div className="nav-in">
             <a href="#top" className="nav-mark" aria-label="Caliber, back to top">
-              <img src="/logo_transparent.png" alt="" />
+              <img src={`${BASE}/logo_transparent.png`} alt="" />
             </a>
             <div className="nav-links">
               <a href="#work">How it works</a>
@@ -447,7 +456,7 @@ export default function LandingPage() {
 
           <div className="hero-shot rise">
             <figure className="frame">
-              <img src="/landing/dashboard.png" alt="Caliber dashboard showing meetings, tasks due and the month view" />
+              <img src={`${BASE}/landing/dashboard.png`} alt="Caliber dashboard showing meetings, tasks due and the month view" />
             </figure>
           </div>
         </header>
@@ -526,7 +535,7 @@ export default function LandingPage() {
         <footer className="foot">
           <div className="wrap foot-in">
             <span className="foot-mark">
-              <img src="/logo_transparent.png" alt="" />
+              <img src={`${BASE}/logo_transparent.png`} alt="" />
               © 2026
             </span>
             <div className="foot-links">

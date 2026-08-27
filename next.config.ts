@@ -50,6 +50,8 @@ const nextConfig: NextConfig = isPagesExport
       assetPrefix: "/Caliber",
       images: { unoptimized: true },
       trailingSlash: true,
+      // Read by app/page.tsx, which has to prefix its own <img> tags.
+      env: { NEXT_PUBLIC_BASE_PATH: "/Caliber" },
     }
   : {
       async headers() {
