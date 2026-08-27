@@ -222,6 +222,10 @@ export default function LandingPage() {
         .lp .btn-solid:hover { background: #ffffff; }
         .lp .btn-line { border-color: var(--line-2); color: var(--fg); }
         .lp .btn-line:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.22); }
+        .lp .btn-soon {
+          background: var(--iris-dim); color: var(--iris);
+          border-color: rgba(174,166,253,0.28); cursor: default;
+        }
         .lp .btn-lg { height: 42px; padding: 0 20px; font-size: 15px; border-radius: 8px; }
 
         /* Hero */
@@ -381,8 +385,8 @@ export default function LandingPage() {
               <a href="#built">What you get</a>
             </div>
             <div className="nav-end">
-              <Link href="/login" className="btn btn-quiet">Log in</Link>
-              <Link href="/login" className="btn btn-solid">Get started</Link>
+              <a href="https://github.com/shiphrahx/Caliber" className="btn btn-quiet">GitHub</a>
+              <span className="btn btn-soon">Launching soon</span>
             </div>
           </div>
         </nav>
@@ -396,7 +400,7 @@ export default function LandingPage() {
               it is needed rather than where it is loudest.
             </p>
             <div className="hero-acts">
-              <Link href="/login" className="btn btn-solid btn-lg">Get started, it is free</Link>
+              <span className="btn btn-soon btn-lg">Launching soon</span>
               <a href="#work" className="btn btn-line btn-lg">See how it works</a>
             </div>
 
@@ -506,11 +510,15 @@ export default function LandingPage() {
 
         <section className="close">
           <div className="wrap">
-            <h2>Set it up before your next 1:1</h2>
-            <p>Two minutes, no card, no rollout. Add your team and the scale fills itself in.</p>
+            <h2>Not open yet</h2>
+            <p>
+              Caliber is still being built. It will be free when it opens, and it is being built
+              in the open, so the code is there to read in the meantime.
+            </p>
             <div className="close-acts">
-              <Link href="/login" className="btn btn-solid btn-lg">Get started, it is free</Link>
-              <Link href="/login" className="btn btn-line btn-lg">Log in</Link>
+              <a href="https://github.com/shiphrahx/Caliber" className="btn btn-line btn-lg">
+                Read the code on GitHub
+              </a>
             </div>
           </div>
         </section>
@@ -522,7 +530,6 @@ export default function LandingPage() {
               © 2026
             </span>
             <div className="foot-links">
-              <Link href="/login">Log in</Link>
               <Link href="/privacy">Privacy</Link>
               <Link href="/terms">Terms</Link>
               <a href="https://github.com/shiphrahx/Caliber">GitHub</a>
