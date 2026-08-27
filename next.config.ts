@@ -30,15 +30,36 @@ const securityHeaders = [
   { key: "X-DNS-Prefetch-Control", value: "on" },
 ];
 
-const nextConfig: NextConfig = {
-  async headers() {
-    return [
-      {
-        source: "/(.*)",
-        headers: securityHeaders,
+/**
+ * The GitHub Pages build.
+ *
+ * Pages serves files, not a server, so this mode exports the marketing pages
+ * on their own. The workflow strips everything that needs a server first, and
+ * headers() goes with it: a static host sets its own, and Next refuses to
+ * export at all while it is declared.
+ *
+ * basePath is the repo name because this is a project site, served from
+ * /Caliber rather than the root of the domain.
+ */
+const isPagesExport = process.env["PAGES_EXPORT"] === "1";
+
+const nextConfig: NextConfig = isPagesExport
+  ? {
+      output: "export",
+      basePath: "/Caliber",
+      assetPrefix: "/Caliber",
+      images: { unoptimized: true },
+      trailingSlash: true,
+    }
+  : {
+      async headers() {
+        return [
+          {
+            source: "/(.*)",
+            headers: securityHeaders,
+          },
+        ];
       },
-    ];
-  },
-};
+    };
 
 export default nextConfig;
