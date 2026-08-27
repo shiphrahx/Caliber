@@ -118,15 +118,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_user_profiles_updated_at ON public.user_profiles;
 CREATE TRIGGER update_user_profiles_updated_at BEFORE UPDATE ON public.user_profiles
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_teams_updated_at ON public.teams;
 CREATE TRIGGER update_teams_updated_at BEFORE UPDATE ON public.teams
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_people_updated_at ON public.people;
 CREATE TRIGGER update_people_updated_at BEFORE UPDATE ON public.people
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_tasks_updated_at ON public.tasks;
 CREATE TRIGGER update_tasks_updated_at BEFORE UPDATE ON public.tasks
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -143,42 +147,54 @@ ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.task_relations ENABLE ROW LEVEL SECURITY;
 
 -- User Profiles: Users can only read/write their own profile
+DROP POLICY IF EXISTS "Users can view own profile" ON public.user_profiles;
 CREATE POLICY "Users can view own profile" ON public.user_profiles
   FOR SELECT USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can update own profile" ON public.user_profiles;
 CREATE POLICY "Users can update own profile" ON public.user_profiles
   FOR UPDATE USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.user_profiles;
 CREATE POLICY "Users can insert own profile" ON public.user_profiles
   FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- Teams: Users can only access their own teams
+DROP POLICY IF EXISTS "Users can view own teams" ON public.teams;
 CREATE POLICY "Users can view own teams" ON public.teams
   FOR SELECT USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can insert own teams" ON public.teams;
 CREATE POLICY "Users can insert own teams" ON public.teams
   FOR INSERT WITH CHECK (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can update own teams" ON public.teams;
 CREATE POLICY "Users can update own teams" ON public.teams
   FOR UPDATE USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can delete own teams" ON public.teams;
 CREATE POLICY "Users can delete own teams" ON public.teams
   FOR DELETE USING (auth.uid() = owning_user_id);
 
 -- People: Users can only access their own people
+DROP POLICY IF EXISTS "Users can view own people" ON public.people;
 CREATE POLICY "Users can view own people" ON public.people
   FOR SELECT USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can insert own people" ON public.people;
 CREATE POLICY "Users can insert own people" ON public.people
   FOR INSERT WITH CHECK (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can update own people" ON public.people;
 CREATE POLICY "Users can update own people" ON public.people
   FOR UPDATE USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can delete own people" ON public.people;
 CREATE POLICY "Users can delete own people" ON public.people
   FOR DELETE USING (auth.uid() = owning_user_id);
 
 -- Team Memberships: Users can access memberships for their teams/people
+DROP POLICY IF EXISTS "Users can view own team memberships" ON public.team_memberships;
 CREATE POLICY "Users can view own team memberships" ON public.team_memberships
   FOR SELECT USING (
     EXISTS (
@@ -186,6 +202,7 @@ CREATE POLICY "Users can view own team memberships" ON public.team_memberships
     )
   );
 
+DROP POLICY IF EXISTS "Users can insert own team memberships" ON public.team_memberships;
 CREATE POLICY "Users can insert own team memberships" ON public.team_memberships
   FOR INSERT WITH CHECK (
     EXISTS (
@@ -193,6 +210,7 @@ CREATE POLICY "Users can insert own team memberships" ON public.team_memberships
     )
   );
 
+DROP POLICY IF EXISTS "Users can update own team memberships" ON public.team_memberships;
 CREATE POLICY "Users can update own team memberships" ON public.team_memberships
   FOR UPDATE USING (
     EXISTS (
@@ -200,6 +218,7 @@ CREATE POLICY "Users can update own team memberships" ON public.team_memberships
     )
   );
 
+DROP POLICY IF EXISTS "Users can delete own team memberships" ON public.team_memberships;
 CREATE POLICY "Users can delete own team memberships" ON public.team_memberships
   FOR DELETE USING (
     EXISTS (
@@ -208,19 +227,24 @@ CREATE POLICY "Users can delete own team memberships" ON public.team_memberships
   );
 
 -- Tasks: Users can only access their own tasks
+DROP POLICY IF EXISTS "Users can view own tasks" ON public.tasks;
 CREATE POLICY "Users can view own tasks" ON public.tasks
   FOR SELECT USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can insert own tasks" ON public.tasks;
 CREATE POLICY "Users can insert own tasks" ON public.tasks
   FOR INSERT WITH CHECK (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can update own tasks" ON public.tasks;
 CREATE POLICY "Users can update own tasks" ON public.tasks
   FOR UPDATE USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can delete own tasks" ON public.tasks;
 CREATE POLICY "Users can delete own tasks" ON public.tasks
   FOR DELETE USING (auth.uid() = owning_user_id);
 
 -- Task Relations: Users can access relations for their tasks
+DROP POLICY IF EXISTS "Users can view own task relations" ON public.task_relations;
 CREATE POLICY "Users can view own task relations" ON public.task_relations
   FOR SELECT USING (
     EXISTS (
@@ -228,6 +252,7 @@ CREATE POLICY "Users can view own task relations" ON public.task_relations
     )
   );
 
+DROP POLICY IF EXISTS "Users can insert own task relations" ON public.task_relations;
 CREATE POLICY "Users can insert own task relations" ON public.task_relations
   FOR INSERT WITH CHECK (
     EXISTS (
@@ -235,6 +260,7 @@ CREATE POLICY "Users can insert own task relations" ON public.task_relations
     )
   );
 
+DROP POLICY IF EXISTS "Users can update own task relations" ON public.task_relations;
 CREATE POLICY "Users can update own task relations" ON public.task_relations
   FOR UPDATE USING (
     EXISTS (
@@ -242,6 +268,7 @@ CREATE POLICY "Users can update own task relations" ON public.task_relations
     )
   );
 
+DROP POLICY IF EXISTS "Users can delete own task relations" ON public.task_relations;
 CREATE POLICY "Users can delete own task relations" ON public.task_relations
   FOR DELETE USING (
     EXISTS (
@@ -276,11 +303,13 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Triggers for cascading task deletion
+DROP TRIGGER IF EXISTS cascade_delete_person_tasks ON public.people;
 CREATE TRIGGER cascade_delete_person_tasks
   BEFORE DELETE ON public.people
   FOR EACH ROW
   EXECUTE FUNCTION delete_orphaned_tasks('person');
 
+DROP TRIGGER IF EXISTS cascade_delete_team_tasks ON public.teams;
 CREATE TRIGGER cascade_delete_team_tasks
   BEFORE DELETE ON public.teams
   FOR EACH ROW
@@ -379,18 +408,23 @@ CREATE INDEX IF NOT EXISTS idx_achievements_user ON public.achievements(owning_u
 -- ============================================================================
 -- TRIGGERS for Career Goals updated_at timestamps
 -- ============================================================================
+DROP TRIGGER IF EXISTS update_career_goals_profiles_updated_at ON public.career_goals_profiles;
 CREATE TRIGGER update_career_goals_profiles_updated_at BEFORE UPDATE ON public.career_goals_profiles
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_gap_analysis_categories_updated_at ON public.gap_analysis_categories;
 CREATE TRIGGER update_gap_analysis_categories_updated_at BEFORE UPDATE ON public.gap_analysis_categories
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_focus_distributions_updated_at ON public.focus_distributions;
 CREATE TRIGGER update_focus_distributions_updated_at BEFORE UPDATE ON public.focus_distributions
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_career_goals_updated_at ON public.career_goals;
 CREATE TRIGGER update_career_goals_updated_at BEFORE UPDATE ON public.career_goals
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_achievements_updated_at ON public.achievements;
 CREATE TRIGGER update_achievements_updated_at BEFORE UPDATE ON public.achievements
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -406,67 +440,87 @@ ALTER TABLE public.career_goals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.achievements ENABLE ROW LEVEL SECURITY;
 
 -- Career Goals Profiles: Users can only access their own profile
+DROP POLICY IF EXISTS "Users can view own career profile" ON public.career_goals_profiles;
 CREATE POLICY "Users can view own career profile" ON public.career_goals_profiles
   FOR SELECT USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can insert own career profile" ON public.career_goals_profiles;
 CREATE POLICY "Users can insert own career profile" ON public.career_goals_profiles
   FOR INSERT WITH CHECK (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can update own career profile" ON public.career_goals_profiles;
 CREATE POLICY "Users can update own career profile" ON public.career_goals_profiles
   FOR UPDATE USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can delete own career profile" ON public.career_goals_profiles;
 CREATE POLICY "Users can delete own career profile" ON public.career_goals_profiles
   FOR DELETE USING (auth.uid() = owning_user_id);
 
 -- Gap Analysis Categories: Users can only access their own categories
+DROP POLICY IF EXISTS "Users can view own gap categories" ON public.gap_analysis_categories;
 CREATE POLICY "Users can view own gap categories" ON public.gap_analysis_categories
   FOR SELECT USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can insert own gap categories" ON public.gap_analysis_categories;
 CREATE POLICY "Users can insert own gap categories" ON public.gap_analysis_categories
   FOR INSERT WITH CHECK (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can update own gap categories" ON public.gap_analysis_categories;
 CREATE POLICY "Users can update own gap categories" ON public.gap_analysis_categories
   FOR UPDATE USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can delete own gap categories" ON public.gap_analysis_categories;
 CREATE POLICY "Users can delete own gap categories" ON public.gap_analysis_categories
   FOR DELETE USING (auth.uid() = owning_user_id);
 
 -- Focus Distributions: Users can only access their own distributions
+DROP POLICY IF EXISTS "Users can view own focus distributions" ON public.focus_distributions;
 CREATE POLICY "Users can view own focus distributions" ON public.focus_distributions
   FOR SELECT USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can insert own focus distributions" ON public.focus_distributions;
 CREATE POLICY "Users can insert own focus distributions" ON public.focus_distributions
   FOR INSERT WITH CHECK (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can update own focus distributions" ON public.focus_distributions;
 CREATE POLICY "Users can update own focus distributions" ON public.focus_distributions
   FOR UPDATE USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can delete own focus distributions" ON public.focus_distributions;
 CREATE POLICY "Users can delete own focus distributions" ON public.focus_distributions
   FOR DELETE USING (auth.uid() = owning_user_id);
 
 -- Career Goals: Users can only access their own goals
+DROP POLICY IF EXISTS "Users can view own career goals" ON public.career_goals;
 CREATE POLICY "Users can view own career goals" ON public.career_goals
   FOR SELECT USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can insert own career goals" ON public.career_goals;
 CREATE POLICY "Users can insert own career goals" ON public.career_goals
   FOR INSERT WITH CHECK (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can update own career goals" ON public.career_goals;
 CREATE POLICY "Users can update own career goals" ON public.career_goals
   FOR UPDATE USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can delete own career goals" ON public.career_goals;
 CREATE POLICY "Users can delete own career goals" ON public.career_goals
   FOR DELETE USING (auth.uid() = owning_user_id);
 
 -- Achievements: Users can only access their own achievements
+DROP POLICY IF EXISTS "Users can view own achievements" ON public.achievements;
 CREATE POLICY "Users can view own achievements" ON public.achievements
   FOR SELECT USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can insert own achievements" ON public.achievements;
 CREATE POLICY "Users can insert own achievements" ON public.achievements
   FOR INSERT WITH CHECK (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can update own achievements" ON public.achievements;
 CREATE POLICY "Users can update own achievements" ON public.achievements
   FOR UPDATE USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can delete own achievements" ON public.achievements;
 CREATE POLICY "Users can delete own achievements" ON public.achievements
   FOR DELETE USING (auth.uid() = owning_user_id);
 
@@ -497,13 +551,14 @@ CREATE TABLE IF NOT EXISTS public.meetings (
 );
 
 -- Create index for faster queries
-CREATE INDEX idx_meetings_owning_user_id ON public.meetings(owning_user_id);
-CREATE INDEX idx_meetings_meeting_date ON public.meetings(meeting_date DESC);
-CREATE INDEX idx_meetings_person_id ON public.meetings(person_id);
-CREATE INDEX idx_meetings_team_id ON public.meetings(team_id);
-CREATE INDEX idx_meetings_type ON public.meetings(meeting_type);
+CREATE INDEX IF NOT EXISTS idx_meetings_owning_user_id ON public.meetings(owning_user_id);
+CREATE INDEX IF NOT EXISTS idx_meetings_meeting_date ON public.meetings(meeting_date DESC);
+CREATE INDEX IF NOT EXISTS idx_meetings_person_id ON public.meetings(person_id);
+CREATE INDEX IF NOT EXISTS idx_meetings_team_id ON public.meetings(team_id);
+CREATE INDEX IF NOT EXISTS idx_meetings_type ON public.meetings(meeting_type);
 
 -- Trigger to update updated_at timestamp
+DROP TRIGGER IF EXISTS update_meetings_updated_at ON public.meetings;
 CREATE TRIGGER update_meetings_updated_at
   BEFORE UPDATE ON public.meetings
   FOR EACH ROW
@@ -512,15 +567,19 @@ CREATE TRIGGER update_meetings_updated_at
 -- Row Level Security Policies
 ALTER TABLE public.meetings ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own meetings" ON public.meetings;
 CREATE POLICY "Users can view own meetings" ON public.meetings
   FOR SELECT USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can insert own meetings" ON public.meetings;
 CREATE POLICY "Users can insert own meetings" ON public.meetings
   FOR INSERT WITH CHECK (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can update own meetings" ON public.meetings;
 CREATE POLICY "Users can update own meetings" ON public.meetings
   FOR UPDATE USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can delete own meetings" ON public.meetings;
 CREATE POLICY "Users can delete own meetings" ON public.meetings
   FOR DELETE USING (auth.uid() = owning_user_id);
 
@@ -539,20 +598,25 @@ CREATE TABLE IF NOT EXISTS public.meeting_templates (
 
 CREATE INDEX IF NOT EXISTS idx_meeting_templates_owning_user ON public.meeting_templates(owning_user_id);
 
+DROP TRIGGER IF EXISTS update_meeting_templates_updated_at ON public.meeting_templates;
 CREATE TRIGGER update_meeting_templates_updated_at BEFORE UPDATE ON public.meeting_templates
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 ALTER TABLE public.meeting_templates ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own meeting templates" ON public.meeting_templates;
 CREATE POLICY "Users can view own meeting templates" ON public.meeting_templates
   FOR SELECT USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can insert own meeting templates" ON public.meeting_templates;
 CREATE POLICY "Users can insert own meeting templates" ON public.meeting_templates
   FOR INSERT WITH CHECK (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can update own meeting templates" ON public.meeting_templates;
 CREATE POLICY "Users can update own meeting templates" ON public.meeting_templates
   FOR UPDATE USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can delete own meeting templates" ON public.meeting_templates;
 CREATE POLICY "Users can delete own meeting templates" ON public.meeting_templates
   FOR DELETE USING (auth.uid() = owning_user_id);
 
@@ -580,25 +644,30 @@ CREATE TABLE IF NOT EXISTS public.evidence_entries (
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
-CREATE INDEX idx_evidence_person ON public.evidence_entries(person_id, occurred_at DESC);
-CREATE INDEX idx_evidence_user ON public.evidence_entries(owning_user_id);
-CREATE INDEX idx_evidence_category ON public.evidence_entries(person_id, category);
+CREATE INDEX IF NOT EXISTS idx_evidence_person ON public.evidence_entries(person_id, occurred_at DESC);
+CREATE INDEX IF NOT EXISTS idx_evidence_user ON public.evidence_entries(owning_user_id);
+CREATE INDEX IF NOT EXISTS idx_evidence_category ON public.evidence_entries(person_id, category);
 
+DROP TRIGGER IF EXISTS update_evidence_entries_updated_at ON public.evidence_entries;
 CREATE TRIGGER update_evidence_entries_updated_at
   BEFORE UPDATE ON public.evidence_entries
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 ALTER TABLE public.evidence_entries ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own evidence" ON public.evidence_entries;
 CREATE POLICY "Users can view own evidence" ON public.evidence_entries
   FOR SELECT USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can insert own evidence" ON public.evidence_entries;
 CREATE POLICY "Users can insert own evidence" ON public.evidence_entries
   FOR INSERT WITH CHECK (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can update own evidence" ON public.evidence_entries;
 CREATE POLICY "Users can update own evidence" ON public.evidence_entries
   FOR UPDATE USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can delete own evidence" ON public.evidence_entries;
 CREATE POLICY "Users can delete own evidence" ON public.evidence_entries
   FOR DELETE USING (auth.uid() = owning_user_id);
 
@@ -616,23 +685,28 @@ CREATE TABLE IF NOT EXISTS public.review_cycles (
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
-CREATE INDEX idx_review_cycles_user ON public.review_cycles(owning_user_id);
+CREATE INDEX IF NOT EXISTS idx_review_cycles_user ON public.review_cycles(owning_user_id);
 
+DROP TRIGGER IF EXISTS update_review_cycles_updated_at ON public.review_cycles;
 CREATE TRIGGER update_review_cycles_updated_at
   BEFORE UPDATE ON public.review_cycles
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 ALTER TABLE public.review_cycles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own review cycles" ON public.review_cycles;
 CREATE POLICY "Users can view own review cycles" ON public.review_cycles
   FOR SELECT USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can insert own review cycles" ON public.review_cycles;
 CREATE POLICY "Users can insert own review cycles" ON public.review_cycles
   FOR INSERT WITH CHECK (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can update own review cycles" ON public.review_cycles;
 CREATE POLICY "Users can update own review cycles" ON public.review_cycles
   FOR UPDATE USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can delete own review cycles" ON public.review_cycles;
 CREATE POLICY "Users can delete own review cycles" ON public.review_cycles
   FOR DELETE USING (auth.uid() = owning_user_id);
 
@@ -653,24 +727,29 @@ CREATE TABLE IF NOT EXISTS public.review_summaries (
   UNIQUE (owning_user_id, person_id, period_start, period_end)
 );
 
-CREATE INDEX idx_review_summaries_person ON public.review_summaries(person_id);
-CREATE INDEX idx_review_summaries_user ON public.review_summaries(owning_user_id);
+CREATE INDEX IF NOT EXISTS idx_review_summaries_person ON public.review_summaries(person_id);
+CREATE INDEX IF NOT EXISTS idx_review_summaries_user ON public.review_summaries(owning_user_id);
 
+DROP TRIGGER IF EXISTS update_review_summaries_updated_at ON public.review_summaries;
 CREATE TRIGGER update_review_summaries_updated_at
   BEFORE UPDATE ON public.review_summaries
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 ALTER TABLE public.review_summaries ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own review summaries" ON public.review_summaries;
 CREATE POLICY "Users can view own review summaries" ON public.review_summaries
   FOR SELECT USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can insert own review summaries" ON public.review_summaries;
 CREATE POLICY "Users can insert own review summaries" ON public.review_summaries
   FOR INSERT WITH CHECK (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can update own review summaries" ON public.review_summaries;
 CREATE POLICY "Users can update own review summaries" ON public.review_summaries
   FOR UPDATE USING (auth.uid() = owning_user_id);
 
+DROP POLICY IF EXISTS "Users can delete own review summaries" ON public.review_summaries;
 CREATE POLICY "Users can delete own review summaries" ON public.review_summaries
   FOR DELETE USING (auth.uid() = owning_user_id);
 
@@ -695,16 +774,18 @@ CREATE TABLE IF NOT EXISTS public.follow_ups (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_follow_ups_person ON public.follow_ups(person_id, status);
-CREATE INDEX idx_follow_ups_user ON public.follow_ups(user_id, status);
-CREATE INDEX idx_follow_ups_due ON public.follow_ups(user_id, due_date) WHERE status = 'open';
+CREATE INDEX IF NOT EXISTS idx_follow_ups_person ON public.follow_ups(person_id, status);
+CREATE INDEX IF NOT EXISTS idx_follow_ups_user ON public.follow_ups(user_id, status);
+CREATE INDEX IF NOT EXISTS idx_follow_ups_due ON public.follow_ups(user_id, due_date) WHERE status = 'open';
 
+DROP TRIGGER IF EXISTS update_follow_ups_updated_at ON public.follow_ups;
 CREATE TRIGGER update_follow_ups_updated_at
   BEFORE UPDATE ON public.follow_ups
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 ALTER TABLE public.follow_ups ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage their own follow ups" ON public.follow_ups;
 CREATE POLICY "Users can manage their own follow ups"
   ON public.follow_ups
   FOR ALL
@@ -730,14 +811,16 @@ CREATE TABLE IF NOT EXISTS public.weekly_reviews (
   UNIQUE(user_id, week_start)
 );
 
-CREATE INDEX idx_weekly_reviews_user_week ON public.weekly_reviews(user_id, week_start DESC);
+CREATE INDEX IF NOT EXISTS idx_weekly_reviews_user_week ON public.weekly_reviews(user_id, week_start DESC);
 
+DROP TRIGGER IF EXISTS update_weekly_reviews_updated_at ON public.weekly_reviews;
 CREATE TRIGGER update_weekly_reviews_updated_at
   BEFORE UPDATE ON public.weekly_reviews
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 ALTER TABLE public.weekly_reviews ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage their own weekly reviews" ON public.weekly_reviews;
 CREATE POLICY "Users can manage their own weekly reviews"
   ON public.weekly_reviews
   FOR ALL
@@ -770,11 +853,12 @@ CREATE TABLE IF NOT EXISTS public.review_dismissed_items (
   note TEXT
 );
 
-CREATE INDEX idx_review_dismissed_review ON public.review_dismissed_items(weekly_review_id);
-CREATE INDEX idx_review_dismissed_user ON public.review_dismissed_items(user_id);
+CREATE INDEX IF NOT EXISTS idx_review_dismissed_review ON public.review_dismissed_items(weekly_review_id);
+CREATE INDEX IF NOT EXISTS idx_review_dismissed_user ON public.review_dismissed_items(user_id);
 
 ALTER TABLE public.review_dismissed_items ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage their own dismissed items" ON public.review_dismissed_items;
 CREATE POLICY "Users can manage their own dismissed items"
   ON public.review_dismissed_items
   FOR ALL
@@ -795,14 +879,16 @@ CREATE TABLE IF NOT EXISTS public.competency_frameworks (
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
-CREATE INDEX idx_competency_frameworks_user ON public.competency_frameworks(owning_user_id);
+CREATE INDEX IF NOT EXISTS idx_competency_frameworks_user ON public.competency_frameworks(owning_user_id);
 
+DROP TRIGGER IF EXISTS update_competency_frameworks_updated_at ON public.competency_frameworks;
 CREATE TRIGGER update_competency_frameworks_updated_at
   BEFORE UPDATE ON public.competency_frameworks
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 ALTER TABLE public.competency_frameworks ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage their own frameworks" ON public.competency_frameworks;
 CREATE POLICY "Users can manage their own frameworks"
   ON public.competency_frameworks FOR ALL
   USING (auth.uid() = owning_user_id)
@@ -821,14 +907,16 @@ CREATE TABLE IF NOT EXISTS public.competency_areas (
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
-CREATE INDEX idx_competency_areas_framework ON public.competency_areas(framework_id, sort_order);
+CREATE INDEX IF NOT EXISTS idx_competency_areas_framework ON public.competency_areas(framework_id, sort_order);
 
+DROP TRIGGER IF EXISTS update_competency_areas_updated_at ON public.competency_areas;
 CREATE TRIGGER update_competency_areas_updated_at
   BEFORE UPDATE ON public.competency_areas
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 ALTER TABLE public.competency_areas ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage their own competency areas" ON public.competency_areas;
 CREATE POLICY "Users can manage their own competency areas"
   ON public.competency_areas FOR ALL
   USING (auth.uid() = owning_user_id)
@@ -847,12 +935,14 @@ CREATE TABLE IF NOT EXISTS public.competency_levels (
   UNIQUE(area_id, level)
 );
 
+DROP TRIGGER IF EXISTS update_competency_levels_updated_at ON public.competency_levels;
 CREATE TRIGGER update_competency_levels_updated_at
   BEFORE UPDATE ON public.competency_levels
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 ALTER TABLE public.competency_levels ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage their own competency levels" ON public.competency_levels;
 CREATE POLICY "Users can manage their own competency levels"
   ON public.competency_levels FOR ALL
   USING (auth.uid() = owning_user_id)
@@ -874,15 +964,17 @@ CREATE TABLE IF NOT EXISTS public.competency_assessments (
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
-CREATE INDEX idx_assessments_person ON public.competency_assessments(person_id, assessed_at DESC);
-CREATE INDEX idx_assessments_area ON public.competency_assessments(area_id);
+CREATE INDEX IF NOT EXISTS idx_assessments_person ON public.competency_assessments(person_id, assessed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_assessments_area ON public.competency_assessments(area_id);
 
+DROP TRIGGER IF EXISTS update_competency_assessments_updated_at ON public.competency_assessments;
 CREATE TRIGGER update_competency_assessments_updated_at
   BEFORE UPDATE ON public.competency_assessments
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 ALTER TABLE public.competency_assessments ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage their own assessments" ON public.competency_assessments;
 CREATE POLICY "Users can manage their own assessments"
   ON public.competency_assessments FOR ALL
   USING (auth.uid() = owning_user_id)
@@ -905,14 +997,16 @@ CREATE TABLE IF NOT EXISTS public.growth_plans (
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
-CREATE INDEX idx_growth_plans_person ON public.growth_plans(person_id, status);
+CREATE INDEX IF NOT EXISTS idx_growth_plans_person ON public.growth_plans(person_id, status);
 
+DROP TRIGGER IF EXISTS update_growth_plans_updated_at ON public.growth_plans;
 CREATE TRIGGER update_growth_plans_updated_at
   BEFORE UPDATE ON public.growth_plans
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 ALTER TABLE public.growth_plans ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage their own growth plans" ON public.growth_plans;
 CREATE POLICY "Users can manage their own growth plans"
   ON public.growth_plans FOR ALL
   USING (auth.uid() = owning_user_id)
@@ -974,14 +1068,16 @@ CREATE TABLE IF NOT EXISTS public.ai_config (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_ai_config_user ON public.ai_config(user_id);
+CREATE INDEX IF NOT EXISTS idx_ai_config_user ON public.ai_config(user_id);
 
+DROP TRIGGER IF EXISTS update_ai_config_updated_at ON public.ai_config;
 CREATE TRIGGER update_ai_config_updated_at
   BEFORE UPDATE ON public.ai_config
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 ALTER TABLE public.ai_config ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage their own AI config" ON public.ai_config;
 CREATE POLICY "Users can manage their own AI config"
   ON public.ai_config FOR ALL
   USING (auth.uid() = user_id)
@@ -1003,15 +1099,17 @@ CREATE TABLE IF NOT EXISTS public.ai_request_log (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_ai_request_log_user_time ON public.ai_request_log(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ai_request_log_user_time ON public.ai_request_log(user_id, created_at DESC);
 
 ALTER TABLE public.ai_request_log ENABLE ROW LEVEL SECURITY;
 
 -- Users can read their own log (for future usage dashboard); Edge Function uses service role to insert
+DROP POLICY IF EXISTS "Users can view their own AI request log" ON public.ai_request_log;
 CREATE POLICY "Users can view their own AI request log"
   ON public.ai_request_log FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Service role can insert AI request log" ON public.ai_request_log;
 CREATE POLICY "Service role can insert AI request log"
   ON public.ai_request_log FOR INSERT
   WITH CHECK (true);
