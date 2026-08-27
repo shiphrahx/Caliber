@@ -13,10 +13,12 @@ export default function LoginPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    // Check if user is already logged in
+    // Already signed in? Go to the app, not back to the marketing page.
+    // Sending them to "/" bounced them onto the landing page, whose only
+    // links point at /login, so signing in became a loop you can't leave.
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        router.push("/")
+        router.push("/dashboard")
       }
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
