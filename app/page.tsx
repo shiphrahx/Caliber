@@ -145,6 +145,7 @@ export default function LandingPage() {
           --iris-dim: rgba(174,166,253,0.11);
 
           --measure: 1080px;
+          --measure-wide: 1280px;
           --pad: 24px;
 
           background: var(--ink);
@@ -160,6 +161,7 @@ export default function LandingPage() {
         .lp h1, .lp h2, .lp h3, .lp h4, .lp p, .lp figure { margin: 0; }
 
         .wrap { max-width: var(--measure); margin: 0 auto; padding: 0 var(--pad); }
+        .wrap-wide { max-width: var(--measure-wide); margin: 0 auto; padding: 0 var(--pad); }
 
         /* Tight, low-contrast display setting. The size does the shouting,
            never the weight and never a gradient. */
@@ -298,9 +300,8 @@ export default function LandingPage() {
           background: var(--raise); overflow: hidden;
         }
         .frame img { display: block; width: 100%; height: auto; }
-        .row .frame { aspect-ratio: 16 / 10; }
-        .row .frame img { height: 100%; object-fit: cover; object-position: top left; }
-        .hero-shot { margin: 88px auto 0; max-width: 1180px; padding: 0 var(--pad); }
+
+        .hero-shot { margin: 88px auto 0; max-width: var(--measure-wide); padding: 0 var(--pad); }
         .hero-shot .frame { box-shadow: 0 40px 90px -40px rgba(0,0,0,0.9); }
 
         /* Sections */
@@ -312,11 +313,10 @@ export default function LandingPage() {
         .band-head p { margin-top: 16px; color: var(--fg-2); font-size: 16.5px; }
 
         /* Feature rows */
-        .rows { margin-top: 76px; display: flex; flex-direction: column; gap: 96px; }
-        .row { display: grid; grid-template-columns: minmax(0,0.85fr) minmax(0,1.15fr); gap: 56px; align-items: center; }
-        .row:nth-child(even) .row-copy { order: 2; }
-        .row-copy h3 { margin-top: 16px; font-size: 1.6rem; }
-        .row-copy p { margin-top: 14px; color: var(--fg-2); font-size: 15.5px; }
+        .rows { margin-top: 72px; display: flex; flex-direction: column; gap: 112px; }
+        .row-copy { max-width: 58ch; margin-bottom: 30px; }
+        .row-copy h3 { margin-top: 16px; font-size: 1.75rem; }
+        .row-copy p { margin-top: 14px; color: var(--fg-2); font-size: 16px; }
         /* The label sits on the same tick mark used on the rule above. Same
            instrument, read at a different scale. */
         .row-label { display: flex; align-items: center; gap: 10px; }
@@ -353,8 +353,7 @@ export default function LandingPage() {
 
         @media (max-width: 860px) {
           .nav-links { display: none; }
-          .row { grid-template-columns: 1fr; gap: 28px; }
-          .row:nth-child(even) .row-copy { order: 0; }
+          .rows { gap: 76px; }
           .cells { grid-template-columns: 1fr; }
           .band { padding: 84px 0; }
           .hero { padding-top: 72px; }
@@ -459,7 +458,9 @@ export default function LandingPage() {
                 ask yourself somewhere between Monday and Friday.
               </p>
             </div>
+          </div>
 
+          <div className="wrap-wide">
             <div className="rows">
               {FEATURES.map((feature) => (
                 <article className="row rise" key={feature.label}>
